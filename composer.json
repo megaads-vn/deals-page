@@ -1,0 +1,32 @@
+{
+    "name": "megaads/deals-page",
+    "description": "Deal page",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Megaads\\DealsPage\\": "src/"
+        },
+        "files": [
+            "src/Helpers/helper.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "MegaAds",
+            "email": "info@megaads.vn"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=5.6.4",
+        "laravel/framework": ">=5.2.41"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "Illuminate\\Foundation\\ComposerScripts::postInstall",
+            "php artisan migrate --path=vendor/megaads/deals-page/src/Migrations",
+            "php artisan vendor:publish --provider=\"Megaads\\DealsPage\\Providers\\DealsPageProvider\" --tag=config",
+            "php artisan vendor:publish --provider=\"Megaads\\DealsPage\\Providers\\DealsPageProvider\" --tag=public"
+        ]
+    }
+}
