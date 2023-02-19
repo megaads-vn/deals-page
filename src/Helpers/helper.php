@@ -10,6 +10,15 @@ if (!function_exists("sendHttpRequest")) {
     function sendHttpRequest($url, $method = "GET", $params = [], $headers = []) {
         $ch = curl_init();
         $timeout = 2;
+        if ($method == 'GET') {
+            $strParams = '';
+            foreach ($params as $key => $val) {
+                $strParams .= $key . '=' . $val . '&';
+            }
+            $strParams = rtrim($strParams, '&');
+            $url .= '?' . $strParams;
+            \Log::info('REQUEST_URL: ' . $url);
+        }
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         if ($headers) {

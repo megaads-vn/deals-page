@@ -6,20 +6,20 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class DealProductJob extends Job implements ShouldQueue
+class CatalogJob extends Job implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
 
-    protected $catalogId;
+    protected $pageId;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(string $catalogId)
+    public function __construct($pageId)
     {
-        $this->catalogId = $catalogId;
+        $this->pageId = $pageId;
     }
 
     /**
@@ -29,6 +29,7 @@ class DealProductJob extends Job implements ShouldQueue
      */
     public function handle()
     {
-//        sendHttpRequest('https://couponforless.test/service/deal/testing-queue', 'GET');
+        $appUrl = \Config::get('deals-page.app_url');
+        sendHttpRequest($appUrl . "/service/catalog/bulk-create", "POST", ["pageId" => $this->pageId]);
     }
 }

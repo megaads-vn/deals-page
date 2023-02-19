@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace Megaads\DealsPage\Jobs;
 
 use Illuminate\Bus\Queueable;
 

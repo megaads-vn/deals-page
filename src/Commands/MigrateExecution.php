@@ -48,7 +48,7 @@ class MigrateExecution extends Command
                 break;
             default:
                     \Artisan::call("migrate", [
-                        "--path" => "vendor/megaads/deals-page/src/Migrations"
+                        "--path" => "vendor/megaads/deals-page/src/Migrations/"
                     ]);
                     $output = \Artisan::output();
                 break;

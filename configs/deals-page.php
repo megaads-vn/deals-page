@@ -1,6 +1,7 @@
 <?php
  return [
      "enable" => true,
+     "app_url" => 'http://couponforless.test',
      "layouts" => [
          "extends" => [
              "name" => "frontend.layout.master",

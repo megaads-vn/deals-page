@@ -2,9 +2,11 @@
 
 namespace Megaads\DealsPage\Controllers\Services;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Megaads\DealsPage\Jobs\CatalogJob;
 use Megaads\DealsPage\Repositories\ApiRequestRepository;
 use Megaads\DealsPage\Repositories\CatalogRepository;
 
@@ -20,23 +22,48 @@ class CatalogService extends BaseService
         $this->catalogRepository = new CatalogRepository();
     }
 
+    public function find(Request $request) {
+        $response = $this->getDefaultStatus();
+        $filters = $request->all();
+        $result = $this->catalogRepository->read($filters);
+        if (!empty($result)) {
+            $response = $this->getSuccessStatus($result);
+        }
+        return Response::json($response);
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function bulkCreate(Request $request) {
         $response = $this->getDefaultStatus();
-        $result = $this->apiRequestRepository->readCatalogs();
-        if (!empty($result)) {
-            $insertArray = [];
-            foreach ($result as $item) {
-                $insertArray[] = $this->buildInsertCatalogs($item);
-            }
-            $insertRs = $this->catalogRepository->bulkCreate($insertArray);
-            if ($insertRs) {
-                $response = $this->getSuccessStatus();
-            }
-        }
+        $pageId = $request->get('pageId', 1);
+
+        Log::info(date('Y-m-d H:i:s') . ' -- pageId: ' . $pageId);
+        $pageId += 1;
+        $runAt = Carbon::now()->addMinutes(5);
+        $job = (new CatalogJob($pageId))->delay($runAt);
+        $this->dispatch($job);
+
+
+//        $result = $this->apiRequestRepository->readCatalogs($pageId);
+//        \Log::info('GET_CATALOG_RESULT: ' . count($result));
+//        if (!empty($result)) {
+//            $insertArray = [];
+//            foreach ($result as $item) {
+//                $insertArray[] = $this->buildInsertCatalogs($item);
+//            }
+//            $insertRs = $this->catalogRepository->bulkCreate($insertArray);
+//            if ($insertRs) {
+//                $pageId += 1;
+//                $runAt = Carbon::now()->addMinutes(1);
+//                $job = (new CatalogJob($pageId))->delay(60 * 1);
+//                $this->dispatch($job);
+//                \Log::info('SET_JOB: ' . $pageId);
+//                $response = $this->getSuccessStatus();
+//            }
+//        }
         return Response::json($response);
     }
 

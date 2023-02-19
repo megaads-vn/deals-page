@@ -19,10 +19,21 @@ class ApiRequestRepository
     /**
      * @return array|mixed
      */
-    public function readCatalogs()
+    public function readCatalogs($pageId = 1)
     {
         $retVal = [];
-        $resResult = sendHttpRequest('https://couponforless.test/catalogs.json');
+        $requestConig = Config::get('deals-page.service');
+        $baseUrl = $requestConig['domain'];
+        $requestPath = "/service/flexoffer/get-product-catalogs";
+        $fullRequest = $baseUrl . "" . $requestPath;
+        $params = [
+            "token" => $requestConig['token'],
+            "siteName" => Config::get('deals-page.site_name'),
+            "aid" => "113",
+            "page" => $pageId,
+            "pageSize" => 500,
+        ];
+        $resResult = sendHttpRequest($fullRequest, "GET", $params);
         if (isset($resResult["status"]) && $resResult["status"] == 'successful') {
             $retVal = $resResult["data"];
         }
@@ -32,7 +43,7 @@ class ApiRequestRepository
     public function readCatalogProducts($catalogId)
     {
         $retVal = [];
-        $resResult = sendHttpRequest('https://couponforless.test/products.json');
+        $resResult = sendHttpRequest('http://couponforless.test/products.json');
         if (isset($resResult["status"]) && $resResult["status"] == 'successful') {
             $retVal = $resResult["data"];
         }
