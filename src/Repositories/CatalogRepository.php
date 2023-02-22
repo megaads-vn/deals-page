@@ -113,6 +113,9 @@ class CatalogRepository extends BaseRepository
         if (array_key_exists('crawl_page', $filters) && preg_match('/^\!/', $filters['crawl_page'])) {
             $query->where('crawl_page', '!=', $filters['crawl_page']);
         }
+        if (array_key_exists("craw_state", $filters)) {
+            $query->where('craw_state', $filters['craw_state']);
+        }
         if (array_key_exists('order_by', $filters)) {
             $orderByAttributes = explode('_', $filters['order_by']);
             $sortOrder = $orderByAttributes[1];

@@ -187,9 +187,14 @@ class DealService extends BaseService
             if (\Cache::has('dealCrawler::catalogPage')) {
                 $catalogPage = \Cache::get('dealCrawler::catalogPage');
             }
-            $catalog = $this->catalogRepository->read(['crawl_page' => $catalogPage, 'metrics' => 'first', 'columns' => ['id', 'cid', 'crawl_page']]);
+            $count = $this->catalogRepository->read(['craw_state' => 'processing', 'metrics' => 'count', 'columns' => ['id', 'cid', 'crawl_page']]);
+            if ($count <= 0 ) {
+                $response = $this->getSuccessStatus();
+                $response['message'] = 'All Done';
+                return \Response::json($response);
+            }
+            $catalog = $this->catalogRepository->read(['crawl_page' => $catalogPage, 'craw_state' => 'processing', 'metrics' => 'first', 'columns' => ['id', 'cid', 'crawl_page']]);
             if (!empty($catalog)) {
-                \Cache::decrement('dealCrawler::fail', 1);
                 $catalogId = $catalog->cid;
                 $pageId = $catalog->crawl_page + 1;
                 $reqResult = $this->apiRequestRepository->readCatalogProducts($catalogId, $pageId);
@@ -207,19 +212,16 @@ class DealService extends BaseService
                         $job = (new DealProductJob())->delay($runAt);
                         $this->dispatch($job);
                     }
+                    $this->catalogRepository->update($catalog->id, ['crawl_page' => $catalog->crawl_page + 1]);
                 } else {
+                    $this->catalogRepository->update($catalog->id, ['crawl_page' => 0, 'craw_state' => 'done']);
                     $runAt = Carbon::now()->addSeconds(30);
                     $job = (new DealProductJob())->delay($runAt);
                     $this->dispatch($job);
                 }
-                $this->catalogRepository->update($catalog->id, ['crawl_page' => $catalog->crawl_page + 1]);
                 $response = $this->getSuccessStatus();
                 $response['message'] = 'Job was set!';
             } else {
-                \Cache::increment('dealCrawler::fail', 1);
-                if (\Cache::get('dealCrawler::fail') > 5) {
-                    exit();
-                }
                 //When catalog current page crawl completely go to next page.
                 \Log::info('DONE_ON_PAGE[' . $catalogPage . ']_GOTO_NEXT');
                 $catalogPage = $catalogPage + 1;
