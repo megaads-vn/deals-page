@@ -30,6 +30,6 @@ class CatalogJob extends Job implements ShouldQueue
     public function handle()
     {
         $appUrl = \Config::get('deals-page.app_url');
-        sendHttpRequest($appUrl . "/service/catalog/bulk-create", "POST", ["pageId" => $this->pageId]);
+        sendHttpRequest($appUrl . "/service/catalog/bulk-create", "POST", ["pageId" => $this->pageId], ["Authorization: Basic YXBpOjEyM0AxMjNh"]);
     }
 }

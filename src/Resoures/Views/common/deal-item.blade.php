@@ -6,7 +6,7 @@
             <small>OFF</small>
         </span>
         @endif
-        <img src="{{ $item->image_url }}" alt="{{ $item->title }}">
+        <img src="{{ $item->image }}" alt="{{ $item->title }}">
     </a>
     <div class="deal-item-info">
         <a target="_blank" href="{{ $item->url }}" class="box-top">
@@ -18,10 +18,10 @@
         <div class="deal-item-footer">
             <div class="deal-item-price-box">
                 @if ($item->sale_price <= 0)
-                    <span class="sale-price">{{ $item->currency . "" . $item->regular_price }}</span>
-                @elseif ($item->sale_price > 0 && $item->sale_pirce < $item->regular_price)
-                    <span class="sale-price">{{ $item->currency . "" . $item->sale_price }}</span>
-                    <span class="hight-price">{{ $item->currency . "" . $item->regular_price }}</span>
+                    <span class="sale-price">{{ $item->currency_code . "" . $item->price }}</span>
+                @elseif ($item->sale_price > 0 && $item->sale_pirce < $item->price)
+                    <span class="sale-price">{{ $item->currency_code . "" . $item->sale_price }}</span>
+                    <span class="hight-price">{{ $item->currency_code . "" . $item->price }}</span>
                 @endif
             </div>
             <div class="deal-item-footer-box">

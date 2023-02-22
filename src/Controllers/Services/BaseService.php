@@ -18,7 +18,7 @@ class BaseService extends BaseController
             'status' => 'successful'
         ];
         if (!empty($data)) {
-            $retVal['result'] = $data;
+            $retVal["result"] = $data;
         }
         return $retVal;
     }

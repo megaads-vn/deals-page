@@ -38,6 +38,7 @@ class CatalogRepository extends BaseRepository
         $retVal = NULL;
         try {
              $query = $this->buildQuery($filters);
+
              if (array_key_exists('page_size', $filters)) {
                  $this->pageSize = $filters['page_size'];
              }
@@ -45,9 +46,15 @@ class CatalogRepository extends BaseRepository
                  $this->pageId = $filters['page_id'];
              }
 
-             $query->limit($this->pageSize);
-             $query->offset(($this->pageSize * $this->pageId));
-             $retVal = $query->get();
+             if (array_key_exists('metrics', $filters) && $filters['metrics'] == 'first') {
+                 $retVal = $query->first();
+             } else if (array_key_exists('metrics', $filters) && $filters['metrics'] == 'count') {
+                 $retVal = $query->count();
+             } else {
+                $query->limit($this->pageSize);
+                $query->offset(($this->pageSize * $this->pageId));
+                $retVal = $query->get();
+             }
 
         } catch (\Exception $exception) {
             dealPageSysLog('error', 'READ_CATALOG: ', $exception);
@@ -94,12 +101,23 @@ class CatalogRepository extends BaseRepository
      */
     protected function buildQuery($filters) {
         $query = Catalog::query();
+        $columns = ['*'];
 
+        if (array_key_exists('columns', $filters)) {
+            $columns = $filters['columns'];
+            $query->select($columns);
+        }
         if (array_key_exists('crawl_page', $filters)) {
             $query->where('crawl_page', $filters['crawl_page']);
         }
-        if (array_key_exists('crawl_page', $filters) && strpos($filters['crawl_page'], '!') >= 0) {
+        if (array_key_exists('crawl_page', $filters) && preg_match('/^\!/', $filters['crawl_page'])) {
             $query->where('crawl_page', '!=', $filters['crawl_page']);
+        }
+        if (array_key_exists('order_by', $filters)) {
+            $orderByAttributes = explode('_', $filters['order_by']);
+            $sortOrder = $orderByAttributes[1];
+            $field = $orderByAttributes[0];
+            $query->orderBy($field, $sortOrder);
         }
 
         return $query;

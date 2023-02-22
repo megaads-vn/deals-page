@@ -2,9 +2,13 @@
 
 namespace Megaads\DealsPage\Providers;
 
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Support\ServiceProvider;
 use Megaads\DealsPage\Commands\MigrateExecution;
 use Megaads\DealsPage\Commands\MigrationCreate;
+use Megaads\DealsPage\Middlewares\DealPageAuth;
+use Megaads\DealsPage\Middlewares\DealPageCors;
 use Megaads\DealsPage\Repositories\CatalogRepository;
 use Megaads\DealsPage\Repositories\DealRepository;
 
@@ -37,6 +41,20 @@ class DealsPageProvider extends ServiceProvider
 
         //Registry singleton
 //        $this->registrySingleton();
+
+        //Regitry queue callback
+        $this->afterQueueDone();
+
+        //Registry alias middleware
+        $this->registerAliasMiddleware('deals_auth', 'Megaads\DealsPage\Middlewares\DealPageAuth');
+        $kernel = $this->app->make(Kernel::class);
+
+        // When the HandleCors middleware is not attached globally, add the PreflightCheck
+        if (class_exists(\Barryvdh\Cors\HandleCors::class)) {
+            $this->registerAliasMiddleware('deals_cors', 'Barryvdh\Cors\HandleCors');
+        } else {
+            $this->registerAliasMiddleware('deals_cors', 'Megaads\DealsPage\Middlewares\DealPageCors');
+        }
     }
 
     public function register()
@@ -76,8 +94,26 @@ class DealsPageProvider extends ServiceProvider
         });
     }
 
-    protected function registryCommand() {
-
+    protected function afterQueueDone() {
+        \Queue::after(function(JobProcessed $event) {
+//            \Log::info('Job: ', [$event->job]);
+//            \Log::info('Data: ', [$event->data["data"]] );
+        });
     }
 
+    protected function registerAliasMiddleware($alias, $class) {
+        $appVersion = app()->version();
+        preg_match('/\d+\.\d+/i', $appVersion, $matched);
+        $matchVersion = isset($matched[0]) ? $matched[0] : 0;
+        if ($matchVersion <= 5.2) {
+            app('router')->middleware($alias, $class);
+        } else if ($matchVersion > 5.2 && $matchVersion <= 5.8) {
+            $this->app['router']->middleware($alias, $class);
+        }
+    }
+
+    protected function registerCommonMiddleware($middleware) {
+        $kernel = $this->app['Illuminate\Contracts\Http\Kernel'];
+        $kernel->pushMiddleware($middleware);
+    }
 }

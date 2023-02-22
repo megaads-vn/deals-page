@@ -39,31 +39,22 @@ class CatalogService extends BaseService
     public function bulkCreate(Request $request) {
         $response = $this->getDefaultStatus();
         $pageId = $request->get('pageId', 1);
-
-        Log::info(date('Y-m-d H:i:s') . ' -- pageId: ' . $pageId);
-        $pageId += 1;
-        $runAt = Carbon::now()->addMinutes(5);
-        $job = (new CatalogJob($pageId))->delay($runAt);
-        $this->dispatch($job);
-
-
-//        $result = $this->apiRequestRepository->readCatalogs($pageId);
-//        \Log::info('GET_CATALOG_RESULT: ' . count($result));
-//        if (!empty($result)) {
-//            $insertArray = [];
-//            foreach ($result as $item) {
-//                $insertArray[] = $this->buildInsertCatalogs($item);
-//            }
-//            $insertRs = $this->catalogRepository->bulkCreate($insertArray);
-//            if ($insertRs) {
-//                $pageId += 1;
-//                $runAt = Carbon::now()->addMinutes(1);
-//                $job = (new CatalogJob($pageId))->delay(60 * 1);
-//                $this->dispatch($job);
-//                \Log::info('SET_JOB: ' . $pageId);
-//                $response = $this->getSuccessStatus();
-//            }
-//        }
+        $result = $this->apiRequestRepository->readCatalogs($pageId);
+        \Log::info('CATALOG_BULK: PAGE[' . $pageId . ']:: COUNT[' . count($result)  . ']');
+        if (!empty($result)) {
+            $insertArray = [];
+            foreach ($result as $item) {
+                $insertArray[] = $this->buildInsertCatalogs($item);
+            }
+            $insertRs = $this->catalogRepository->bulkCreate($insertArray);
+            if ($insertRs) {
+                $pageId += 1;
+                $runAt = Carbon::now()->addMinutes(1);
+                $job = (new CatalogJob($pageId))->delay($runAt);
+                $this->dispatch($job);
+                $response = $this->getSuccessStatus();
+            }
+        }
         return Response::json($response);
     }
 

@@ -18,18 +18,21 @@ class CreateTableDealItems extends Migration
                $table->string('title')->nullable();
                $table->string('slug')->nullable();
                $table->string('search_slug')->nullable();
-               $table->string('type', 20)->default('DEAL')->nullable();
-               $table->string('code', 50)->nullable();
+               $table->float('price')->nullable()->default(0);
+               $table->float('sale_price')->nullable()->default(0);
+               $table->float('final_price')->nullable()->default(0);
+               $table->float('discount')->nullable()->default(0);
+               $table->float('sale_off')->nullable()->default(0);
                $table->string('image')->nullable();
+               $table->string('content')->nullable();
+               $table->integer('store_id')->nullable();
+               $table->bigInteger('clicks')->nullable();
+               $table->timestamp('expire_time')->nullable();
                $table->string('affiliate_link', 1000)->nullable();
                $table->string('origin_link', 1000)->nullable();
-               $table->string('content')->nullable();
                $table->integer('sorder')->nullable();
                $table->integer('sorder_in_category')->nullable();
-               $table->timestamp('expire_time')->nullable();
-               $table->integer('store_id')->nullable();
                $table->bigInteger('views')->nullable();
-               $table->bigInteger('clicks')->nullable();
                $table->integer('vote_up')->nullable();
                $table->integer('vote_down')->nullable();
                $table->string('meta_title')->nullable();
@@ -44,13 +47,12 @@ class CreateTableDealItems extends Migration
                $table->string('crawl_id')->nullable();
                $table->string('mpn')->nullable();
                $table->string('sku')->nullable();
-               $table->float('price')->nullable()->default(0);
-               $table->float('sale_price')->nullable()->default(0);
-               $table->float('final_price')->nullable()->default(0);
-               $table->float('discount')->nullable()->default(0);
                $table->tinyInteger('in_stock')->nullable()->default(1);
                $table->string('manufacturer')->nullable();
                $table->enum('status', ['active','pending','delete','future','unreliable'])->default('active');
+               $table->string('type', 20)->default('DEAL')->nullable();
+               $table->string('code', 50)->nullable();
+               $table->timestamp('publish_time')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
                $table->timestamp('create_time')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
                $table->timestamp('update_time')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
                $table->integer('creator_id')->nullable();
@@ -61,6 +63,8 @@ class CreateTableDealItems extends Migration
                 $table->index(['expire_time']);
                 $table->index(['sorder']);
                 $table->index(['catalogs_id']);
+                $table->index(['sale_off']);
+                $table->index(['publish_time']);
             });
 
             DB::statement(
