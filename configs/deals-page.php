@@ -1,7 +1,8 @@
 <?php
  return [
      "enable" => true,
-     "app_url" => 'http://couponforless.test',
+     "site_name" => "couponforless",
+     "app_url" => "https://couponforless.test",
      "layouts" => [
          "extends" => [
              "name" => "frontend.layout.master",
@@ -12,5 +13,20 @@
              "javascript" => "js",
              "style" => "style"
          ]
+     ],
+
+     /**
+        SERVICE CONFIGURE SECTION
+      */
+     "service" => [
+         "domain" => "https://service.coupon.megaads.vn",
+         "token" => "ajsdf435kjdsjf43t343",
+     ],
+
+     "queue" => [
+         "enable" => true,
+         "host" => "127.0.0.1",
+         "port" => 4730,
+
      ]
  ];
