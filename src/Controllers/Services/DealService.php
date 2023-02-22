@@ -191,6 +191,7 @@ class DealService extends BaseService
             if ($count <= 0 ) {
                 $response = $this->getSuccessStatus();
                 $response['message'] = 'All Done';
+                \Log::info('CRAWL_DEALS_IS_ALL_DONE');
                 return \Response::json($response);
             }
             $catalog = $this->catalogRepository->read(['crawl_page' => $catalogPage, 'craw_state' => 'processing', 'metrics' => 'first', 'columns' => ['id', 'cid', 'crawl_page']]);
