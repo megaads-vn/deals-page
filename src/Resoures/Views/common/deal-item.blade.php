@@ -9,7 +9,7 @@
         <img src="{{ $item->image }}" alt="{{ $item->title }}">
     </a>
     <div class="deal-item-info">
-        <a target="_blank" href="{{ $item->url }}" class="box-top">
+        <a target="_blank" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" class="box-top">
             <h3 class="deal-item-header">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
