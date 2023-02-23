@@ -26,6 +26,6 @@ class DealProductJob extends Job implements ShouldQueue
     public function handle()
     {
         $appUrl = \Config::get('deals-page.app_url');
-        sendHttpRequest($appUrl . "/service/deal/bulk-create", "POST", [], ["Authorization: Basic YXBpOjEyM0AxMjNh"]);
+        sendHttpRequest($appUrl . "/service/deal/schedule-bulk-create", "POST", [], ["Authorization: Basic YXBpOjEyM0AxMjNh"]);
     }
 }

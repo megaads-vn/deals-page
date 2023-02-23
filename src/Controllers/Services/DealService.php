@@ -176,25 +176,41 @@ class DealService extends BaseService
         return Response::json($resposne);
     }
 
+    public function bulkCreate(Request $request) {
+        $response = $this->getDefaultStatus();
+        try {
+            if ($request->has('params')) {
+                $params = $request->get('params');
+                $this->dealRepository->bulkInsert($params);
+                $response = $this->getSuccessStatus();
+            }
+        } catch (\Exception $exception) {
+            $response['message'] = 'Fail! ' . $exception->getMessage() . '. See full message in log';
+            dealPageSysLog('error', 'BULK_CREATE_ERROR: ', $exception);
+        }
+        return \Response::json($response);
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkCreate(Request $request) {
+    public function bulkCreateWithSchedule(Request $request) {
         $response = $this->getDefaultStatus();
         try {
             $catalogPage = 0;
             if (\Cache::has('dealCrawler::catalogPage')) {
                 $catalogPage = \Cache::get('dealCrawler::catalogPage');
             }
-            $count = $this->catalogRepository->read(['craw_state' => 'processing', 'metrics' => 'count', 'columns' => ['id', 'cid', 'crawl_page']]);
+            $count = $this->catalogRepository->read(['crawl_state' => 'processing', 'metrics' => 'count', 'columns' => ['id', 'cid', 'crawl_page']]);
             if ($count <= 0 ) {
                 $response = $this->getSuccessStatus();
                 $response['message'] = 'All Done';
                 \Log::info('CRAWL_DEALS_IS_ALL_DONE');
                 return \Response::json($response);
             }
-            $catalog = $this->catalogRepository->read(['crawl_page' => $catalogPage, 'craw_state' => 'processing', 'metrics' => 'first', 'columns' => ['id', 'cid', 'crawl_page']]);
+            $catalog = $this->catalogRepository->read(['crawl_page' => $catalogPage, 'crawl_state' => 'processing', 'metrics' => 'first', 'columns' => ['id', 'cid', 'crawl_page']]);
+            $catalog = $this->catalogRepository->read($filterParams);
             if (!empty($catalog)) {
                 $catalogId = $catalog->cid;
                 $pageId = $catalog->crawl_page + 1;
@@ -207,15 +223,22 @@ class DealService extends BaseService
                     foreach ($reqResult as $item) {
                         $bulkInsertData[] = $this->buildInsertDealItem($item);
                     }
-                    $result = $this->dealRepository->bulkInsert($bulkInsertData);
-                    if ($result) {
+                    $result = sendHttpRequest("https://couponforless.com/service/deal/bulk-create",
+                        "POST",
+                        ["params" => $bulkInsertData],
+                        [
+                            "Authorization: Basic YXBpOjEyM0AxMjNh",
+                            "Accept: application/json, text/plain, */*",
+                            "Content-Type: application/json;charset=utf-8"
+                        ]);
+                    if (isset($result['status']) && $result['status'] === 'successful') {
                         $runAt = Carbon::now()->addSeconds(30);
                         $job = (new DealProductJob())->delay($runAt);
                         $this->dispatch($job);
                     }
                     $this->catalogRepository->update($catalog->id, ['crawl_page' => $catalog->crawl_page + 1]);
                 } else {
-                    $this->catalogRepository->update($catalog->id, ['crawl_page' => 0, 'craw_state' => 'done']);
+                    $this->catalogRepository->update($catalog->id, ['crawl_page' => 0, 'crawl_state' => 'done']);
                     $runAt = Carbon::now()->addSeconds(30);
                     $job = (new DealProductJob())->delay($runAt);
                     $this->dispatch($job);
