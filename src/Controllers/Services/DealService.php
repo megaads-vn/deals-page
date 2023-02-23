@@ -210,7 +210,6 @@ class DealService extends BaseService
                 return \Response::json($response);
             }
             $catalog = $this->catalogRepository->read(['crawl_page' => $catalogPage, 'crawl_state' => 'processing', 'metrics' => 'first', 'columns' => ['id', 'cid', 'crawl_page']]);
-            $catalog = $this->catalogRepository->read($filterParams);
             if (!empty($catalog)) {
                 $catalogId = $catalog->cid;
                 $pageId = $catalog->crawl_page + 1;

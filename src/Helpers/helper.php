@@ -27,7 +27,7 @@ if (!function_exists("sendHttpRequest")) {
         }
         if ($method != 'GET') {
             curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
         }
 
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
