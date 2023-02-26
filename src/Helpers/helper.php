@@ -75,3 +75,20 @@ if (!function_exists('dealPageSysLog')) {
         \Log::$type($message . '' . $exception->getMessage() . '. File: ' . $exception->getFile() . ' Line: ' . $exception->getLine());
     }
 }
+
+if (!function_exists('topDeals')) {
+    function topDeals($limit = 9) {
+        $retVal = 0;
+        try {
+            $query = \Megaads\DealsPage\Models\Deal::query();
+            $query->whereNotNull('discount');
+            $query->orderBy('discount', 'DESC');
+            $query->orderBy('id', 'DESC');
+            $query->limit($limit);
+            $retVal = $query->get(['id', 'slug', 'image', 'description', 'price', 'sale_price']);
+        } catch (Exception $exception) {
+            dealPageSysLog('error', 'topDeals_Helper: ', $exception);
+        }
+        return $retVal;
+    }
+}

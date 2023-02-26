@@ -20,9 +20,7 @@ class CreateTableDealItems extends Migration
                $table->string('search_slug')->nullable();
                $table->float('price')->nullable()->default(0);
                $table->float('sale_price')->nullable()->default(0);
-               $table->float('final_price')->nullable()->default(0);
                $table->float('discount')->nullable()->default(0);
-               $table->float('sale_off')->nullable()->default(0);
                $table->string('image')->nullable();
                $table->string('content')->nullable();
                $table->integer('store_id')->nullable();
@@ -39,16 +37,11 @@ class CreateTableDealItems extends Migration
                $table->string('meta_description')->nullable();
                $table->string('meta_keywords')->nullable();
                $table->string('currency')->nullable();
-               $table->string('country')->nullable();
-               $table->string('advertiser')->nullable();
-               $table->integer('advertiser_id')->nullable();
-               $table->string('catalogs_name')->nullable();
-               $table->string('catalogs_id')->nullable();
                $table->string('crawl_id')->nullable();
+               $table->string('category_id')->nullable();
                $table->string('mpn')->nullable();
                $table->string('sku')->nullable();
                $table->tinyInteger('in_stock')->nullable()->default(1);
-               $table->string('manufacturer')->nullable();
                $table->enum('status', ['active','pending','delete','future','unreliable'])->default('active');
                $table->string('type', 20)->default('DEAL')->nullable();
                $table->string('code', 50)->nullable();
@@ -62,8 +55,7 @@ class CreateTableDealItems extends Migration
 
                 $table->index(['expire_time']);
                 $table->index(['sorder']);
-                $table->index(['catalogs_id']);
-                $table->index(['sale_off']);
+                $table->index(['discount']);
                 $table->index(['publish_time']);
             });
 

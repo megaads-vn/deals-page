@@ -7,6 +7,7 @@ use Google\Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Megaads\DealsPage\Jobs\DealProductJob;
+use Megaads\DealsPage\Models\Category;
 use Megaads\DealsPage\Models\DealRelation;
 use Megaads\DealsPage\Models\Store;
 use Megaads\DealsPage\Repositories\CatalogRepository;
@@ -156,7 +157,7 @@ class DealService extends BaseService
                             "affiliate_link" => $oldItem->url,
                             "store_id" => $oldItem->store_id,
                             "category_id" => $oldItem->category_id,
-                            "sale_off" => $saleOff
+                            "discount" => $saleOff
                         ];
                         $insertId = $this->dealRepository->create($insertNewItems);
                         if (!empty($insertId)) {
@@ -176,6 +177,10 @@ class DealService extends BaseService
         return Response::json($resposne);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function bulkCreate(Request $request) {
         $response = $this->getDefaultStatus();
         try {
@@ -199,9 +204,9 @@ class DealService extends BaseService
         $response = $this->getDefaultStatus();
         try {
             $catalogPage = 0;
-            if (\Cache::has('dealCrawler::catalogPage')) {
-                $catalogPage = \Cache::get('dealCrawler::catalogPage');
-            }
+//            if (\Cache::has('dealCrawler::catalogPage')) {
+//                $catalogPage = \Cache::get('dealCrawler::catalogPage');
+//            }
             $count = $this->catalogRepository->read(['crawl_state' => 'processing', 'metrics' => 'count', 'columns' => ['id', 'cid', 'crawl_page']]);
             if ($count <= 0 ) {
                 $response = $this->getSuccessStatus();
@@ -222,7 +227,7 @@ class DealService extends BaseService
                     foreach ($reqResult as $item) {
                         $bulkInsertData[] = $this->buildInsertDealItem($item);
                     }
-                    $result = sendHttpRequest("https://couponforless.com/service/deal/bulk-create",
+                    $result = sendHttpRequest("https://couponforless.test/service/deal/bulk-create",
                         "POST",
                         ["params" => $bulkInsertData],
                         [
@@ -273,6 +278,14 @@ class DealService extends BaseService
         if ($rawData['salePrice'] > 0 && $rawData['salePrice'] < $rawData['price']) {
             $saleOff = floor((($rawData['price'] - $rawData['salePrice']) / $rawData['price']) * 100);
         }
+        $storeId = 0;
+        $categoryIds = '';
+        if (!empty($rawData['manufacturer'])) {
+            $storeId = $this->findLocalStore($rawData['manufacturer']);
+        }
+        if (!empty($rawData['category'])) {
+            $categoryIds = $this->findLocalCategory($rawData['category']);
+        }
         $retVal = [
             "title" => $rawData["name"],
             "slug" => slugify($rawData["name"]),
@@ -286,22 +299,44 @@ class DealService extends BaseService
             "meta_description" => $rawData["shortDescription"],
             "meta_keywords" => $rawData["keywords"],
             "currency" => $rawData["priceCurrency"],
-            "country" => $rawData["advertiserCountry"],
-            "advertiser" => $rawData["advertiserName"],
-            "advertiser_id" => $rawData["aid"],
-            "catalogs_name" => $rawData["catalogName"],
-            "catalogs_id" => $rawData["cid"],
             "mpn" => $rawData["mpn"],
             "sku" => $rawData["sku"],
             "price" => $rawData["price"],
             "sale_price" => $rawData["salePrice"],
-            "final_price" => $rawData["finalPrice"],
-            "discount" => $rawData["discount"],
+            "discount" => !empty($retVal['discount']) ? $retVal['discount'] : $saleOff,
             "in_stock" => $rawData["isInstock"],
-            "manufacturer" => $rawData["manufacturer"],
-            "sale_off" => $saleOff
+            "store_id" => $storeId,
+            "category_id" => $categoryIds
         ];
 
+        return $retVal;
+    }
+
+    protected function findLocalStore($manufactureName) {
+        $retVal = 0;
+        $findStore = Store::where('title', 'like',"%" . trim($manufactureName) . "%")->get(['id']);
+        if (!empty($findStore)) {
+            $retVal = $findStore[0]->id;
+        }
+        return $retVal;
+    }
+
+    protected function findLocalCategory($categoryName) {
+        $retVal = '';
+        $listName = explode('>', $categoryName);
+        $findCategory = Category::where('title', 'like', "%" . trim($listName[0]) . "%")->pluck('id');
+        if (!empty($findCategory)) {
+            $retVal = $findCategory->toArray();
+            $retVal = join(',', $retVal);
+        }
+        if (isset($listName[1]) && empty($retVal)) {
+            $findCategory = Category::where('title', 'like', "%" . trim($listName[1]) . "%")->pluck('id');
+            if (!empty($findCategory)) {
+                $retVal = $findCategory->toArray();
+                $retVal = join(',', $retVal);
+            }
+        }
+        \Log::info('findLocalCategory: ' . $retVal);
         return $retVal;
     }
 
@@ -344,4 +379,5 @@ class DealService extends BaseService
         unset($retVal['is_pinned']);
         return $retVal;
     }
+
 }
