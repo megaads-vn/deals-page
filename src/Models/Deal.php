@@ -11,7 +11,9 @@ class Deal extends Model
 
     protected $fillable = [
         'title', 'content', 'slug', 'search_slug', 'status', 'type', 'price', 'sale_price', 'sorder', 'store_id', 'creator_name', 'creator_id',
-        'modifier_id', 'affiliate_link', 'origin_link', 'image', 'currency'
+        'modifier_id', 'affiliate_link', 'origin_link', 'image', 'currency', 'discount', 'category_id', 'expire_time', 'sorder_in_category',
+        'views', 'vote_up', 'vote_down', 'meta_title', 'meta_description', 'meta_keywords', 'crawl_id', 'mpn', 'sku',
+        'in_stock'
     ];
 
     protected $appends = [

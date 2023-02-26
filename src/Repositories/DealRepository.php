@@ -169,6 +169,9 @@ class DealRepository extends BaseRepository
 
         if (array_key_exists('columns', $filters)) {
             $columns = $filters['columns'];
+            if (is_string($columns)) {
+                $columns = explode(',', $columns);
+            }
             $query->select($columns);
         }
 
@@ -216,6 +219,17 @@ class DealRepository extends BaseRepository
             $createFrom = preg_replace('/\//i', '-', $filters['createTimeFrom']);
             $createFrom = new \DateTime($createFrom . ' 00:00:00');
             $query->whereBetween('create_time', [$createFrom, $createTo]);
+        }
+
+        if (array_key_exists('discountMoreThan', $filters)) {
+            $query->where('discount', '>', $filters['discountMoreThan']);
+        }
+        if (array_key_exists('discountLessThan', $filters)) {
+            $query->where('discount', '<', $filters['discountLessThan']);
+        }
+
+        if (array_key_exists('discountMoreThan', $filters) && array_key_exists('discountLessThan', $filters)) {
+            $query->whereBetween('discount', [$filters['discountMoreThan'], $filters['discountLessThan']]);
         }
 
         if (array_key_exists('order_by', $filters)) {

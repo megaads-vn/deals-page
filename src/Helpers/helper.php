@@ -81,11 +81,14 @@ if (!function_exists('topDeals')) {
         $retVal = 0;
         try {
             $query = \Megaads\DealsPage\Models\Deal::query();
+            $query->with(['store' => function($s) {
+                $s->select(['id', 'title as name', 'slug']);
+            }, 'categories']);
             $query->whereNotNull('discount');
             $query->orderBy('discount', 'DESC');
             $query->orderBy('id', 'DESC');
             $query->limit($limit);
-            $retVal = $query->get(['id', 'slug', 'image', 'description', 'price', 'sale_price']);
+            $retVal = $query->get(['id', 'title', 'slug', 'image', 'content', 'price', 'sale_price', 'discount', 'store_id']);
         } catch (Exception $exception) {
             dealPageSysLog('error', 'topDeals_Helper: ', $exception);
         }

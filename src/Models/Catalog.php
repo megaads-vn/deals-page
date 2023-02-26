@@ -8,4 +8,8 @@ class Catalog extends Model
 {
     const UPDATED_AT = 'update_time';
     const CREATED_AT = 'create_time';
+
+    protected $fillable = [
+        'crawl_page'
+    ];
 }

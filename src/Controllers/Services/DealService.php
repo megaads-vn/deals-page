@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Megaads\DealsPage\Jobs\DealProductJob;
 use Megaads\DealsPage\Models\Category;
+use Megaads\DealsPage\Models\DealCategory;
 use Megaads\DealsPage\Models\DealRelation;
 use Megaads\DealsPage\Models\Store;
 use Megaads\DealsPage\Repositories\CatalogRepository;
@@ -186,7 +187,27 @@ class DealService extends BaseService
         try {
             if ($request->has('params')) {
                 $params = $request->get('params');
-                $this->dealRepository->bulkInsert($params);
+                \Log::info('BULK_CREATE_DEAL');
+                $insertResult = [];
+                foreach ($params as $item) {
+                    $resultId = $this->dealRepository->create($item);
+                    $insertResult[$resultId] = $item['category_id'];
+                }
+                if (count($insertResult) > 0) {
+                    foreach ($insertResult as $dealId => $strCategoryId) {
+                        $categoryIds = explode(',', $strCategoryId);
+                        $bulkCateInsert = [];
+                        foreach ($categoryIds as $cId) {
+                            $bulkCateInsert = [
+                                'deal_id' => $dealId,
+                                'category_id' => trim($cId)
+                            ];
+                        }
+                        if (count($bulkCateInsert) > 0) {
+                            DealCategory::insert($bulkCateInsert);
+                        }
+                    }
+                }
                 $response = $this->getSuccessStatus();
             }
         } catch (\Exception $exception) {
@@ -204,9 +225,9 @@ class DealService extends BaseService
         $response = $this->getDefaultStatus();
         try {
             $catalogPage = 0;
-//            if (\Cache::has('dealCrawler::catalogPage')) {
-//                $catalogPage = \Cache::get('dealCrawler::catalogPage');
-//            }
+            if (\Cache::has('dealCrawler::catalogPage')) {
+                $catalogPage = \Cache::get('dealCrawler::catalogPage');
+            }
             $count = $this->catalogRepository->read(['crawl_state' => 'processing', 'metrics' => 'count', 'columns' => ['id', 'cid', 'crawl_page']]);
             if ($count <= 0 ) {
                 $response = $this->getSuccessStatus();
@@ -227,7 +248,7 @@ class DealService extends BaseService
                     foreach ($reqResult as $item) {
                         $bulkInsertData[] = $this->buildInsertDealItem($item);
                     }
-                    $result = sendHttpRequest("https://couponforless.test/service/deal/bulk-create",
+                    $result = sendHttpRequest("https://couponforless.com/service/deal/bulk-create",
                         "POST",
                         ["params" => $bulkInsertData],
                         [
@@ -315,7 +336,7 @@ class DealService extends BaseService
     protected function findLocalStore($manufactureName) {
         $retVal = 0;
         $findStore = Store::where('title', 'like',"%" . trim($manufactureName) . "%")->get(['id']);
-        if (!empty($findStore)) {
+        if (!empty($findStore) && count($findStore) > 0) {
             $retVal = $findStore[0]->id;
         }
         return $retVal;
@@ -336,7 +357,6 @@ class DealService extends BaseService
                 $retVal = join(',', $retVal);
             }
         }
-        \Log::info('findLocalCategory: ' . $retVal);
         return $retVal;
     }
 
