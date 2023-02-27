@@ -166,7 +166,6 @@ class DealRepository extends BaseRepository
             $s->select(['id', 'title as name', 'slug']);
         }]);
         $columns = ['*'];
-
         if (array_key_exists('columns', $filters)) {
             $columns = $filters['columns'];
             if (is_string($columns)) {

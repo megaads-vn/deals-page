@@ -77,13 +77,21 @@ if (!function_exists('dealPageSysLog')) {
 }
 
 if (!function_exists('topDeals')) {
-    function topDeals($limit = 9) {
+    function topDeals($limit = 9, $filters = []) {
         $retVal = 0;
         try {
             $query = \Megaads\DealsPage\Models\Deal::query();
             $query->with(['store' => function($s) {
                 $s->select(['id', 'title as name', 'slug']);
             }, 'categories']);
+            if (array_key_exists('store_id', $filters)) {
+                $query->where('store_id', $filters['store_id']);
+            }
+            if (array_key_exists('category_id', $filters)) {
+                $query->whereHas('categories', function($c) use ($filters) {
+                   $c->where('category_id', $filters['category_id']);
+                });
+            }
             $query->whereNotNull('discount');
             $query->orderBy('discount', 'DESC');
             $query->orderBy('id', 'DESC');
@@ -93,5 +101,50 @@ if (!function_exists('topDeals')) {
             dealPageSysLog('error', 'topDeals_Helper: ', $exception);
         }
         return $retVal;
+    }
+}
+if (!function_exists('pagination')) {
+    function pagination($links, $total, $limit, $param) {
+        $page = 1;
+        if (isset($param['p'])) {
+            $page = $param['p'];
+            unset($param['p']);
+        }
+        // $href = http_build_query($param, null, null, PHP_QUERY_RFC3986);
+        $href = http_build_query($param);
+        if (!empty($href)) {
+            $href .= '&';
+        }
+        $last = ceil($total / $limit);
+        $start = ( ( $page - $links ) > 0 ) ? $page - $links : 1;
+        $end = ( ( $page + $links ) < $last ) ? $page + $links : $last;
+        $html = '<div class="list-pagination"><ul class="pagination">';
+        if ($page != 1) {
+            $class = ($page == 1) ? "disabled" : "";
+            $html .= '<li class="' . $class . '"><a href="?' . $href . 'p=1">&laquo;</a></li>';
+        }
+        for ($i = $start; $i <= $end; $i++) {
+            $class = ($page == $i) ? "p-active" : "";
+            $html .= '<li><a class="' . $class . '" href="?' . $href . 'p=' . $i . '">' . $i . '</a></li>';
+        }
+
+        if ($page != $last) {
+            $class = ($page == $last) ? "disable" : "";
+            $html .= '<li class="' . $class . '"><a href="?' . $href . 'p=' . $end . '">&raquo;</a> </li>';
+        }
+        $html .= '</ul></div>';
+        return $html;
+    }
+}
+
+if (!function_exists('timeOnGoing')) {
+    function timeOnGoing($expireTime, $format = 'M d, Y') {
+        $expireDate = date($format);
+        if ($expireTime && $expireTime != '0000-00-00') {
+            $expireDate = date($format, strtotime($expireTime));
+        } else {
+            $expireDate = 'On going';
+        }
+        return $expireDate;
     }
 }

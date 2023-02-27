@@ -8,6 +8,7 @@ use Megaads\DealsPage\Models\Store;
 use Megaads\DealsPage\Models\DealRelation;
 use App\Utils\Utils;
 use Illuminate\Support\Facades\Input;
+use Megaads\DealsPage\Repositories\DealRepository;
 use PHPExcel_Cell;
 use PHPExcel_IOFactory;
 
@@ -20,11 +21,13 @@ class DealsController extends Controller {
      */
     private $dealPageTable;
     private $dealPageColumns;
+    protected $dealRepository;
 
     public function __construct() {
         parent::__construct();
         $this->dealPageTable = \Config::get('deals-page.deal_related_page.name', 'store_n_keyword');
         $this->dealPageColumns = \Config::get('deals-page.deal_related_page.name', ['id', 'keyword']);
+        $this->dealRepository = new DealRepository();
     }
 
     public function index($slug) {
@@ -40,7 +43,7 @@ class DealsController extends Controller {
         $deals = Deal::with(['store', 'categories'])
             ->whereIn('id', $dealIds)
             ->get(['id', 'title', 'slug', 'content', 'meta_title', 'meta_description', 'meta_keywords', 'price', 'store_id', 'sale_price',
-            'image', 'currency', 'create_time', 'expire_time', 'affiliate_link', 'origin_link', 'discount']);
+                'image', 'currency', 'create_time', 'expire_time', 'affiliate_link', 'origin_link', 'discount']);
 
         $retVal['deals'] = $deals;
         $retVal['page'] = $relationPage;
@@ -49,10 +52,121 @@ class DealsController extends Controller {
         return \View::make('deals-page::deals.index', $retVal);
     }
 
+
+    public function allDeals() {
+        $retVal = [];
+        $dealFilter = [
+            'columns' => ['id', 'title', 'slug',
+                'image', 'content', 'price',
+                'sale_price', 'discount', 'store_id',
+                'expire_time', 'origin_link', 'affiliate_link',
+                'create_time', 'modifier_name', 'modifier_id'],
+            'order_by' => 'discount_DESC'
+        ];
+        $retVal['brands'] = NULL;
+        $retVal['stores'] = $this->getDealStore();
+        $findResult = $this->dealRepository->read($dealFilter);
+        if ($findResult['status'] = 'successful') {
+            $retVal['deals'] = $findResult['data'];
+            $dealFilter['metrics'] = 'count';
+            $getTotal = $this->dealRepository->read($dealFilter);
+            $totalCount  = 0;
+            $pageCount = 0;
+            if (isset($getTotal['data'])) {
+                $getTotal = $getTotal['data'];
+                $pageCount = ceil($getTotal / $findResult['pageSize']);
+            }
+            $retVal['pagination'] = [
+                'page_count' => $pageCount,
+                'total_count' => $totalCount,
+            ];
+        }
+        return view('deals-page::deals.alldeals', $retVal);
+    }
+
+    public function dealDetail($itemId, \Request  $request) {
+        $segment = request()->segment(2);
+        $filterDeal = [
+            'id' => $itemId,
+            'metrics' => 'first',
+            'columns' => ['id', 'title', 'slug',
+                'image', 'content', 'price',
+                'sale_price', 'discount', 'store_id',
+                'expire_time', 'origin_link', 'affiliate_link',
+                'create_time', 'modifier_name', 'modifier_id', 'views']
+        ];
+        $dataDeal = $this->dealRepository->read($filterDeal);
+        if ( isset($dataDeal['data'])) {
+            $dealId = $dataDeal['data']->id;
+            $views = isset($dataDeal['data']->views) ? $dataDeal['data']->views : 0;
+            $this->dealRepository->update($dealId, ["views" => $views + 1]);
+            $retVal['dataDeal'] = $dataDeal['data'];
+
+//            $anotherCoupon = $this->dealRepository->getData([
+//                'page_size' => 10,
+//                'status' => Coupon::STATUS_ACTIVE,
+//                'store_id' => $dataDeal->store_id,
+//                'join_store' => 1,
+//                'columns' => ['deal.*', 'store.slug as store_slug', 'store.image as store_image', 'store.title as store_title']
+//            ]);
+//            $retVal['otherCoupon'] = $anotherCoupon;
+            if ( $segment == 'c' ) {
+                $retVal['showPopup'] = true;
+            }
+            return view('deals-page::deals.deal-detail', $retVal);
+        } else {
+            return view('errors.404');
+        }
+
+    }
+
+    public function listByStore($slug, \Request $request) {
+        $retVal = [];
+        $findStore = Store::query()->where('slug', $slug)->first(['id', 'title', 'slug']);
+
+        $dealFilter = [
+            'storeId' => $findStore->id,
+            'columns' => ['id', 'title', 'slug',
+                'image', 'content', 'price',
+                'sale_price', 'discount', 'store_id',
+                'expire_time', 'origin_link', 'affiliate_link',
+                'create_time', 'modifier_name', 'modifier_id'],
+            'order_by' => 'discount_DESC'
+        ];
+
+        $retVal['brands'] = NULL;
+        $retVal['stores'] = $this->getDealStore();
+        $findResult = $this->dealRepository->read($dealFilter);
+        if ($findResult['status'] = 'successful') {
+            $retVal['deals'] = $findResult['data'];
+            $dealFilter['metrics'] = 'count';
+            $getTotal = $this->dealRepository->read($dealFilter);
+            $totalCount  = 0;
+            $pageCount = 0;
+            if (isset($getTotal['data'])) {
+                $getTotal = $getTotal['data'];
+                $pageCount = ceil($getTotal / $findResult['pageSize']);
+            }
+            $retVal['pagination'] = [
+                'page_count' => $pageCount,
+                'total_count' => $totalCount,
+            ];
+        }
+        return view('deals-page::deals.alldeals', $retVal);
+    }
+
     public function goUrl($slug)
     {
-        $deals = Deal::where('slug', $slug)->first(['affiliate_link', 'store_id', 'id']);
+        $query = Deal::query();
+        if (is_nan($slug)) {
+            $query->where('slug', $slug);
+        } else {
+            $query->where('id', $slug);
+        }
+        $deals = $query->first(['affiliate_link', 'store_id', 'id', 'clicks']);
         if (!empty($deals) && !empty($deals->affiliate_link)) {
+            $click = isset($deals->clicks) ? $deals->clicks : 0;
+            $this->dealRepository->update($deals->id, ["clicks" => $click +1 ]);
             $url = $this->addXcust($deals->affiliate_link,$deals->store_id,$deals->id, 'deal');
             return redirect($url);
         } else {
@@ -172,4 +286,44 @@ class DealsController extends Controller {
         }
     }
 
+    protected function getDealStore() {
+        $retVal = NULL;
+        $dealStoreIds = Deal::query()->where('store_id', '>', 0)->distinct()->pluck('store_id');
+        if (count($dealStoreIds) > 0) {
+            $storeIds = $dealStoreIds->toArray(); 
+            $retVal = Store::whereIn('id', $storeIds)->orderBy('title', 'ASC')->select(['id', 'title', 'slug'])->get();
+        }
+        return $retVal;
+    }
+
+    protected function showDeal($itemId, $slug = '') {
+        $retVal = [];
+        $dealFilter = [
+            'columns' => ['id', 'title', 'slug',
+                'image', 'content', 'price',
+                'sale_price', 'discount', 'store_id',
+                'expire_time', 'origin_link', 'affiliate_link',
+                'create_time', 'modifier_name', 'modifier_id'],
+            'order_by' => 'discount_DESC'
+        ];
+        $retVal['brands'] = NULL;
+        $retVal['stores'] = $this->getDealStore();
+        $findResult = $this->dealRepository->read($dealFilter);
+        if ($findResult['status'] = 'successful') {
+            $retVal['deals'] = $findResult['data'];
+            $dealFilter['metrics'] = 'count';
+            $getTotal = $this->dealRepository->read($dealFilter);
+            $totalCount  = 0;
+            $pageCount = 0;
+            if (isset($getTotal['data'])) {
+                $getTotal = $getTotal['data'];
+                $pageCount = ceil($getTotal / $findResult['pageSize']);
+            }
+            $retVal['pagination'] = [
+                'page_count' => $pageCount,
+                'total_count' => $totalCount,
+            ];
+        }
+        return view('deals-page::deals.alldeals', $retVal);
+    }
 }

@@ -248,7 +248,7 @@ class DealService extends BaseService
                     foreach ($reqResult as $item) {
                         $bulkInsertData[] = $this->buildInsertDealItem($item);
                     }
-                    $result = sendHttpRequest("https://couponforless.com/service/deal/bulk-create",
+                    $result = sendHttpRequest("https://couponforless.test/service/deal/bulk-create",
                         "POST",
                         ["params" => $bulkInsertData],
                         [
@@ -256,6 +256,7 @@ class DealService extends BaseService
                             "Accept: application/json, text/plain, */*",
                             "Content-Type: application/json;charset=utf-8"
                         ]);
+                    \Log::info('DEAL' . json_encode($result));
                     if (isset($result['status']) && $result['status'] === 'successful') {
                         $runAt = Carbon::now()->addSeconds(30);
                         $job = (new DealProductJob())->delay($runAt);
@@ -333,6 +334,10 @@ class DealService extends BaseService
         return $retVal;
     }
 
+    /**
+     * @param $manufactureName
+     * @return int
+     */
     protected function findLocalStore($manufactureName) {
         $retVal = 0;
         $findStore = Store::where('title', 'like',"%" . trim($manufactureName) . "%")->get(['id']);
@@ -342,6 +347,10 @@ class DealService extends BaseService
         return $retVal;
     }
 
+    /**
+     * @param $categoryName
+     * @return string
+     */
     protected function findLocalCategory($categoryName) {
         $retVal = '';
         $listName = explode('>', $categoryName);
