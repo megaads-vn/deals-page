@@ -30,7 +30,7 @@
     $topDealItems = topDeals($dealLimit, $dealFilters);
     if (!empty($topDealItems) && count($topDealItems) > 0):
     $topDealBoxTitle = isset($topDealBoxTitle) ? $topDealBoxTitle : "Today's Best Deals";
-    $storeRoute = Config::get('deals-page.store_route', 'frontend::store::listByStore');
+    $storeRoute = Config::get('deals-page.store_route', 'deal::list::by::store');
 ?>
 <div class="row_box is-homepage home-deal">
     <div class="target home-deal-tar">
