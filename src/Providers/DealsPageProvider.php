@@ -2,6 +2,7 @@
 
 namespace Megaads\DealsPage\Providers;
 
+use Illuminate\Routing\Route;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Support\ServiceProvider;
@@ -11,6 +12,7 @@ use Megaads\DealsPage\Middlewares\DealPageAuth;
 use Megaads\DealsPage\Middlewares\DealPageCors;
 use Megaads\DealsPage\Repositories\CatalogRepository;
 use Megaads\DealsPage\Repositories\DealRepository;
+use Megaads\DealsPage\Validators\CustomValidator;
 
 class DealsPageProvider extends ServiceProvider
 {
@@ -44,6 +46,9 @@ class DealsPageProvider extends ServiceProvider
 
         //Regitry queue callback
         $this->afterQueueDone();
+
+        //Register route custom validator
+        $this->registerCustomRouteValidator();
 
         //Registry alias middleware
         $this->registerAliasMiddleware('deals_auth', 'Megaads\DealsPage\Middlewares\DealPageAuth');
@@ -115,5 +120,11 @@ class DealsPageProvider extends ServiceProvider
     protected function registerCommonMiddleware($middleware) {
         $kernel = $this->app['Illuminate\Contracts\Http\Kernel'];
         $kernel->pushMiddleware($middleware);
+    }
+
+    protected function registerCustomRouteValidator() {
+        Route::$validators = array_merge([
+            $this->app->make(CustomValidator::class)
+        ], Route::getValidators());
     }
 }

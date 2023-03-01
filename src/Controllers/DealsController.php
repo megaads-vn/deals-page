@@ -140,7 +140,7 @@ class DealsController extends Controller {
                 'create_time', 'modifier_name', 'modifier_id'],
             'order_by' => 'discount_DESC',
             'pageId' => 0,
-            'pageSize' => 50
+            'pageSize' => 52
         ];
         if (isset($_GET['p'])) {
             $dealFilter['pageId'] = $_GET['p'] - 1;
