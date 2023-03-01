@@ -55,6 +55,7 @@ class DealsController extends Controller {
 
 
     public function allDeals() {
+        return redirect('/');
         $retVal = [];
         $dealFilter = [
             'columns' => ['id', 'title', 'slug',
@@ -88,6 +89,7 @@ class DealsController extends Controller {
     }
 
     public function dealDetail($itemId, \Request  $request) {
+        return redirect('/');
         $segment = request()->segment(2);
         $filterDeal = [
             'id' => $itemId,
@@ -126,6 +128,7 @@ class DealsController extends Controller {
     }
 
     public function listByStore($slug, \Request $request) {
+        return redirect('/');
         $retVal = [];
         $findStore = Store::query()->where('slug', $slug)->first(['id', 'title', 'slug']);
         if (empty($findStore))
