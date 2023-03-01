@@ -1,6 +1,6 @@
 <?php
     $pageType = "";
-    $dealLimit = isset($limitDealItem) ? $limitDealItem : 9;
+    $dealLimit = isset($limitDealItem) ? $limitDealItem : 12;
     $routeArray = app('request')->route()->getAction();
     $controllerAction = class_basename($routeArray['controller']);
     $allRoute = 'deal::all';
@@ -27,57 +27,32 @@
             }
         }
     }
-    $topDealItems = topDeals($dealLimit, $dealFilters);
+    if (isset($listDeals)) {
+        $topDealItems = $listDeals;
+    } else {
+        $topDealItems = topDeals($dealLimit, $dealFilters);
+    }
     if (!empty($topDealItems) && count($topDealItems) > 0):
     $topDealBoxTitle = isset($topDealBoxTitle) ? $topDealBoxTitle : "Today's Best Deals";
-    $storeRoute = Config::get('deals-page.store_route', 'deal::list::by::store');
+    $storeRoute = Config::get('deals-page.store_route', 'frontend::store::listByStore');
 ?>
-<div class="row_box is-homepage home-deal">
+<div class="homepage-coupons-wapper">
     <div class="target home-deal-tar">
-        <h2><?= $topDealBoxTitle ?></h2>
-        <a href="{{ route($allRoute, $allRoutParams) }}">View more</a>
+        <h2 class="home-heading first-box-heading"><?= $topDealBoxTitle ?></h2>
     </div>
-    <ul class="tabs_list clear">
+    <ul class="tabs-list">
         @foreach ($topDealItems as $item)
-            <li class="lf shaw deals">
-            <div class="deals_inner">
-                <div class="small">
-                    <a href="javascript:void(0);" rel="nofollow" target="_blank" class="js-deal" data-clipboard-text="{{ $item->id }}" data-id="{{ $item->id }}">
-                        <div class="d-log">
-                            <img src="{{ $item->image }}" class="deal-image" height="120" alt="{{ $item->title }}">
-                        </div>
-                    </a>
-                    <div class="main_tit">
-                        @if (isset($item->store) && !empty($item->store))
-                        <p class="text_ell">
-                            From <a href="{{ route($storeRoute, ['slug' => $item->store->slug]) }}">{{ $item->store->name }}</a>
-                        </p>
-                        @endif
-                        <a href="javascript:void(0);" class="main_title js-deal" data-clipboard-text="{{ $item->id }}" data-id="{{ $item->id }}">{{ $item->title }}</a>
-                        <span class="deal-expired">Expire: {{ !empty($item->expired_at) ? $item->expired_at : 'On going' }}</span>
-                    </div>
-                    <p>
-                        <span class="big">${{ $item->sale_price }}</span>
-                        <span class="small_big">${{ $item->price }}</span>
-                    </p>
-                </div>
-                <div class="amazon_footer">
-                    <div class="deals_bot">
-                <span class="shopnow js-deal" data-clipboard-text="{{ $item->id }}" data-id="{{ $item->id }}">
-                    <span class="shop">Shop Now</span>
-                </span>
-                    </div>
-                </div>
-                <div class="offstyle">
-                    <span class="shop">{{ $item->discount }}% off</span>
-                </div>
-            </div>
-        </li>
+            @include('deals-page::deals.inc.deal-item', ['item' => $item])
         @endforeach
     </ul>
+    <a class="viewmore-deal" href="{{ route($allRoute, $allRoutParams) }}" title="View more">View more</a>
 </div>
 <?php endif; ?>
 @section('js')
     @parent
     <script defer src="{{ asset('/vendor/deals-page/js/deals-page.js?v=' . time()) }}"></script>
+@endsection
+@section('style')
+    @parent
+    <link rel="stylesheet" href="{{ asset('/vendor/deals-page/css/all-deals.css?v=' . time()) }}" />
 @endsection

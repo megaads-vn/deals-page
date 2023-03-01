@@ -1,38 +1,29 @@
 <li class="lf shaw deals">
-    <div class="deals_inner">
-        <div class="small">
-            <a href="javascript:void(0);" rel="nofollow" target="_blank" class="js-deal" data-clipboard-text="{{ $item->id }}" data-id="{{ $item->id }}">
-                <div class="d-log">
-                    <img src="{{ $item->image }}" class="deal-image" height="120" alt="{{ $item->title }}">
+    <div class="deals-inner">
+        <div class=" deal-image-wrapper js-deal" data-clipboard-text="{{ $item->id }}" data-id="{{ $item->id }}">
+            <img src="{{ $item->image }}" class="deal-image" alt="{{ $item->title }}">
+        </div>
+        <div class="main-tit">
+            @if (isset($item->store) && !empty($item->store))
+                <div class="text-ell">
+                    From <a href="{{ route($storeRoute, ['slug' => $item->store->slug]) }}">{{ $item->store->name }}</a>
                 </div>
-            </a>
-            <div class="main_tit">
-                @if (isset($item->store))
-                    <p class="text_ell">
-                        From <a href="<?= route("frontend::store::listByStore", ['slug' => $item->store->slug]) ?>"><?= $item->store->name ?></a>
-                    </p>
-                @endif
-                <a href="javascript:void(0);" class="main_title js-deal" data-clipboard-text="<?= $item->id ?>" data-id="<?= $item->id ?>"><?= $item->title ?></a>
-                <span class="deal-expired">Expire: <?= App\Utils\Utils::timeOnGoing($item->expire_time) ?></span>
-            </div>
-            <p>
-                <span class="big"><?= $item->currency_code ?><?= $item->price ?></span>
-                <?php if ($item->discount > 0) { ?>
-                <span class="small_big"><?= $item->currency_code ?><?= $item->sale_price ?></span>
-                <?php } ?>
-            </p>
+            @endif
+            <h3 class="deal-title js-deal" data-clipboard-text="{{ $item->id }}" data-id="{{ $item->id }}">
+                {{ $item->title }}
+            </h3>
+            <span class="deal-expired">Expire: {{ !empty($item->expired_at) ? $item->expired_at : 'On going' }}</span>
         </div>
-        <div class="amazon_footer">
-            <div class="deals_bot">
-                <span class="shopnow js-deal" data-clipboard-text="<?= $item->id ?>" data-id="<?= $item->id ?>">
-                    <span class="shop">Shop Now</span>
-                </span>
-            </div>
+        <div class="deal-price">
+            <span class="big">${{ $item->sale_price }}</span>
+            <del class="small-big">${{ $item->price }}</del>
         </div>
-        <?php if ($item->discount > 0) { ?>
+        <button class="deal-shopnow js-deal" data-clipboard-text="{{ $item->id }}" data-id="{{ $item->id }}">
+            Shop Now
+        </button>
         <div class="offstyle">
-            <span class="shop">{{ $item->discount }}% off</span>
+            <span class="shop">{{ $item->discount }}%</span>
+            <small>Off</small>
         </div>
-        <?php } ?>
     </div>
 </li>

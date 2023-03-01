@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Megaads\DealsPage\Jobs\DealProductJob;
 use Megaads\DealsPage\Models\Category;
+use Megaads\DealsPage\Models\Deal;
 use Megaads\DealsPage\Models\DealCategory;
 use Megaads\DealsPage\Models\DealRelation;
 use Megaads\DealsPage\Models\Store;
@@ -190,8 +191,11 @@ class DealService extends BaseService
                 \Log::info('BULK_CREATE_DEAL');
                 $insertResult = [];
                 foreach ($params as $item) {
-                    $resultId = $this->dealRepository->create($item);
-                    $insertResult[$resultId] = $item['category_id'];
+                    $findExists = Deal::query()->where('slug', $item->slug)->orWhere('origin_link', $item->origin_link)->first(['id']);
+                    if (!empty($findExists)) {
+                        $resultId = $this->dealRepository->create($item);
+                        $insertResult[$resultId] = $item['category_id'];
+                    }
                 }
                 if (count($insertResult) > 0) {
                     foreach ($insertResult as $dealId => $strCategoryId) {
@@ -248,7 +252,7 @@ class DealService extends BaseService
                     foreach ($reqResult as $item) {
                         $bulkInsertData[] = $this->buildInsertDealItem($item);
                     }
-                    $result = sendHttpRequest("https://couponforless.test/service/deal/bulk-create",
+                    $result = sendHttpRequest("https://couponforless.com/service/deal/bulk-create",
                         "POST",
                         ["params" => $bulkInsertData],
                         [
@@ -332,6 +336,40 @@ class DealService extends BaseService
         ];
 
         return $retVal;
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function removeDuplicateDeals(Request $request) {
+        $response = $this->getDefaultStatus();
+        try {
+            $fields = $request->get('fields', 'slug');
+            $totalDuplicate = Deal::query()
+                                    ->having(\DB::raw('COUNT(*)'), '>', 1)
+                                    ->select([$fields, \DB::raw('COUNT(*) AS total')])
+                                    ->groupBy($fields)
+                                    ->orderBy('total', 'DESC')
+                                    ->get();
+            $totalDeleted = 0;
+            foreach ($totalDuplicate as $item) {
+                $ids = Deal::where($fields, $item->$fields)->pluck('id');
+                if (count($ids) > 0) {
+                    $ids = $ids->toArray();
+                    array_shift($ids);
+                    if (count($ids) > 0) {
+                        $totalDeleted++;
+                        DealCategory::whereIn('deal_id', $ids)->delete();
+                        Deal::whereIn('id', $ids)->delete();
+                    }
+                }
+            }
+            $response = $this->getSuccessStatus(['count' => $totalDeleted]);
+        } catch (\Exception $ex) {
+            dealPageSysLog('error', 'REMOVE_DUPLICATE_DEALS: ', $ex);
+        }
+        return \Response::json($response);
     }
 
     /**

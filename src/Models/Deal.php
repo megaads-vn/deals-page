@@ -17,7 +17,13 @@ class Deal extends Model
     ];
 
     protected $appends = [
-        'originUrl', 'affilidateUrl', 'expireTime', 'createTime', 'modifierName', 'modifierId', 'currency_code'
+        'originUrl',
+        'expireTime',
+        'createTime',
+        'modifierId',
+        'modifierName',
+        'affilidateUrl',
+        'currency_code'
     ];
 
     protected $hidden = [
@@ -33,22 +39,23 @@ class Deal extends Model
     }
 
     public function getOriginUrlAttribute() {
-        return $this->attributes['origin_link'];
+        return isset($this->attributes['origin_link']) ? $this->attributes['origin_link'] : NULL;
     }
+
     public function getAffilidateUrlAttribute() {
-        return $this->attributes['affiliate_link'];
+        return isset($this->attributes['affiliate_link']) ? $this->attributes['affiliate_link'] : NULL;
     }
     public function getExpireTimeAttribute() {
-        return $this->attributes['expire_time'];
+        return isset($this->attributes['expire_time']) ? $this->attributes['expire_time'] : NULL;
     }
     public function getCreateTimeAttribute() {
-        return $this->attributes['create_time'];
+        return isset($this->attributes['create_time']) ? $this->attributes['create_time'] : NULL;
     }
     public function getModifierIdAttribute() {
-        return $this->attributes['modifier_id'];
+        return isset($this->attributes['modifier_id']) ? $this->attributes['modifier_id'] : NULL;
     }
     public function getModifierNameAttribute() {
-        return $this->attributes['modifier_name'];
+        return isset($this->attributes['modifier_name']) ? $this->attributes['modifier_name'] : NULL;
     }
     public function getCurrencyCodeAttribute() {
         return '$';

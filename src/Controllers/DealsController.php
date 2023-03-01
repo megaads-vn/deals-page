@@ -81,6 +81,7 @@ class DealsController extends Controller {
                 'total_count' => $totalCount,
             ];
         }
+        $retVal['title'] = 'All Deals';
         return view('deals-page::deals.alldeals', $retVal);
     }
 
