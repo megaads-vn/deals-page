@@ -111,6 +111,10 @@
     border: 2px solid #e1e1e1;
     border-radius: 3px;
 }
+.list-pagination .p-active, .p-active:hover {
+    color: #23527c!important;
+    background-color: #eee!important;
+}
 @media  (max-width: 760px) {
     .tabs-list {
         grid-template-columns: repeat(2, 1fr);

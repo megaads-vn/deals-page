@@ -88,15 +88,14 @@ if (!function_exists('topDeals')) {
                 $query->where('store_id', $filters['store_id']);
             }
             if (array_key_exists('category_id', $filters)) {
-                $query->whereHas('categories', function($c) use ($filters) {
-                   $c->where('category_id', $filters['category_id']);
-                });
+                $query->join('deal_n_category', 'deal_n_category.deal_id', '=', 'deals.id');
+                $query->where('deal_n_category.category_id', $filters['category_id']);
             }
             $query->whereNotNull('discount');
             $query->orderBy('discount', 'DESC');
-            $query->orderBy('id', 'DESC');
+            $query->orderBy('deals.id', 'DESC');
             $query->limit($limit);
-            $retVal = $query->get(['id', 'title', 'slug', 'image', 'content', 'price', 'sale_price', 'discount', 'store_id']);
+            $retVal = $query->get(['deals.id', 'title', 'slug', 'image', 'content', 'price', 'sale_price', 'discount', 'store_id']);
         } catch (Exception $exception) {
             dealPageSysLog('error', 'topDeals_Helper: ', $exception);
         }
@@ -123,7 +122,7 @@ if (!function_exists('pagination')) {
             $class = ($page == 1) ? "disabled" : "";
             $html .= '<li class="' . $class . '"><a href="?' . $href . 'p=1">&laquo;</a></li>';
         }
-        for ($i = $start; $i <= $end; $i++) {
+        for ($i = $start; $i < $end; $i++) {
             $class = ($page == $i) ? "p-active" : "";
             $html .= '<li><a class="' . $class . '" href="?' . $href . 'p=' . $i . '">' . $i . '</a></li>';
         }
@@ -146,5 +145,31 @@ if (!function_exists('timeOnGoing')) {
             $expireDate = 'On going';
         }
         return $expireDate;
+    }
+}
+
+if (!function_exists('isStore')) {
+    function isStore() {
+        $routeArray = app('request')->route()->getAction();
+        $controllerAction = class_basename($routeArray['controller']);
+        list($controller, $action) = explode('@', $controllerAction);
+        return $controller === 'StoreController' ? true : false;
+    }
+}
+if (!function_exists('isCategory')) {
+    function isCategory() {
+        $routeArray = app('request')->route()->getAction();
+        $controllerAction = class_basename($routeArray['controller']);
+        list($controller, $action) = explode('@', $controllerAction);
+        return $controller === 'CategoryController' ? true : false;
+    }
+}
+
+if (!function_exists('isDeal')) {
+    function isDeal() {
+        $routeArray = app('request')->route()->getAction();
+        $controllerAction = class_basename($routeArray['controller']);
+        list($controller, $action) = explode('@', $controllerAction);
+        return $controller === 'DealsController' && ($action == 'listByStore' || $action == 'allDeals') ? true : false;
     }
 }

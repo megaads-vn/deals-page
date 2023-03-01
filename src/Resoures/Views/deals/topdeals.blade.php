@@ -1,14 +1,11 @@
 <?php
     $pageType = "";
     $dealLimit = isset($limitDealItem) ? $limitDealItem : 12;
-    $routeArray = app('request')->route()->getAction();
-    $controllerAction = class_basename($routeArray['controller']);
     $allRoute = 'deal::all';
     $allRoutParams = [];
-    list($controller, $action) = explode('@', $controllerAction);
     $currentParams = Route::current()->parameters();
     $dealFilters = [];
-    if ($controller === "StoreController") {
+    if (isStore()) {
         $pageType = "store";
         if (isset($currentParams['slug'])) {
             $findStore = \Megaads\DealsPage\Models\Store::query()->where('slug', $currentParams['slug'])->first(['id', 'slug']);
@@ -18,7 +15,7 @@
             $allRoute = 'deal::list::by::store';
             $allRoutParams = ['slug' => $findStore->slug];
         }
-    } else if ($controller === "CategoryController") {
+    } else if (isCategory()) {
         $pageType = "category";
         if (isset($currentParams['slug'])) {
             $findCategory = \Megaads\DealsPage\Models\Category::query()->where('slug', $currentParams['slug'])->first(['id']);
@@ -27,6 +24,7 @@
             }
         }
     }
+    $topDealItems = [];
     if (isset($listDeals)) {
         $topDealItems = $listDeals;
     } else {
@@ -34,7 +32,7 @@
     }
     if (!empty($topDealItems) && count($topDealItems) > 0):
     $topDealBoxTitle = isset($topDealBoxTitle) ? $topDealBoxTitle : "Today's Best Deals";
-    $storeRoute = Config::get('deals-page.store_route', 'frontend::store::listByStore');
+    $storeRoute = Config::get('deals-page.store_route', 'deal::list::by::store');
 ?>
 <div class="homepage-coupons-wapper">
     <div class="target home-deal-tar">
@@ -45,7 +43,9 @@
             @include('deals-page::deals.inc.deal-item', ['item' => $item])
         @endforeach
     </ul>
-    <a class="viewmore-deal" href="{{ route($allRoute, $allRoutParams) }}" title="View more">View more</a>
+    @if (!isDeal())
+        <a class="viewmore-deal" href="{{ route($allRoute, $allRoutParams) }}" title="View more">View more</a>
+    @endif
 </div>
 <?php endif; ?>
 @section('js')

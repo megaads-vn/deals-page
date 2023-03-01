@@ -28,6 +28,7 @@ class DealsController extends Controller {
         $this->dealPageTable = \Config::get('deals-page.deal_related_page.name', 'store_n_keyword');
         $this->dealPageColumns = \Config::get('deals-page.deal_related_page.name', ['id', 'keyword']);
         $this->dealRepository = new DealRepository();
+        view()->share('allDealTitle', 'All Deals');
     }
 
     public function index($slug) {
@@ -82,6 +83,7 @@ class DealsController extends Controller {
             ];
         }
         $retVal['title'] = 'All Deals';
+        $retVal['meta']['title'] = 'All Deals';
         return view('deals-page::deals.alldeals', $retVal);
     }
 
@@ -114,6 +116,8 @@ class DealsController extends Controller {
             if ( $segment == 'c' ) {
                 $retVal['showPopup'] = true;
             }
+            $retVal['title'] = 'All Deals';
+            $retVal['meta']['title'] = 'All Deals';
             return view('deals-page::deals.deal-detail', $retVal);
         } else {
             return view('errors.404');
@@ -124,6 +128,8 @@ class DealsController extends Controller {
     public function listByStore($slug, \Request $request) {
         $retVal = [];
         $findStore = Store::query()->where('slug', $slug)->first(['id', 'title', 'slug']);
+        if (empty($findStore))
+            abort(404);
 
         $dealFilter = [
             'storeId' => $findStore->id,
@@ -132,27 +138,37 @@ class DealsController extends Controller {
                 'sale_price', 'discount', 'store_id',
                 'expire_time', 'origin_link', 'affiliate_link',
                 'create_time', 'modifier_name', 'modifier_id'],
-            'order_by' => 'discount_DESC'
+            'order_by' => 'discount_DESC',
+            'pageId' => 0,
+            'pageSize' => 50
         ];
+        if (isset($_GET['p'])) {
+            $dealFilter['pageId'] = $_GET['p'] - 1;
+        }
 
         $retVal['brands'] = NULL;
         $retVal['stores'] = $this->getDealStore();
+        $retVal['title'] = !empty($findStore) ? 'All Deals in ' . $findStore->title : '';
+        $retVal['meta']['title'] = !empty($findStore) ? 'All Deals in ' . $findStore->title : '';
         $findResult = $this->dealRepository->read($dealFilter);
         if ($findResult['status'] = 'successful') {
             $retVal['deals'] = $findResult['data'];
             $dealFilter['metrics'] = 'count';
+            unset($dealFilter['pageId']);
+            unset($dealFilter['pageSize']);
             $getTotal = $this->dealRepository->read($dealFilter);
             $totalCount  = 0;
             $pageCount = 0;
             if (isset($getTotal['data'])) {
-                $getTotal = $getTotal['data'];
-                $pageCount = ceil($getTotal / $findResult['pageSize']);
+                $totalCount = $getTotal['data'];
+                $pageCount = ceil($totalCount / $findResult['pageSize']);
             }
             $retVal['pagination'] = [
                 'page_count' => $pageCount,
                 'total_count' => $totalCount,
             ];
         }
+        view()->share('allDealTitle', 'All ' . $findStore->title . ' Deals');
         return view('deals-page::deals.alldeals', $retVal);
     }
 

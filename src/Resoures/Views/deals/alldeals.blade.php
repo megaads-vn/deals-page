@@ -1,5 +1,7 @@
 @extends('frontend.layout.master', ['title' => $title])
-@section('title', 'HELLO WORLD')
+@section('meta')
+    @include('frontend.layout.meta', [ 'data' => isset($meta) ? $meta : NULL ])
+@endsection
 @section('js')
     @parent
     <script defer src="{{ asset('/vendor/deals-page/js/deals-page.js?v=' . time()) }}"></script>
@@ -110,6 +112,10 @@
                 background-color: #337ab7;
             }
         }
+        .list-pagination .p-active, .p-active:hover {
+            color: #23527c!important;
+            background-color: #eee!important;
+        }
     </style>
 @endsection
 @section('content')
@@ -117,13 +123,13 @@
         <div class="container">
             <div class="deal_con">
                 <div class="deal_textCon">
-                    <h1 class="text_center">All Deals</h1>
+                    <h1 class="text_center"><?= $allDealTitle ?></h1>
                     <p class="deal_mainp"></p>
                 </div>
             </div>
             <div class="main_dealbg">
                 <div class="deal_content" id="main_inner">
-                    @if (count($deals) > 1)
+                    @if (count($deals) > 1 && 1 == 2)
                         <div class="deallist_tab">
                             <form action="/deals/" method="get" id="cates_submit" class="list search-deals-form">
                                 <div class="list listbig">
@@ -162,9 +168,6 @@
                     @endif
                 </div>
             </div>
-            <?php if(isset($dataDeal) && !empty($dataDeal)) { ?>
-                @include('deals-page::deals.topdeals', ['title' => 'Top Deals'])
-            <?php } ?>
         </div>
     </main>
 @endsection
