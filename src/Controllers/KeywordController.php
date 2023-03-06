@@ -163,7 +163,8 @@ class KeywordController extends Controller {
      */
     protected function getRecommendedCoupon(&$retVal, $keyword) {
         $query = Coupon::query();
-        $query->where('status', Coupon::STATUS_ACTIVE);
+        $query->where('coupon.status', Coupon::STATUS_ACTIVE);
+        $query->join('store', 'store.id', '=', 'coupon.store_id');
         if (isset($keyword['filter']) && !empty($keyword['filter'])) {
             $strQuery = explode('|', $keyword['filter']);
             preg_match('/(\w+)(\+|\-)(.*)/i', $strQuery[0], $matches);
@@ -187,7 +188,7 @@ class KeywordController extends Controller {
         } else {
             $query->where('store_id', $keyword['store_id']);
         }
-        $getCoupon = $query->get();
+        $getCoupon = $query->get(['coupon.*', 'store.image as storeImage']);
         if (count($getCoupon) > 0) {
             $retVal['recommendedCoupons'] = $getCoupon;
         }
@@ -205,7 +206,7 @@ class KeywordController extends Controller {
             if (!empty($findCate)) {
                 $categoryId = $findCate->category_id;
                 $storeIds = StoreCategory::query()->where('category_id', $categoryId)->pluck('store_id');
-                $retVal['relatedStore'] = Store::query()->whereIn('id', $storeIds)->get(['id', 'title', 'slug', 'image']);
+                $retVal['relatedStore'] = Store::query()->whereIn('id', $storeIds)->get(['id', 'title', 'slug', 'image as coverImage']);
             }
         } else {
             $retVal['relatedStore'] = $this->getPopularStore();
