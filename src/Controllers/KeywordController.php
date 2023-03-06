@@ -278,7 +278,7 @@ class KeywordController extends Controller {
             if (!empty($getConfig)) {
                 $objectValue = json_decode($getConfig);
                 $objectValue = json_decode($objectValue->value);
-                $stores = Store::query()->whereIn('id', $objectValue->ids)->get(['id', 'title', 'slug', 'image']);
+                $stores = Store::query()->whereIn('id', $objectValue->ids)->get(['id', 'title', 'slug', 'image as coverImage']);
 
                 if (count($stores) > 0) {
                     $expiredAt = Carbon::now()->addHour(1);
