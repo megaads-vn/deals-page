@@ -9,6 +9,7 @@ use Firebase\JWT\Key;
 use Megaads\DealsPage\Models\Category;
 use Megaads\DealsPage\Models\Config;
 use Megaads\DealsPage\Models\Coupon;
+use Megaads\DealsPage\Models\DealRelation;
 use Megaads\DealsPage\Models\Store;
 use Megaads\DealsPage\Models\StoreCategory;
 use Megaads\DealsPage\Models\StoreContact;
@@ -47,6 +48,7 @@ class KeywordController extends Controller {
             return abort(404);
         }
         $storeId = -1;
+        $relationIds = DealRelation::query()->where('target_id', $keyword->id)->pluck('object_id');
         $store = NULL;
         if (!empty($keyword->store_id)) {
             $storeId = $keyword->store_id;
@@ -63,6 +65,7 @@ class KeywordController extends Controller {
                     'content'
                 ]);
         }
+
         if($page - 1 <= 0) {
             $pagination = 0;
             $paginationString = "";
@@ -115,6 +118,10 @@ class KeywordController extends Controller {
         View::share('dealFilterActivated', $filterActivated);
         if (!empty($keyword['deal_filter'])) {
             $dealFiler['advSearch'] = trim($keyword['deal_filter']);
+        } else if (!empty($keyword['store_id'])) {
+            $dealFiler['storeId'] = $keyword['store_id'];
+        } else if (!empty($relationIds)) {
+            $dealFiler['ids'] = $relationIds->toArray();
         } else {
             $dealFiler['like_title'] = str_replace("%","\%",$keyword['keyword']);
         }
@@ -146,11 +153,7 @@ class KeywordController extends Controller {
         $this->getSimilarSearch($retVal, $keyword);
         $this->contentTemplate($retVal, $keyword);
         $this->getTodayDeals($retVal, $keyword);
-//        $retVal['relatedCouponsFromStore'] = $this->getCouponsFromRelatedStores($keyword, $keyword['related_store_id']);
-//        if (isset($store)) {
-//            Utils::hideKeypageAdsense($store['slug']);
-//            $retVal['localSchema'] = $this->buildSchema($store, $keyword['image_url'],$couponResult['result']['data']);
-//        }s
+
         return response()->make(view('deals-page::keypage.index', $retVal));
     }
 

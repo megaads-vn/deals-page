@@ -178,12 +178,16 @@ class DealRepository extends BaseRepository
             $query->where('id', $filters['id']);
         }
 
+        if (array_key_exists('ids', $filters)) {
+            $query->whereIn('id', $filters['ids']);
+        }
+
         if (array_key_exists('title', $filters)) {
             $query->where('title', $filters['title']);
         }
 
         if (array_key_exists('like_title', $filters)) {
-            $query->where('title', 'like', "'%" . $filters["title"] . "%'");
+            $query->where('title', 'like', "'%" . $filters["like_title"] . "%'");
         }
 
         if (array_key_exists('storeId', $filters)) {

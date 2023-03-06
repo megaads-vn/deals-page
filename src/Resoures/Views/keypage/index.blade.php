@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="{{ asset('/vendor/deals-page/css/deal.css?v=' . time()) }}">
     <link rel="stylesheet" href="{{ asset('/vendor/deals-page/css/price-range.css?v=' . time()) }}">
 @endsection
-
 @section('content')
     <?php
     if (isset($localSchema)) {
@@ -44,7 +43,7 @@
                     <div class="lp-top-keyword">
                         <div class="lp-list-coupon">
                             <!-- coupon item -->
-                            <div class="js-active-box">
+                            <div class="js-active-box list-deal-wrapper">
                                 @include('deals-page::common.widgets.list-deal', ['listDeal' => $listDeal, 'store' => $keyword['keyword'], 'date' => '(' .date('d. M Y'). ')'])
                             </div>
                             @if(!empty($recommendedCoupons) && view()->exists('frontend.common.item'))
