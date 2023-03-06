@@ -113,3 +113,7 @@ input[type="range"]::-moz-range-thumb{
         display: block;
     }
 }
+
+.mb-content svg {
+    display: none;
+}
