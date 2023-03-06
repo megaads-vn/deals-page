@@ -99,11 +99,11 @@ class KeywordController extends Controller {
                     $filterActivated = 'code';
                 }
                 if ($allParams['dealType'] === 'offer') {
-                    $dealFiler['orderBy'] = 'price_DESC';
+                    $dealFiler['order_by'] = 'price_DESC';
                     $filterActivated = 'offer';
                 }
                 if ($allParams['dealType'] === 'newest') {
-                    $dealFiler['orderBy'] = 'id_DESC';
+                    $dealFiler['order_by'] = 'id_DESC';
                     $filterActivated = 'newest';
                 }
 
