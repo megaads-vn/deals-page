@@ -67,7 +67,7 @@
                         </div>
                     </div>
                     @if(isset($contentTemplateFAQ) && !empty($contentTemplateFAQ))
-                        @include('deals-page::deals.inc.contentTemplateFAQ', ['contentTemplateFAQ' => $contentTemplateFAQ])
+                        @include('deals-page::keypage.inc.contentTemplateFAQ', ['contentTemplateFAQ' => $contentTemplateFAQ])
                     @else
                         {!!$keyword['content']!!}
                     @endif
