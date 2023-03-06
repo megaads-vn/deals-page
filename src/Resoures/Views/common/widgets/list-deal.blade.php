@@ -2,7 +2,6 @@
 use Megaads\Adsense\Utils\Adsense;
 ?>
 @if (isset($listDeal))
-    @include('deals-page::keypage.inc.filter')
     @forelse ($listDeal as $index => $item)
         @include('deals-page::common.item', ['item' => $item])
     @empty

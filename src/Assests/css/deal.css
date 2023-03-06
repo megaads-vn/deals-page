@@ -5,7 +5,9 @@
 .list-deal-wrapper {
 	--itemImage: 180px;
 }
-
+.lp-breadcrumb {
+	width: 100%;
+}
 .deal-item-wrapper {
 	display: flex;
 	justify-content: flex-start;
@@ -252,7 +254,7 @@
 @media (max-width: 760px) {
 	.list-deal-wrapper {
 		display: grid;
-		grid-template-columns: repeat(2, 1fr);
+		grid-template-columns: repeat(1, 1fr);
 	}
 
 	.deal-item-header {
@@ -279,7 +281,7 @@
 	border: none;
 	color: #69b820;
 	background-color: transparent;
-	padding: 10px calc(16px + (32 - 16) * ((100vw - 300px) / (1920 - 300)));
+	padding: 10px calc(6px + (32 - 6) * ((100vw - 300px) / (1920 - 300)));
 	text-align: center;
 	display: block;
 	cursor: pointer;

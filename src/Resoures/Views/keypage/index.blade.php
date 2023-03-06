@@ -42,6 +42,7 @@
                     </ul>
                     <div class="lp-top-keyword">
                         <div class="lp-list-coupon">
+                            @include('deals-page::keypage.inc.filter')
                             <!-- coupon item -->
                             <div class="js-active-box list-deal-wrapper">
                                 @include('deals-page::common.widgets.list-deal', ['listDeal' => $listDeal, 'store' => $keyword['keyword'], 'date' => '(' .date('d. M Y'). ')'])
