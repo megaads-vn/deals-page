@@ -466,7 +466,7 @@ class KeywordController extends Controller {
     private function getTodayDeals(&$retVal, $keyword)
     {
         $dealFilters = [
-            'pageSize' => 15,
+            'pageSize' => 3,
             'orderBy' => 'id_DESC',
             'columns' => ['id', 'title', 'slug']
         ];

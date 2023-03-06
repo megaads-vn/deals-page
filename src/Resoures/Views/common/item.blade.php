@@ -1,5 +1,5 @@
 <div class="deal-item-wrapper">
-    <a class="deal-item-image" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" rel="nofollow">
+    <a class="deal-item-image" rel="nofollow" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" rel="nofollow">
         @if ($item->discount > 0)
         <span class="deal-tag">
             <span>{{ $item->discount }}%</span>
@@ -9,7 +9,7 @@
         <img src="{{ $item->image }}" alt="{{ $item->title }}">
     </a>
     <div class="deal-item-info">
-        <a target="_blank" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" class="box-top">
+        <a target="_blank" rel="nofollow" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" class="box-top">
             <h3 class="deal-item-header">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
@@ -27,7 +27,7 @@
             <div class="deal-item-footer-box">
                 @if (!empty($item->store))
                     <a target="_blank" href="{{ route('frontend::store::listByStore', ['slug' => $item->store->slug]) }}" class="name">
-                        Store: <span>{{ $item->store->title }}</span>
+                        Store: <span>{{ $item->store->name }}</span>
                     </a>
                 @endif
                 @if (!empty($item->category))
@@ -40,7 +40,7 @@
                 </div>
             </div>
             <div class="deal-item-action">
-                <a class="deal-item-button" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}">Shop Now</a>
+                <a class="deal-item-button" rel="nofollow" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}">Shop Now</a>
             </div>
         </div>
     </div>
