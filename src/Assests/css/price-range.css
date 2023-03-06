@@ -107,3 +107,9 @@ input[type="range"]::-moz-range-thumb{
 .deal-apply-filter-btn {
     cursor: pointer;
 }
+
+@media (max-width: 760px) {
+    .input-wrap {
+        display: block;
+    }
+}
