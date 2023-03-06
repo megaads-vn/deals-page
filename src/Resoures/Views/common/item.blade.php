@@ -1,8 +1,8 @@
 <div class="deal-item-wrapper">
-    <a class="deal-item-image" href="/deals/10-piece-metric-cap-oil-filter-wrench-set-32-99-shipped-w/-prime" rel="nofollow">
-        @if ($item->sale_off > 0)
+    <a class="deal-item-image" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" rel="nofollow">
+        @if ($item->discount > 0)
         <span class="deal-tag">
-            <span>{{ $item->sale_off }}%</span>
+            <span>{{ $item->discount }}%</span>
             <small>OFF</small>
         </span>
         @endif
@@ -13,13 +13,13 @@
             <h3 class="deal-item-header">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
-            {!! $item->description !!}
+            {!! $item->content !!}
         </div>
         <div class="deal-item-footer">
             <div class="deal-item-price-box">
-                @if ($item->sale_price <= 0)
+                @if ($item->discount <= 0)
                     <span class="sale-price">{{ $item->currency_code . "" . $item->price }}</span>
-                @elseif ($item->sale_price > 0 && $item->sale_pirce < $item->price)
+                @elseif ($item->discount > 0)
                     <span class="sale-price">{{ $item->currency_code . "" . $item->sale_price }}</span>
                     <span class="hight-price">{{ $item->currency_code . "" . $item->price }}</span>
                 @endif

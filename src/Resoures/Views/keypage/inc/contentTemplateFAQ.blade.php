@@ -1,5 +1,3 @@
-
-
 <div class="aside-box faq-template">
     <h3 class="aside-title widget-title faqs-title">
         FAQ for {{ $keyword['keyword'] }} {{ date('M Y') }}

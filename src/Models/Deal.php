@@ -9,6 +9,9 @@ class Deal extends Model
     const CREATED_AT =  'create_time';
     const UPDATED_AT =  'update_time';
 
+    const STATUS_ACTIVE = 'active';
+    const STATUS_DISABLE = 'disable';
+
     protected $fillable = [
         'title', 'content', 'slug', 'search_slug', 'status', 'type', 'price', 'sale_price', 'sorder', 'store_id', 'creator_name', 'creator_id',
         'modifier_id', 'affiliate_link', 'origin_link', 'image', 'currency', 'discount', 'category_id', 'expire_time', 'sorder_in_category',

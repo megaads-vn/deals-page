@@ -44,6 +44,9 @@ class DealsPageProvider extends ServiceProvider
         //Registry singleton
 //        $this->registrySingleton();
 
+        //Registry common middlewares
+        $this->registerCommonMiddleware('Megaads\DealsPage\Middlewares\KeypageRouting');
+
         //Regitry queue callback
         $this->afterQueueDone();
 
@@ -62,6 +65,9 @@ class DealsPageProvider extends ServiceProvider
         }
     }
 
+    /**
+     * @return void
+     */
     public function register()
     {
         $this->commands($this->commands);
@@ -99,6 +105,9 @@ class DealsPageProvider extends ServiceProvider
         });
     }
 
+    /**
+     * @return void
+     */
     protected function afterQueueDone() {
         \Queue::after(function(JobProcessed $event) {
 //            \Log::info('Job: ', [$event->job]);
@@ -106,6 +115,11 @@ class DealsPageProvider extends ServiceProvider
         });
     }
 
+    /**
+     * @param $alias
+     * @param $class
+     * @return void
+     */
     protected function registerAliasMiddleware($alias, $class) {
         $appVersion = app()->version();
         preg_match('/\d+\.\d+/i', $appVersion, $matched);
@@ -117,11 +131,18 @@ class DealsPageProvider extends ServiceProvider
         }
     }
 
+    /**
+     * @param $middleware
+     * @return void
+     */
     protected function registerCommonMiddleware($middleware) {
         $kernel = $this->app['Illuminate\Contracts\Http\Kernel'];
         $kernel->pushMiddleware($middleware);
     }
 
+    /**
+     * @return void
+     */
     protected function registerCustomRouteValidator() {
         Route::$validators = array_merge([
             $this->app->make(CustomValidator::class)

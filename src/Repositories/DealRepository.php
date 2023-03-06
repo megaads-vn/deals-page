@@ -195,6 +195,15 @@ class DealRepository extends BaseRepository
             $query->where('deal_n_category.category_id', $filters['categoryId']);
         }
 
+        if (array_key_exists('codeNotNull', $filters)) {
+            $query->whereNotNull('code');
+        }
+
+        if (array_key_exists('priceFrom', $filters) && array_key_exists('priceTo', $filters)) {
+            $query->whereBetween('price', [$filters['priceFrom'], $filters['priceTo']]);
+        }
+
+
         if (array_key_exists('statuses', $filters)) {
             $statuses = explode(",", $filters['statuses']);
             $query->whereIn('status', $statuses);
@@ -229,6 +238,25 @@ class DealRepository extends BaseRepository
 
         if (array_key_exists('discountMoreThan', $filters) && array_key_exists('discountLessThan', $filters)) {
             $query->whereBetween('discount', [$filters['discountMoreThan'], $filters['discountLessThan']]);
+        }
+
+        if (array_key_exists('advSearch', $filters)) {
+            $strQuery = explode('|', $filters['advSearch']);
+            preg_match('/(\w+)(\+|\-)(.*)/i', $strQuery[0], $matches);
+            foreach ($strQuery as $item) {
+                preg_match('/(\w+)(\+|\-)(.*)/i', $item, $matches);
+                if ($matches) {
+                    $field = $matches[1];
+                    $operation = $matches[2];
+                    if ($operation == '+') {
+                        $operation = 'LIKE';
+                    } else if ($operation == '-') {
+                        $operation = 'NOT LIKE';
+                    }
+                    $value = '%' . $matches[3] . '%';
+                    $query->where($field, $operation, $value);
+                }
+            }
         }
 
         if (array_key_exists('order_by', $filters)) {

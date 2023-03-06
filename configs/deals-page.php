@@ -2,7 +2,7 @@
  return [
      "enable" => true,
      "site_name" => "couponforless",
-     "app_url" => "https://couponforless.test",
+     "app_url" => "https://couponforless.com",
      "layouts" => [
          "extends" => [
              "name" => "frontend.layout.master",
@@ -27,6 +27,5 @@
          "enable" => true,
          "host" => "127.0.0.1",
          "port" => 4730,
-
-     ]
+     ],
  ];

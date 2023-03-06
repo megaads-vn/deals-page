@@ -1,5 +1,5 @@
 .lp-results {
-	width: 90%;
+	width: 75%;
 }
 
 .list-deal-wrapper {
@@ -258,4 +258,200 @@
 	.deal-item-header {
 		font-size: 17px;
 	}
+}
+
+/** DEAL FILTER BUTTON */
+
+.deal-button-filter-wrapper {
+	display: flex;
+	justify-content: flex-start;
+	align-items: stretch;
+	margin-bottom: 20px;
+	border-bottom: 2px solid #e1e1e1;
+}
+
+.deal-filter-label {
+	position: relative;
+	margin: 0;
+}
+
+.deal-filter-item {
+	border: none;
+	color: #69b820;
+	background-color: transparent;
+	padding: 10px calc(16px + (32 - 16) * ((100vw - 300px) / (1920 - 300)));
+	text-align: center;
+	display: block;
+	cursor: pointer;
+	user-select: none;
+	outline: none;
+	position: relative;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.deal-filter-item::before {
+	content: "";
+	height: 100%;
+	width: 1px;
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: #fff;
+}
+
+.deal-filter-item:hover {
+	color: #4f9310;
+}
+
+.deal-filter-item::after {
+	content: "";
+	width: 100%;
+	height: 3px;
+	display: block;
+	background-color: #ff7e00;
+	position: absolute;
+	bottom: -2px;
+	border-radius: 3px;
+	left: 50%;
+	transform: translateX(-50%);
+	opacity: 0;
+	transition: opacity 250ms ease-in-out;
+}
+
+.deal-input:checked ~ .deal-filter-item {
+	color: #ff7e00;
+	cursor: default;
+}
+
+.deal-input {
+	position: absolute;
+	opacity: 0;
+}
+
+.deal-input:checked ~ .deal-filter-item:after {
+	opacity: 1;
+}
+
+.round-box {
+	width: 70%;
+	margin: 10px auto;
+	display: block;
+	position: relative;
+}
+
+.round-box img {
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	overflow: hidden;
+	position: absolute;
+	top: 0;
+	left: 0;
+	object-fit: cover;
+	object-position: center;
+}
+
+.round-box::after {
+	content: "";
+	padding-bottom: 100%;
+	display: block;
+}
+
+@media (max-width: 990px) {
+	.lp-results, .lp-results+.lp-aside {
+		width: 100%;
+		margin-top: 15px;
+		margin-bottom: 15px;
+		padding: 0;
+	}
+	.keydeal-heading {
+		padding: 0;
+		width: 100%;
+	}
+}
+
+
+/** RATING */
+.rate {
+	height: 24px;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	flex-direction: row-reverse;
+}
+.rate:not(:checked) > input {
+	position:absolute;
+	border: none;
+	background: none;
+	outline: 0;
+	opacity: 0;
+}
+.rate:not(:checked) > label {
+	width: 16px;
+	margin-right: 2px;
+	overflow:hidden;
+	white-space:nowrap;
+	cursor:pointer;
+	color:#fff;
+	font-size: 0px;
+}
+.rate:not(:checked) > label:before {
+	content: "";
+	width: 16px;
+	min-width: 16px;
+	height: 16px;
+	margin-right: 3px;
+	background-color: #d1d1d1;
+	-webkit-mask-image: url('/images/review-star.svg');
+	mask-image: url('/images/review-star.svg');
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	position: relative;
+	display: inline-block;
+	transition: all 350ms ease;
+}
+.rate > input:checked ~ label::before {
+	background-color: #ffbc59;
+}
+
+.rate:not(:checked):hover > label:before {
+	background: #d1d1d1;
+}
+
+.rate:not(:checked) > label:hover::before,
+.rate:not(:checked) > label:hover ~ label::before {
+	background-color: #ffbc59;
+}
+.rate > input:checked + label:hover::before,
+.rate > input:checked + label:hover ~ label:hover::before,
+.rate > input:checked ~ label:hover::before,
+.rate > input:checked ~ label:hover ~ label::before,
+.rate > label:hover ~ input:checked ~ label::before {
+	background-color: #ffbc59;
+}
+
+span[ itemprop="ratingCount"] {
+	margin: 0 3px;
+}
+
+.star-rating {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	font-size: 16px;
+	position: relative;
+	padding-left: 25px;
+	margin-top: 6px;
+}
+.star-rating span {
+	font-size: 14px;
+}
+
+.js-vote-message {
+	margin: 3px 0;
+	color: #3ea9f5;
 }

@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\URL;
+
 if (!function_exists('package_layout_head')) {
     function package_layout_head() {
 
@@ -167,9 +169,97 @@ if (!function_exists('isCategory')) {
 
 if (!function_exists('isDeal')) {
     function isDeal() {
+        list($controller, $action) = getControllerAction('both');
+        return $controller === 'DealsController' && ($action == 'listByStore' || $action == 'allDeals') ? true : false;
+    }
+}
+
+if (!function_exists('getControllerAction')) {
+    function getControllerAction($type = 'controller') {
+        $retVal = NULL;
         $routeArray = app('request')->route()->getAction();
         $controllerAction = class_basename($routeArray['controller']);
         list($controller, $action) = explode('@', $controllerAction);
-        return $controller === 'DealsController' && ($action == 'listByStore' || $action == 'allDeals') ? true : false;
+        if ($type == 'action') {
+            $retVal = $action;
+        } else if ($type == 'controller') {
+            $retVal = $controller;
+        } else {
+            $retVal = [$controller, $action];
+        }
+        return $retVal;
+    }
+}
+
+if (!function_exists('getDefaultMeta')) {
+    function getDefaultMeta($key, $metaType) {
+        $retval = NULL;
+        $type = $key;
+        $key = $key . '.defaultMeta';
+        $defaultMeta = \Megaads\DealsPage\Models\Config::where('key', $key)->first();
+        if (!empty($defaultMeta)) {
+            $retval = (object) json_decode($defaultMeta->value);
+        } else {
+            $defaultValue = [
+                'metaTitle' => '{text} Coupons {month} {year}: Find {text} Promo Codes',
+                'metaDescription' => 'Get FREE {text} Coupon Codes and Free Shipping Codes! Find and share {text} Coupons at CouponForLess.com',
+                'metaKeywords' => '{text}, {text} Promo Code, {text} codes, {text} discounts, {text} coupons, {text} promotional, {text} deals',
+                'metaImage' => '/frontend/image/noimage.png'
+            ];
+            $retval = (object) $defaultValue;
+        }
+        return  ($metaType == '' || !isset($retval->$metaType)) ? $retval : $retval->$metaType;
+    }
+}
+
+if (!function_exists('replaceMonthYear')) {
+    function replaceMonthYear($string) {
+        $string = str_replace("{year}",date('Y'), $string);
+        $string = str_replace("{month}",date('F'), $string);
+        $string = str_replace("{Domain}", ucfirst(request()->getHost()), $string);
+        $string = str_replace("{domain}", request()->getHost(), $string);
+        $string = trim(str_replace(array("\n", "\n\r", "\r", "\r\n"), "", $string));
+        return $string;
+    }
+}
+
+if (!function_exists('reSizeImage')) {
+    function reSizeImage($imagePath, $width = 100, $height = 100, $quality = 90)
+    {
+        $cdnUrl = null;
+        if(config('cdn.active')) {
+            $baseUrl = URL::to('/');
+
+            if(config('app.debug')) {
+                $baseUrl = 'https://couponforless.com/';
+            }
+            $baseUrl = str_replace('https://couponforless.com', 'couponforless.com', $baseUrl);
+            $cdnServer = config('cdn.server');
+            $thumberString = "/unsafe/{$width}x{$height}/left/top/smart/filters:quality($quality)/";
+
+            if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+                $cdnUrl = $cdnServer . $thumberString . $imagePath;
+            } else {
+                $cdnUrl = $cdnServer . $thumberString . $baseUrl . $imagePath;
+            }
+
+        } else {
+            $newGenerationResizeImage = true;
+            if ($newGenerationResizeImage) {
+                $retval = "/thumbnail/$width/$height/$imagePath";
+                $retval = str_replace("//", "/", $retval);
+                return $retval;
+            } else {
+                $retVal = [
+                    'width' => $width,
+                    'height' => $height,
+                    'imagePath' => $imagePath
+                ];
+                $ext = explode('.', $imagePath);
+                $ext = '.' . array_pop($ext);
+                $cdnUrl = route('frontend::resizeImage', $ext).'?'.http_build_query($retVal);
+            }
+        }
+        return $cdnUrl;
     }
 }
