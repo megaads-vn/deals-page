@@ -29,6 +29,7 @@ class KeypageRouting
                                     ->where('slug', $params['slug'])
                                     ->first(['id']);
                 if (!empty($findKeypage)) {
+                    $_COOKIE['keywordRouteName'] = 'frontend::keyword';
                     return app()->call('\Megaads\DealsPage\Controllers\KeywordController@index', $params);
                 }
             }

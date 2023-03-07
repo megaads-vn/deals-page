@@ -1,11 +1,7 @@
 <?php
-
 namespace Megaads\DealsPage\Controllers;
 
-use App\Models\Config as AppConfig;
-use App\Utils\Utils;
 use Carbon\Carbon;
-use Firebase\JWT\Key;
 use Megaads\DealsPage\Models\Category;
 use Megaads\DealsPage\Models\Config;
 use Megaads\DealsPage\Models\Coupon;
@@ -142,7 +138,6 @@ class KeywordController extends Controller {
         $defaultMetaTitle = getDefaultMeta('keyword', 'metaTitle');
         $defaultMetaTitle = str_replace("{text}", $keyword['keyword'], $defaultMetaTitle);
         $retVal['title'] = replaceMonthYear($defaultMetaTitle);
-        $defaultMeta['title'] = $retVal['title'];
         $retVal['slug'] = $slug;
         $retVal['listDeal'] = $dealResult;
         $retVal['meta'] = ['title' => $keyword['keyword']];
