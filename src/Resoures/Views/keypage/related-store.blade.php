@@ -3,7 +3,7 @@ $placehoderImage = "/images/blank.gif";
 ?>
 @if(isset($stores) && count($stores) > 0)
     <div class="item-box widget">
-        <h2 class="box-coupon-title">Related Stores</h2>
+        <h2 class="box-coupon-title lp-footer-title">Related Stores</h2>
         <div class="favorite-related-stores" id="relatedStore">
             @foreach($stores as $store)
                 <div class="related-item">

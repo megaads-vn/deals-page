@@ -1,5 +1,5 @@
 <div class="aside-box faq-template">
-    <h2 class="aside-title box-coupon-title">
+    <h2 class="aside-title box-coupon-title lp-footer-title">
         FAQ for {{ $keyword['keyword'] }} {{ date('M Y') }}
     </h2>
     <div class="mb-content" id="faq-content-template">
