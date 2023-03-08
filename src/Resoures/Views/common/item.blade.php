@@ -6,7 +6,7 @@
             <small>OFF</small>
         </span>
         @endif
-        <img src="{{ $item->image }}" alt="{{ $item->title }}">
+        <img class="zoom" src="{{ $item->image }}" alt="{{ $item->title }}">
     </a>
     <div class="deal-item-info">
         <a target="_blank" rel="nofollow" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" class="box-top">

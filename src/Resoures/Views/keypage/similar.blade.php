@@ -1,5 +1,5 @@
 @if (isset($keywords))
-    <div class="lp-footer {{ !empty($isStoreMobile) ? 'widget related-coupons' : '' }}">
+    <div class="item-box lp-footer {{ !empty($isStoreMobile) ? 'widget related-coupons' : '' }}">
         <div class="lp-footer-title">Similar Deal Page Search:</div>
         <div class="lp-footer-keyword">
             @if(!empty($keywords))

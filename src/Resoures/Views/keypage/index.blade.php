@@ -44,11 +44,11 @@
                         <div class="lp-list-coupon">
                             @include('deals-page::keypage.inc.filter')
                             <!-- coupon item -->
-                            <div class="js-active-box list-deal-wrapper">
+                            <div class="item-box js-active-box list-deal-wrapper">
                                 @include('deals-page::common.widgets.list-deal', ['listDeal' => $listDeal, 'store' => $keyword['keyword'], 'date' => '(' .date('d. M Y'). ')'])
                             </div>
                             @if(!empty($recommendedCoupons) && view()->exists('frontend.common.item'))
-                                <div class="js-related-box">
+                                <div class="item-box js-related-box">
                                     <h2 class="box-coupon-title">Recommended {{$keyword['keyword']}} Coupons:</h2>
                                     @foreach ($recommendedCoupons as $index => $item)
                                         @include('frontend.common.item', ['item' => $item])

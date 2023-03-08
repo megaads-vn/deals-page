@@ -1,5 +1,5 @@
 @if (isset($relatedCategories))
-<div class="lp-footer {{ !empty($isStoreMobile) ? 'widget related-coupons' : '' }}">
+<div class="item-box lp-footer {{ !empty($isStoreMobile) ? 'widget related-coupons' : '' }}">
     <div class="lp-footer-title">Related Categories</div>
     <div class="lp-footer-keyword">
         @if(!empty($relatedCategories))

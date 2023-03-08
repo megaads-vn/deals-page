@@ -1,7 +1,7 @@
 <div class="aside-box faq-template">
-    <h3 class="aside-title widget-title faqs-title">
+    <h2 class="aside-title box-coupon-title">
         FAQ for {{ $keyword['keyword'] }} {{ date('M Y') }}
-    </h3>
+    </h2>
     <div class="mb-content" id="faq-content-template">
         <?= $contentTemplateFAQ ?>
         <div class="faq-title feedback-link">
