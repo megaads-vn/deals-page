@@ -161,8 +161,8 @@ class KeywordController extends Controller {
         $query->where('coupon.status', Coupon::STATUS_ACTIVE);
         $query->join('store', 'store.id', '=', 'coupon.store_id');
         if (isset($keyword['filter']) && !empty($keyword['filter'])) {
-            $strQuery = explode('|', $keyword['filter']);
-            preg_match('/(\w+)(\+|\-)(.*)/i', $strQuery[0], $matches);
+            $strQuery = explode(',', $keyword['filter']);
+            $likeQuery = [];
             foreach ($strQuery as $item) {
                 preg_match('/(\w+)(\+|\-)(.*)/i', $item, $matches);
                 if ($matches) {
@@ -175,7 +175,16 @@ class KeywordController extends Controller {
                     }
                     $value = '%' . $matches[3] . '%';
                     $query->where($field, $operation, $value);
+                } else {
+                    $likeQuery[] = $item;
                 }
+            }
+            if (!empty($likeQuery)) {
+                $query->where(function($q) use ($likeQuery) {
+                    foreach ($likeQuery as $item) {
+                        $q->orWhere('coupon.title', 'like', "%" . trim($item) . "%");
+                    }
+                });
             }
         }
         if (empty($keyword['store_id'])) {
@@ -183,6 +192,7 @@ class KeywordController extends Controller {
         } else {
             $query->where('store_id', $keyword['store_id']);
         }
+
         $getCoupon = $query->get(['coupon.*', 'store.image as storeImage']);
         if (count($getCoupon) > 0) {
             $retVal['recommendedCoupons'] = $getCoupon;
