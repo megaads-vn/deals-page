@@ -5,11 +5,14 @@
 @section('meta')
     @include('frontend.layout.meta', ['data' => $meta])
     <style>
-        .aside-table { width: 100%; }
-
-        .aside-table th, td { text-align: left; width: 50%; }
-
-        .aside-box .mb-content { margin-bottom: 20px; }
+        .aside-table{width:100%}
+        .aside-table th,td{text-align:left;width:50%}
+        .aside-box .mb-content{margin-bottom:20px}
+        @media (max-width:760px){
+            #deal-filter-form{position: sticky; top: 90px; background-color: #fff; z-index: 11; width: 100vw; transform: translateX(-14px); overflow: hidden;}
+            .deal-button-filter-wrapper {padding-left: 10px}
+            .keydeal-heading { font-size: 21px; margin-top: 12px; line-height: 1.3; }
+        }
     </style>
     <link rel="stylesheet" href="/frontend/css/slick.css?v=<?= Config::get('app.version'); ?>">
     <link rel="stylesheet" href="{{ asset('/vendor/deals-page/css/deal.css?v=' . time()) }}">
@@ -40,9 +43,9 @@
                             <span class="breadcrumb-content"><?= $keyword['keyword']?></span>
                         </li>
                     </ul>
+                    @include('deals-page::keypage.inc.filter')
                     <div class="lp-top-keyword">
                         <div class="lp-list-coupon">
-                            @include('deals-page::keypage.inc.filter')
                             <!-- coupon item -->
                             <div class="item-box js-active-box list-deal-wrapper">
                                 @include('deals-page::common.widgets.list-deal', ['listDeal' => $listDeal, 'store' => $keyword['keyword'], 'date' => '(' .date('d. M Y'). ')'])
