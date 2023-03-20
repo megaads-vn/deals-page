@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Megaads\DealsPage\Jobs\DealProductJob;
 use Megaads\DealsPage\Models\Category;
+use Megaads\DealsPage\Models\CrawlerDeal;
 use Megaads\DealsPage\Models\Deal;
 use Megaads\DealsPage\Models\DealCategory;
 use Megaads\DealsPage\Models\DealRelation;
@@ -191,27 +192,34 @@ class DealService extends BaseService
                 \Log::info('BULK_CREATE_DEAL');
                 $insertResult = [];
                 foreach ($params as $item) {
-                    $findExists = Deal::query()->where('slug', $item->slug)->orWhere('origin_link', $item->origin_link)->first(['id']);
-                    if (!empty($findExists)) {
+                    if (!isset($item['slug']) || empty($item['slug'])) {
+                        \Log::info('EMPTY_DEAL_SLUG: ' . json_encode($item));
+                        continue;
+                    }
+                    $findExists = CrawlerDeal::query()
+                            ->where('slug', $item['slug'])
+                            ->orWhere('origin_link', $item['origin_link'])
+                            ->first(['id']);
+                    if (empty($findExists)) {
                         $resultId = $this->dealRepository->create($item);
                         $insertResult[$resultId] = $item['category_id'];
                     }
                 }
-                if (count($insertResult) > 0) {
-                    foreach ($insertResult as $dealId => $strCategoryId) {
-                        $categoryIds = explode(',', $strCategoryId);
-                        $bulkCateInsert = [];
-                        foreach ($categoryIds as $cId) {
-                            $bulkCateInsert = [
-                                'deal_id' => $dealId,
-                                'category_id' => trim($cId)
-                            ];
-                        }
-                        if (count($bulkCateInsert) > 0) {
-                            DealCategory::insert($bulkCateInsert);
-                        }
-                    }
-                }
+//                if (count($insertResult) > 0) {
+//                    foreach ($insertResult as $dealId => $strCategoryId) {
+//                        $categoryIds = explode(',', $strCategoryId);
+//                        $bulkCateInsert = [];
+//                        foreach ($categoryIds as $cId) {
+//                            $bulkCateInsert = [
+//                                'deal_id' => $dealId,
+//                                'category_id' => trim($cId)
+//                            ];
+//                        }
+//                        if (count($bulkCateInsert) > 0) {
+//                            DealCategory::insert($bulkCateInsert);
+//                        }
+//                    }
+//                }
                 $response = $this->getSuccessStatus();
             }
         } catch (\Exception $exception) {
@@ -249,6 +257,16 @@ class DealService extends BaseService
                 \Cache::put('dealCrawler::catalogPage', $catalogPage, $expireAt);
                 if (!empty($reqResult)) {
                     $bulkInsertData = [];
+                    if (isset($reqResult['message']) && $reqResult['message'] == 'No Valid or Approved Catalog found for your domain') {
+                        \Log::info('NOT_DATA:' . $reqResult['message']);
+                        $runAt = Carbon::now()->addSeconds(30);
+                        $job = (new DealProductJob())->delay($runAt);
+                        $this->dispatch($job);
+                        $response = $this->getSuccessStatus();
+                        $response['message'] = 'Job was set!';
+                        $this->catalogRepository->update($catalog->id, ['crawl_page' => $catalog->crawl_page + 1]);
+                        return response()->json($response);
+                    }
                     foreach ($reqResult as $item) {
                         $bulkInsertData[] = $this->buildInsertDealItem($item);
                     }
@@ -332,6 +350,7 @@ class DealService extends BaseService
             "discount" => !empty($retVal['discount']) ? $retVal['discount'] : $saleOff,
             "in_stock" => $rawData["isInstock"],
             "store_id" => $storeId,
+            "store_tmp" => $rawData['manufacturer'],
             "category_id" => $categoryIds
         ];
 
