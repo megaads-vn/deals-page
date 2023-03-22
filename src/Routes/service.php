@@ -14,6 +14,7 @@ Route::group([
     Route::any('/deal/bulk-create', 'DealService@bulkCreate')->name('deal::bulk::create');
     Route::any('/deal/schedule-bulk-create', 'DealService@bulkCreateWithSchedule')->name('deal::bulk::create::queue');
     Route::get('/deal/remove-duplicate', 'DealService@removeDuplicateDeals');
+    Route::get('/deal/download-image', 'DealService@downDealImage');
 
     Route::get('/catalog', 'CatalogService@find')->name('catalog::find');
     Route::any('/catalog/bulk-create', 'CatalogService@bulkCreate')->name('catalog::bulk::create');

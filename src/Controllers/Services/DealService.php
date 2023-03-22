@@ -196,7 +196,7 @@ class DealService extends BaseService
                         \Log::info('EMPTY_DEAL_SLUG: ' . json_encode($item));
                         continue;
                     }
-                    $findExists = CrawlerDeal::query()
+                    $findExists = Deal::query()
                             ->where('slug', $item['slug'])
                             ->orWhere('origin_link', $item['origin_link'])
                             ->first(['id']);
@@ -205,21 +205,21 @@ class DealService extends BaseService
                         $insertResult[$resultId] = $item['category_id'];
                     }
                 }
-//                if (count($insertResult) > 0) {
-//                    foreach ($insertResult as $dealId => $strCategoryId) {
-//                        $categoryIds = explode(',', $strCategoryId);
-//                        $bulkCateInsert = [];
-//                        foreach ($categoryIds as $cId) {
-//                            $bulkCateInsert = [
-//                                'deal_id' => $dealId,
-//                                'category_id' => trim($cId)
-//                            ];
-//                        }
-//                        if (count($bulkCateInsert) > 0) {
-//                            DealCategory::insert($bulkCateInsert);
-//                        }
-//                    }
-//                }
+                if (count($insertResult) > 0) {
+                    foreach ($insertResult as $dealId => $strCategoryId) {
+                        $categoryIds = explode(',', $strCategoryId);
+                        $bulkCateInsert = [];
+                        foreach ($categoryIds as $cId) {
+                            $bulkCateInsert = [
+                                'deal_id' => $dealId,
+                                'category_id' => trim($cId)
+                            ];
+                        }
+                        if (count($bulkCateInsert) > 0) {
+                            DealCategory::insert($bulkCateInsert);
+                        }
+                    }
+                }
                 $response = $this->getSuccessStatus();
             }
         } catch (\Exception $exception) {
@@ -244,24 +244,19 @@ class DealService extends BaseService
             if ($count <= 0 ) {
                 $response = $this->getSuccessStatus();
                 $response['message'] = 'All Done';
-                \Log::info('CRAWL_DEALS_IS_ALL_DONE');
                 return \Response::json($response);
             }
-            $catalog = $this->catalogRepository->read(['crawl_page' => $catalogPage, 'crawl_state' => 'processing', 'metrics' => 'first', 'columns' => ['id', 'cid', 'crawl_page']]);
+            $catalog = $this->catalogRepository->read(['crawl_page' => $catalogPage, 'crawl_state' => 'processing', 'metrics' => 'first', 'columns' => ['id', 'cid', 'crawl_page', 'name']]);
             if (!empty($catalog)) {
                 $catalogId = $catalog->cid;
                 $pageId = $catalog->crawl_page + 1;
                 $reqResult = $this->apiRequestRepository->readCatalogProducts($catalogId, $pageId);
-                \Log::info('READ_FROM_API_IN_PAGE[' . $pageId . ']=' . count($reqResult));
                 $expireAt = Carbon::now()->addDay(30);
                 \Cache::put('dealCrawler::catalogPage', $catalogPage, $expireAt);
+                $totalDeals = 0;
                 if (!empty($reqResult)) {
                     $bulkInsertData = [];
                     if (isset($reqResult['message']) && $reqResult['message'] == 'No Valid or Approved Catalog found for your domain') {
-                        \Log::info('NOT_DATA:' . $reqResult['message']);
-                        $runAt = Carbon::now()->addSeconds(30);
-                        $job = (new DealProductJob())->delay($runAt);
-                        $this->dispatch($job);
                         $response = $this->getSuccessStatus();
                         $response['message'] = 'Job was set!';
                         $this->catalogRepository->update($catalog->id, ['crawl_page' => $catalog->crawl_page + 1]);
@@ -270,7 +265,8 @@ class DealService extends BaseService
                     foreach ($reqResult as $item) {
                         $bulkInsertData[] = $this->buildInsertDealItem($item);
                     }
-                    $result = sendHttpRequest("https://couponforless.com/service/deal/bulk-create",
+                    $totalDeals = count($bulkInsertData);
+                    sendHttpRequest(config('deals-page.app_url') . "/service/deal/bulk-create",
                         "POST",
                         ["params" => $bulkInsertData],
                         [
@@ -278,30 +274,18 @@ class DealService extends BaseService
                             "Accept: application/json, text/plain, */*",
                             "Content-Type: application/json;charset=utf-8"
                         ]);
-                    \Log::info('DEAL' . json_encode($result));
-                    if (isset($result['status']) && $result['status'] === 'successful') {
-                        $runAt = Carbon::now()->addSeconds(30);
-                        $job = (new DealProductJob())->delay($runAt);
-                        $this->dispatch($job);
-                    }
                     $this->catalogRepository->update($catalog->id, ['crawl_page' => $catalog->crawl_page + 1]);
                 } else {
                     $this->catalogRepository->update($catalog->id, ['crawl_page' => 0, 'crawl_state' => 'done']);
-                    $runAt = Carbon::now()->addSeconds(30);
-                    $job = (new DealProductJob())->delay($runAt);
-                    $this->dispatch($job);
                 }
                 $response = $this->getSuccessStatus();
+                $response['catalogPage'] = $catalogPage;
+                $response['cataLog'] = $catalog->name;
+                $response['totalDeal'] = $totalDeals;
                 $response['message'] = 'Job was set!';
             } else {
-                //When catalog current page crawl completely go to next page.
-                \Log::info('DONE_ON_PAGE[' . $catalogPage . ']_GOTO_NEXT');
-                $catalogPage = $catalogPage + 1;
                 $expireAt = Carbon::now()->addDay(30);
-                \Cache::put('dealCrawler::catalogPage', $catalogPage, $expireAt);
-                $runAt = Carbon::now()->addSeconds(15);
-                $job = (new DealProductJob())->delay($runAt);
-                $this->dispatch($job);
+                \Cache::put('dealCrawler::catalogPage', $catalogPage + 1, $expireAt);
                 $response = $this->getSuccessStatus();
                 $response['message'] = 'Job was set!';
             }
@@ -392,6 +376,18 @@ class DealService extends BaseService
     }
 
     /**
+     * @return void
+     */
+    public function downDealImage()
+    {
+        $diskSpace = $this->checkDiskSpace();
+        echo "<pre>";
+        print_r($diskSpace);
+        echo "</pre>";
+        die;
+    }
+
+    /**
      * @param $manufactureName
      * @return int
      */
@@ -464,6 +460,43 @@ class DealService extends BaseService
         unset($retVal['tag_ids']);
         unset($retVal['is_pinned']);
         return $retVal;
+    }
+
+    /**
+     * @return array
+     */
+    protected function checkDiskSpace() {
+        $total_space = disk_total_space("/");
+        $free_space = disk_free_space("/");
+
+        return [
+            'total' => $this->formatSizeUnits($total_space),
+            'free' => $this->formatSizeUnits($free_space),
+            'usage_percent' => round(($total_space - $free_space) / $total_space * 100),
+            'free_percent' => round(($free_space) / $total_space * 100),
+        ];
+    }
+
+    /**
+     * @param $bytes
+     * @return string
+     */
+    protected function formatSizeUnits($bytes) {
+        if ($bytes >= 1073741824) {
+            $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+        } elseif ($bytes >= 1048576) {
+            $bytes = number_format($bytes / 1048576, 2) . ' MB';
+        } elseif ($bytes >= 1024) {
+            $bytes = number_format($bytes / 1024, 2) . ' KB';
+        } elseif ($bytes > 1) {
+            $bytes = $bytes . ' bytes';
+        } elseif ($bytes == 1) {
+            $bytes = $bytes . ' byte';
+        } else {
+            $bytes = '0 bytes';
+        }
+
+        return $bytes;
     }
 
 }

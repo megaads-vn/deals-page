@@ -2,7 +2,6 @@
 
 namespace Megaads\DealsPage\Repositories;
 
-use Megaads\DealsPage\Models\CrawlerDeal;
 use Megaads\DealsPage\Models\Deal;
 use Megaads\DealsPage\Models\DealCategory;
 
@@ -16,8 +15,7 @@ class DealRepository extends BaseRepository
     {
         $retVal = NULL;
         try {
-//            $deal = new Deal();
-            $deal = new CrawlerDeal();
+            $deal = new Deal();
             $deal->fill($params);
             if ($deal->save()) {
                 $retVal = $deal->id;
@@ -104,7 +102,7 @@ class DealRepository extends BaseRepository
     {
         $reVal = false;
         try {
-            CrawlerDeal::insert($arrayData);
+            Deal::insert($arrayData);
             $reVal = true;
         } catch (\Exception $ex) {
             dealPageSysLog('error', 'BULK_CREATE_PRODUCTS: ', $ex);
