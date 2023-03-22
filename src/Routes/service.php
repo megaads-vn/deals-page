@@ -19,3 +19,5 @@ Route::group([
     Route::get('/catalog', 'CatalogService@find')->name('catalog::find');
     Route::any('/catalog/bulk-create', 'CatalogService@bulkCreate')->name('catalog::bulk::create');
 });
+
+// curl -H "Authorization: Basic YXBpOjEyM0AxMjNh" https://couponforless.test/service/deal/download-image

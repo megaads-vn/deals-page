@@ -380,11 +380,38 @@ class DealService extends BaseService
      */
     public function downDealImage()
     {
+        $res = $this->getDefaultStatus();
         $diskSpace = $this->checkDiskSpace();
-        echo "<pre>";
-        print_r($diskSpace);
-        echo "</pre>";
-        die;
+
+        if (isset($diskSpace['free_percent']) && $diskSpace['free_percent'] >= 3) {
+            // Get Image.
+            $dealImages = Deal::where('crawl_image', 'processing')
+                            ->limit(300)
+                            ->pluck('image', 'id');
+            if (!empty($dealImages)) {
+                $updatedResult = 0;
+                foreach ($dealImages as $id => $imageUrl) {
+                    $imageName = $this->getImageName($imageUrl);
+                    $result = $this->saveUrlImage($imageUrl, $imageName);
+                    if ($result !== "") {
+                        Deal::where('id', $id)->update([
+                            "image" => $result,
+                            "crawl_image" => 'done'
+                        ]);
+                        $updatedResult++;
+                    } else {
+                        Deal::where('id', $id)->update([
+                            "status" => "pending",
+                            "crawl_image" => 'done'
+                        ]);
+                    }
+                }
+                $res = $this->getSuccessStatus(['success_count' => $updatedResult]);
+            }
+        } else {
+            $res['message'] = 'Do not enough disk space. Free ' . $diskSpace['free'];
+        }
+        return response()->json($res);
     }
 
     /**
@@ -499,4 +526,69 @@ class DealService extends BaseService
         return $bytes;
     }
 
+    /**
+     * @param $url
+     * @param $imageName
+     * @return bool
+     */
+    protected function saveUrlImage($url, $imageName)
+    {
+        $retVal = "";
+        if ($this->isValidUrl($url)) {
+            $filePath = public_path("frontend/images/deals");
+            if (!file_exists($filePath)) {
+                mkdir($filePath, 0777);
+            }
+            $fullPathImage = $filePath . "/"  . $imageName;
+            if (file_exists($fullPathImage)) {
+                $retVal = "/frontend/images/deals/" . $imageName;
+            } else {
+
+                $ch = curl_init($url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                $data = curl_exec($ch);
+                curl_close($ch);
+
+                file_put_contents($fullPathImage, $data);
+                $retVal = "/frontend/images/deals/" . $imageName;
+            }
+        }
+        return $retVal;
+    }
+
+    /**
+     * @param $url
+     * @return bool
+     */
+    private function isValidUrl($url) {
+        // Kiểm tra xem URL có bắt đầu bằng một trong các giao thức sau không
+        if (preg_match('/^(http:\/\/|https:\/\/|ftp:\/\/|ftps:\/\/|mailto:|tel:|data:|irc:|ircs:|news:|nntp:)/i', $url)) {
+            // Kiểm tra xem URL có chứa tên miền hoặc địa chỉ IP của máy chủ không
+            if (filter_var($url, FILTER_VALIDATE_URL)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param $url
+     * @return mixed
+     */
+    private function getImageName($url)
+    {
+        $removeUrlParams = '/\?.*$/';
+        $url = preg_replace($removeUrlParams, '', $url);
+
+        $pattern = '/\/([^\/]+\.(jpg|png|jpeg))/i';
+        preg_match($pattern, $url, $matches);
+        $filename = isset($matches[1]) ? $matches[1] : "";
+        $filename = str_replace(",", '_', $filename);
+        if ($filename === "") {
+            $filePaths = explode("/", $url);
+            $filename = end($filePaths) . ".jpg";
+        }
+        return $filename;
+    }
 }
