@@ -100,7 +100,7 @@
                     @if (!empty($storeItem))
                         @include('deals-page::common.widgets.contact-info', [ 'store' => $storeItem, 'showRating' => true ])
                     @endif
-                    <?= \Megaads\Adsense\Utils\Adsense::display(['divClass' => 'section-top', 'adsenseStyle' => 'width: 263px; height: 216px;']) ?>
+                    <?= \Megaads\Adsense\Utils\Adsense::display(['divClass' => 'section-top', 'adsenseStyle' => 'width: 100%; height: 216px;']) ?>
                 </aside>
                 <div class="filter-container-background">
                 </div>

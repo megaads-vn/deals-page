@@ -174,102 +174,121 @@ class DealRepository extends BaseRepository
             $query->select($columns);
         }
 
-        if (array_key_exists('id', $filters)) {
-            $query->where('id', $filters['id']);
-        }
-
-        if (array_key_exists('ids', $filters)) {
-            $query->whereIn('id', $filters['ids']);
-        }
-
-        if (array_key_exists('title', $filters)) {
-            $query->where('title', $filters['title']);
-        }
-
-        if (array_key_exists('like_title', $filters)) {
-            $query->where('title', 'like', "'%" . $filters["like_title"] . "%'");
-        }
-
-        if (array_key_exists('storeId', $filters)) {
-            $query->where('store_id', $filters['storeId']);
-        }
-
-        if (array_key_exists('categoryId', $filters)) {
-            $query->join('deal_n_category', 'deal_n_category.deal_id', '=', 'deals.id');
-            $query->where('deal_n_category.category_id', $filters['categoryId']);
-        }
-
-        if (array_key_exists('codeNotNull', $filters)) {
-            $query->whereNotNull('code');
-        }
-
-        if (array_key_exists('priceFrom', $filters) && array_key_exists('priceTo', $filters)) {
-            $query->whereBetween('price', [$filters['priceFrom'], $filters['priceTo']]);
-        }
-
-
-        if (array_key_exists('statuses', $filters)) {
-            $statuses = explode(",", $filters['statuses']);
-            $query->whereIn('status', $statuses);
-        }
-        if (array_key_exists('status', $filters)) {
-            $query->where('status', $filters['status']);
-        }
-        if (array_key_exists('createTimeFrom', $filters)) {
-            $createFrom = preg_replace('/\//i', '-', $filters['createTimeFrom']);
-            $createFrom = new \DateTime($createFrom . ' 00:00:00');
-            $query->where('create_time', '>=', $createFrom);
-        }
-        if (array_key_exists('createTimeTo', $filters)) {
-            $createTo = preg_replace('/\//i', '-', $filters['createTimeTo']);
-            $createTo = new \DateTime($createTo . ' 00:00:00');
-            $query->where('create_time', '<', $createTo);
-        }
-        if (array_key_exists('createTimeTo', $filters) && array_key_exists('createTimeFrom', $filters)) {
-            $createTo = preg_replace('/\//i', '-', $filters['createTimeTo']);
-            $createTo = new \DateTime($createTo . ' 00:00:00');
-            $createFrom = preg_replace('/\//i', '-', $filters['createTimeFrom']);
-            $createFrom = new \DateTime($createFrom . ' 00:00:00');
-            $query->whereBetween('create_time', [$createFrom, $createTo]);
-        }
-
-        if (array_key_exists('discountMoreThan', $filters)) {
-            $query->where('discount', '>', $filters['discountMoreThan']);
-        }
-        if (array_key_exists('discountLessThan', $filters)) {
-            $query->where('discount', '<', $filters['discountLessThan']);
-        }
-
-        if (array_key_exists('discountMoreThan', $filters) && array_key_exists('discountLessThan', $filters)) {
-            $query->whereBetween('discount', [$filters['discountMoreThan'], $filters['discountLessThan']]);
-        }
-
         if (array_key_exists('advSearch', $filters)) {
-            $strQuery = explode('|', $filters['advSearch']);
-            preg_match('/(\w+)(\+|\-)(.*)/i', $strQuery[0], $matches);
-            foreach ($strQuery as $item) {
-                preg_match('/(\w+)(\+|\-)(.*)/i', $item, $matches);
-                if ($matches) {
-                    $field = $matches[1];
-                    $operation = $matches[2];
-                    if ($operation == '+') {
-                        $operation = 'LIKE';
-                    } else if ($operation == '-') {
-                        $operation = 'NOT LIKE';
+            if (array_key_exists('queryStr', $filters['advSearch'])) {
+                $strQuery = $filters['advSearch']['queryStr'];
+                $strQuery = preg_replace('/\[\[sortBy:(.*?)\]\]/i', '', $strQuery);
+                $strQuery = preg_replace('/\[\[price:(.*?)\]\]/i', '', $strQuery);
+                $strQuery = explode('|', $strQuery);
+                foreach ($strQuery as $item) {
+                    preg_match('/(\w+)(\+|\-)(.*)/i', $item, $matches);
+                    if ($matches) {
+                        $field = $matches[1];
+                        $operation = $matches[2];
+                        if ($operation == '+') {
+                            $operation = 'LIKE';
+                        } else if ($operation == '-') {
+                            $operation = 'NOT LIKE';
+                        }
+                        $value = '%' . $matches[3] . '%';
+                        $query->orWhere($field, $operation, $value);
                     }
-                    $value = '%' . $matches[3] . '%';
-                    $query->where($field, $operation, $value);
+                }
+                preg_match('/\[\[sortBy:(.*?)\]\]/i', $filters['advSearch']['queryStr'], $matchSortBy);
+                if (isset($matchSortBy[1])) {
+                    $sortBy = explode('_', $matchSortBy[1]);
+                    $query->orderBy($sortBy[0], $sortBy[1]);
+                }
+               
+                preg_match('/\[\[price:(.*?)\]\]/i', $filters['advSearch']['queryStr'], $matchPrice);
+                if (isset($matchPrice[1])) {
+                    $priceFilter = json_decode($matchPrice[1]);
+                    $operator = $priceFilter->operator;
+                    $value = $priceFilter->value;
+                    $query->where('price', $operator, $value);
                 }
             }
         }
+        else
+        {
+            if (array_key_exists('id', $filters)) {
+                $query->where('id', $filters['id']);
+            }
 
-        if (array_key_exists('order_by', $filters)) {
-            $orderByAttributes = explode('_', $filters['order_by']);
-            $sortOrder = $orderByAttributes[1];
-            $field = $orderByAttributes[0];
-            $query->orderBy($field, $sortOrder);
-        } else {
-            $query->orderBy('deals.id', 'DESC');
+            if (array_key_exists('ids', $filters)) {
+                $query->whereIn('id', $filters['ids']);
+            }
+
+            if (array_key_exists('title', $filters)) {
+                $query->where('title', $filters['title']);
+            }
+
+            if (array_key_exists('like_title', $filters)) {
+                $query->where('title', 'like', "'%" . $filters["like_title"] . "%'");
+            }
+
+            if (array_key_exists('storeId', $filters)) {
+                $query->where('store_id', $filters['storeId']);
+            }
+
+            if (array_key_exists('categoryId', $filters)) {
+                $query->join('deal_n_category', 'deal_n_category.deal_id', '=', 'deals.id');
+                $query->where('deal_n_category.category_id', $filters['categoryId']);
+            }
+
+            if (array_key_exists('codeNotNull', $filters)) {
+                $query->whereNotNull('code');
+            }
+
+            if (array_key_exists('priceFrom', $filters) && array_key_exists('priceTo', $filters)) {
+                $query->whereBetween('price', [$filters['priceFrom'], $filters['priceTo']]);
+            }
+
+
+            if (array_key_exists('statuses', $filters)) {
+                $statuses = explode(",", $filters['statuses']);
+                $query->whereIn('status', $statuses);
+            }
+            if (array_key_exists('status', $filters)) {
+                $query->where('status', $filters['status']);
+            }
+            if (array_key_exists('createTimeFrom', $filters)) {
+                $createFrom = preg_replace('/\//i', '-', $filters['createTimeFrom']);
+                $createFrom = new \DateTime($createFrom . ' 00:00:00');
+                $query->where('create_time', '>=', $createFrom);
+            }
+            if (array_key_exists('createTimeTo', $filters)) {
+                $createTo = preg_replace('/\//i', '-', $filters['createTimeTo']);
+                $createTo = new \DateTime($createTo . ' 00:00:00');
+                $query->where('create_time', '<', $createTo);
+            }
+            if (array_key_exists('createTimeTo', $filters) && array_key_exists('createTimeFrom', $filters)) {
+                $createTo = preg_replace('/\//i', '-', $filters['createTimeTo']);
+                $createTo = new \DateTime($createTo . ' 00:00:00');
+                $createFrom = preg_replace('/\//i', '-', $filters['createTimeFrom']);
+                $createFrom = new \DateTime($createFrom . ' 00:00:00');
+                $query->whereBetween('create_time', [$createFrom, $createTo]);
+            }
+
+            if (array_key_exists('discountMoreThan', $filters)) {
+                $query->where('discount', '>', $filters['discountMoreThan']);
+            }
+            if (array_key_exists('discountLessThan', $filters)) {
+                $query->where('discount', '<', $filters['discountLessThan']);
+            }
+
+            if (array_key_exists('discountMoreThan', $filters) && array_key_exists('discountLessThan', $filters)) {
+                $query->whereBetween('discount', [$filters['discountMoreThan'], $filters['discountLessThan']]);
+            }
+
+            if (array_key_exists('order_by', $filters)) {
+                $orderByAttributes = explode('_', $filters['order_by']);
+                $sortOrder = $orderByAttributes[1];
+                $field = $orderByAttributes[0];
+                $query->orderBy($field, $sortOrder);
+            } else {
+                $query->orderBy('deals.id', 'DESC');
+            }
         }
 
         return $query;

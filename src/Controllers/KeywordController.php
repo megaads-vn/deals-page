@@ -113,7 +113,7 @@ class KeywordController extends Controller {
         }
         View::share('dealFilterActivated', $filterActivated);
         if (!empty($keyword['deal_filter'])) {
-            $dealFiler['advSearch'] = trim($keyword['deal_filter']);
+            $dealFiler['advSearch']['queryStr'] = trim($keyword['deal_filter']);
         } else if (!empty($keyword['store_id'])) {
             $dealFiler['storeId'] = $keyword['store_id'];
         } else if (!empty($relationIds)) {
