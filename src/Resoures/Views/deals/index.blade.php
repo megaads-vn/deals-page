@@ -37,7 +37,7 @@ if (isset($localSchema)) {
                         @if(isset($deals) && !empty($deals))
                             <div class="list-deal-wrapper">
                                 @foreach ($deals as $item)
-                                    @include('deals-page::common.deal-item', ['item' => $item])
+                                    @include('deals-page::common.item', ['item' => $item])
                                 @endforeach
                             </div>
                         @endif
