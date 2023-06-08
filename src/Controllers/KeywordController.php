@@ -134,6 +134,7 @@ class KeywordController extends Controller {
                 $totalDeal = $getDeals['data'];
             }
         }
+        $this->dealImageProcessing($dealResult);
         $retVal['keyword'] = $keyword;
         $defaultMetaTitle = getDefaultMeta('keyword', 'metaTitle');
         $defaultMetaTitle = str_replace("{text}", $keyword['keyword'], $defaultMetaTitle);
@@ -653,6 +654,23 @@ class KeywordController extends Controller {
             }
         }
         return view('frontend.keyword.page')->with(compact('title', 'alphabet', 'keypageAlphabet'));
+    }
+
+    protected function dealImageProcessing(&$deals)
+    {
+        foreach ($deals as $item) {
+            if (preg_match('/(http|https):\/\//i', $item->image)) {
+                if (!@getimagesize($item->image)) {
+                    $item->image = '/images/stores/' . $item->store->image;
+                }
+            }
+            else if (!file_exists(public_path($item->image))) {
+                $item->image = '/images/stores/' . $item->store->image;
+            }
+            else if (!@getimagesize(public_path($item->image))) {
+                $item->image = '/images/stores/' . $item->store->image;
+            }
+        }
     }
 
 }

@@ -32,6 +32,7 @@ class DealsController extends Controller {
     }
 
     public function index($slug) {
+        return redirect()->route('frontend::keyword', ['slug' => $slug], 301);
         $relationPage = \DB::table($this->dealPageTable)->where('slug', $slug)->first($this->dealPageColumns);
         if (empty($relationPage)) {
             abort(404);

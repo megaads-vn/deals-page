@@ -163,7 +163,7 @@ class DealRepository extends BaseRepository
     {
         $query = Deal::query();
         $query->with(['categories', 'store' => function($s) {
-            $s->select(['id', 'title as name', 'slug']);
+            $s->select(['id', 'title as name', 'slug', 'image']);
         }]);
         $columns = ['*'];
         if (array_key_exists('columns', $filters)) {

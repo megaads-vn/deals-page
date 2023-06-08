@@ -35,14 +35,6 @@
             <!-- landingpage content -->
             <div class="lp-container">
                 <div class="lp-results">
-                    <ul class="lp-breadcrumb">
-                        <li>
-                            <a class="breadcrumb-content" href="/">Home</a>
-                        </li>
-                        <li>
-                            <span class="breadcrumb-content"><?= $keyword['keyword']?></span>
-                        </li>
-                    </ul>
                     @include('deals-page::keypage.inc.filter')
                     <div class="lp-top-keyword">
                         <div class="lp-list-coupon">
@@ -74,6 +66,14 @@
                     @else
                         {!!$keyword['content']!!}
                     @endif
+                    <ul class="lp-breadcrumb">
+                        <li>
+                            <a class="breadcrumb-content" href="/">Home</a>
+                        </li>
+                        <li>
+                            <span class="breadcrumb-content"><?= $keyword['keyword']?></span>
+                        </li>
+                    </ul>
                 </div>
                 <aside class="lp-aside">
                     @if(isset($contentTemplate) && !empty($contentTemplate) && !Utils::isMobile())
