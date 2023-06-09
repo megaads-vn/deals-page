@@ -20,4 +20,6 @@ Route::group([
     Route::any('/catalog/bulk-create', 'CatalogService@bulkCreate')->name('catalog::bulk::create');
 });
 
-// curl -H "Authorization: Basic YXBpOjEyM0AxMjNh" https://couponforless.test/service/deal/download-image
+// */2 * * * * curl -H "Authorization: Basic YXBpOjEyM0AxMjNh" --insecure https://couponforless.com/service/deal/download-image >/dev/null 2>&1
+
+// * * * * * curl -H "Authorization: Basic YXBpOjEyM0AxMjNh" --insecure https://couponforless.com/service/deal/schedule-bulk-create >/dev/null 2>&1
