@@ -263,3 +263,9 @@ if (!function_exists('reSizeImage')) {
         return $cdnUrl;
     }
 }
+
+if (!function_exists('getDealStore')) {
+    function getDealStore($storeId) {
+        return \Megaads\DealsPage\Models\Deal::where('store_id', $storeId)->get();
+    }
+}

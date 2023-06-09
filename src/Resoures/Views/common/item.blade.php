@@ -1,3 +1,4 @@
+@php $showStore = isset($showStore) ? $showStore : true; @endphp
 <div class="deal-item-wrapper">
     <a class="deal-item-image" rel="nofollow" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" rel="nofollow">
         @if ($item->discount > 0)
@@ -25,7 +26,7 @@
                 @endif
             </div>
             <div class="deal-item-footer-box">
-                @if (!empty($item->store))
+                @if (!empty($item->store) && $showStore)
                     <a target="_blank" href="{{ route('frontend::store::listByStore', ['slug' => $item->store->slug]) }}" class="name">
                         Store: <span>{{ $item->store->name }}</span>
                     </a>
