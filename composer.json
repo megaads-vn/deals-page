@@ -29,6 +29,7 @@
             "php artisan vendor:publish --provider=\"Megaads\\DealsPage\\Providers\\DealsPageProvider\" --tag=assets"
         ],
         "post-update-cmd": [
+            "Illuminate\\Foundation\\ComposerScripts::postUpdate",
             "php artisan vendor:publish --provider=\"Megaads\\DealsPage\\Providers\\DealsPageProvider\" --tag=assets --force"
         ]
     }
