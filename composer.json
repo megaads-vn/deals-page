@@ -26,10 +26,10 @@
             "Illuminate\\Foundation\\ComposerScripts::postInstall",
             "php artisan migrate --path=vendor/megaads/deals-page/src/Migrations",
             "php artisan vendor:publish --provider=\"Megaads\\DealsPage\\Providers\\DealsPageProvider\" --tag=config",
-            "php artisan vendor:publish --provider=\"Megaads\\DealsPage\\Providers\\DealsPageProvider\" --tag=asset"
+            "php artisan vendor:publish --provider=\"Megaads\\DealsPage\\Providers\\DealsPageProvider\" --tag=assets"
         ],
         "post-update-cmd": [
-            "php artisan vendor:publish --provider=\"Megaads\\DealsPage\\Providers\\DealsPageProvider\" --tag=asset --force"
+            "php artisan vendor:publish --provider=\"Megaads\\DealsPage\\Providers\\DealsPageProvider\" --tag=assets --force"
         ]
     }
 }
