@@ -17,5 +17,6 @@
     </div>
     @endif
 </div>
+<link rel="stylesheet" href="{{ asset('/vendor/deals-page/css/deal.css?v=' . time()) }}">
 @endif
 @endif
