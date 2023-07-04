@@ -3,6 +3,12 @@
 namespace Megaads\DealsPage\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Author;
+use App\Models\Coupon;
+use App\Models\StoreContact;
+use App\Models\StoreEmbed;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 use Megaads\DealsPage\Models\Deal;
 use Megaads\DealsPage\Models\Store;
 use Megaads\DealsPage\Models\DealRelation;
@@ -317,6 +323,11 @@ class DealsController extends Controller {
         return $retVal;
     }
 
+    /**
+     * @param $itemId
+     * @param $slug
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\View\View
+     */
     protected function showDeal($itemId, $slug = '') {
         $retVal = [];
         $dealFilter = [
@@ -346,5 +357,367 @@ class DealsController extends Controller {
             ];
         }
         return view('deals-page::deals.alldeals', $retVal);
+    }
+
+
+    /**
+     * @param $slug
+     * @param $param1
+     * @param $param2
+     * @return \Illuminate\Contracts\View\View|void
+     */
+    public function storeDeal($slug="", $param1 = 0, $param2 = 0) {
+        $canonicalLink = route('frontend::store::listDeal', $slug);
+        view()->share('canonicalLink', $canonicalLink);
+
+        $retVal = [];
+        $store = $this->getStore($slug);
+        if (empty($store)) {
+            return abort(404);
+        }
+
+        if(!empty(Request::segment(3)) && Request::segment(3) == 'c'){
+            $dataCoupon = $this->getDataInternalRequests('/service/coupon/find', ['id' => $param1, 'host' => 'local']);
+            $retVal['dataCoupon'] = $dataCoupon;
+            $retVal['relatedCoupon'] = $this->getRelatedCoupon($dataCoupon['storeId'], $param1);
+            $pagination = 0;
+        }
+
+        if(!empty(Request::segment(4)) && Request::segment(4) == 'c'){
+            $dataCoupon = $this->getDataInternalRequests('/service/coupon/find', ['id' => $param2, 'host' => 'local']);
+            $relatedCoupon = $this->getRelatedCoupon($dataCoupon['storeId'], $param2);
+        }
+
+        if(Request::input('c')){
+            $dataCoupon = $this->getDataInternalRequests('/service/coupon/find', ['id' => Request::input('c'), 'host' => 'local']);
+            $relatedCoupon = $this->getRelatedCoupon($dataCoupon['storeId'], Request::input('c'));
+        }
+        $this->getStoreContact($store);
+        $dealFilters = [
+            'store_id' => $store->id
+        ];
+        if (isset($_POST['dealType']) && $_POST['dealType'] == 'price') {
+            $dealFilters['minPrice'] = $_POST['minPrice'];
+            $dealFilters['maxPrice'] = $_POST['maxPrice'];
+            $dealFilters['dealType'] = $_POST['dealType'];
+        } else if (isset($_POST['dealType'])) {
+            $dealFilters['dealType'] = $_POST['dealType'];
+        }
+        $dealResult = $this->getDealLists($dealFilters);
+        $retVal['listDeals'] = $dealResult['data'];
+        $retVal['hasNextPage'] = ($dealResult['current_page'] < $dealResult['page_count']) ? true : false;
+        $retVal['currentPage'] = $dealResult['current_page'];
+
+        $breadcrumbs = $this->getBreadcrumbs(json_decode(json_encode($store), true), 'store');
+
+        $author = $this->getStoreAuthor($breadcrumbs);
+
+        $this->formatStoreContent($store, $retVal, $breadcrumbs);
+
+        $retVal['store'] = $store;
+        $defaultMeta = Utils::getDefaultMeta('store', '');
+        $defaultMetaTitle = '';
+        if (isset($defaultMeta->metaTitle)) {
+            $defaultMetaTitle = $defaultMeta->metaTitle;
+            $defaultMetaTitle = str_replace("{text}", $store->title, $defaultMetaTitle);
+        }
+
+
+        $retVal['storeEmbed'] = $this->_getStoreEmbedCoupons($store->id);
+        $retVal['title'] = !empty($store->metaTitle)? \App\Utils\Utils::replaceMonthYeah(str_replace("{text}", $store->title, $store->metaTitle)):\App\Utils\Utils::replaceMonthYeah(str_replace("{text}", $store->title, $defaultMetaTitle));
+        $retVal['storeNameTracking'] = $store->title;
+        $retVal['storeIdTracking'] = $store->id;
+        $retVal['slug'] = $slug;
+        $retVal['listCoupon'] = $this->getListCoupons($store->id);
+        $retVal['breadcrumbs'] = $breadcrumbs;
+        $retVal['author'] = $author;
+        $retVal['dealFilterActivated'] = isset($_POST['dealType']) ? $_POST['dealType'] : 'all';
+        $retVal['placehoderImage'] = "/images/blank.png";
+        $retVal['localSchema'] = ''; //$this->buildSchema($store,$couponResult['result']['data']);
+        return view('deals-page::deals.list-by-store', $retVal);
+    }
+
+
+    public function loadMoreDeal()
+    {
+        $response = [
+            'status' => 'fail'
+        ];
+        $filters = Input::all();
+        $result = $this->getDealLists($filters);
+        if (!empty($result['data'])) {
+            $response = [
+                'status' => 'successful',
+                'has_next' => ($result['current_page'] < $result['page_count']) ? true : false,
+                'current_page' => $result['current_page'],
+                'data' => view('deals-page::common.widgets.list-deal', ['listDeal' => $result['data']])->render()
+            ];
+        }
+
+        return response()->json($response);
+    }
+
+    /**
+     * @param $content
+     * @return mixed
+     */
+    private function getImageFromContent($content) {
+        preg_match_all('/(https?:\/\/\S+\.(?:jpg|png|gif))/', $content, $matches);
+        return $matches;
+    }
+
+    /**
+     * @param $slug
+     * @return object|null
+     */
+    protected function getStore($slug)
+    {
+        $result = NULL;
+        $stores = $this->getDataInternalRequests('/service/store/find', ['slug' => $slug,'status' => \App\Models\Store::STATUS_ENABLE]);
+        if (!empty($stores)) {
+            $result = (object) $stores[0];
+        }
+        return $result;
+    }
+
+    /**
+     * @param $store
+     * @return void
+     */
+    protected function getStoreContact(&$store)
+    {
+        $contact = StoreContact::where('store_id', '=', $store->id)->first();
+        if (!empty($contact)) {
+            $store->contact = $contact->toArray();
+        }
+    }
+
+    /**
+     * @param $breadcrumbs
+     * @return \Illuminate\Database\Query\Builder|mixed|string|null
+     */
+    protected function getStoreAuthor($breadcrumbs)
+    {
+        $author = '';
+        if (isset($breadcrumbs['category'])){
+            $categoryIds = [];
+            foreach ($breadcrumbs['category'] as $category ){
+                $categoryIds[] = $category['id'];
+            }
+            $author = DB::table('author')
+                ->join('author_n_category','author.id','=','author_n_category.author_id')
+                ->where('author.status','=',Author::STATUS_ENABLE)
+                ->whereIn('author_n_category.category_id',$categoryIds)->orderBy(DB::raw('RAND()'))->first();
+        }
+        return $author;
+    }
+
+    /**
+     * @param $store
+     * @param $retVal
+     * @param $breadcrumbs
+     * @return void
+     */
+    protected function formatStoreContent(&$store, &$retVal, $breadcrumbs)
+    {
+        $storeReplacement = "";
+        if (isset($categoryIds)){
+            $storeReplacement = $this->getStoreForTemplate($categoryIds[sizeof($categoryIds)-1]);
+        }
+
+        $categoryTag = '';
+        if (isset($breadcrumbs['category']) && !empty($breadcrumbs['category'])){
+            $lastCategory = $breadcrumbs['category'][0];
+            $href = route('frontend::category::listByCategory',['slug' => $lastCategory['slug']]);
+            $categoryTag = "<a href='$href'>" . $lastCategory['title'] . "</a>";
+        }
+        $trans = [
+            '[title]'=>$store->title,
+            '[date]'=>Utils::timeOnGoing(date('y-m-d')),
+            '[stores]' => $storeReplacement,
+            '[category]'=> $categoryTag,
+            '[total]'=>$store->couponCount
+        ];
+        if (empty($store->content)){
+            $retVal['contentTemplate'] = $this->getContentTemplate($trans,"store.contentTemplate");
+        }else{
+            $store->content = strtr($store->content, $trans);
+        }
+        $store->content = $this->addRelAttribute($store->content);
+        $contents = Utils::makeTableOfContents($store->content);
+        $retVal['toc'] = $contents['toc'];
+        $store->content = $contents['content'];
+        if (empty(strip_tags($store->description))){
+            $store->description = $this->getContentTemplate($trans,"store.descriptionTemplate");
+        }
+        $store->content = Utils::replaceMonthYeah($store->content);
+        $store->description = Utils::replaceMonthYeah($store->description);
+        $configStorePreventedContent = $this->getDataInternalRequests('/service/cfg/find', ['type' => 'store', 'key' => 'store.prevented.content']);
+        if($configStorePreventedContent) {
+            if(isset($configStorePreventedContent[0]['value'])){
+                try {
+                    $storeIdPreventedContent = json_decode($configStorePreventedContent[0]['value']);
+                    if(array_search($store['id'], $storeIdPreventedContent) !== false){
+                        $store->content = '';
+                        $retVal['contentTemplate'] = '';
+                    }
+                } catch (\Throwable $th) {
+//                    echo "ERROR json_decode configStorePreventedContent!";
+                }
+            }
+        }
+    }
+
+    /**
+     * @param $storeId
+     * @return mixed
+     */
+    protected function getListCoupons($storeId)
+    {
+        $result = NULL;
+        $filter = [
+            'storeId' => $storeId,
+            'status' => Coupon::STATUS_ACTIVE,
+            'pageId' => 0,
+            'orderBy' => 'sorderAndPinned',
+            'pageSize' => 5
+        ];
+        $result = $this->getInternalRequests('/service/coupon/find', $filter);
+        return $result;
+    }
+
+    /**
+     * @param $filters
+     * @return array
+     */
+    protected function getDealLists($filters = array())
+    {
+        $perPage = isset($filters['per_page']) ? $filters['per_page'] : 45;
+        $pageId = isset($filters['current_page']) ? $filters['current_page'] - 1 : 0;
+        $dealFiler = [
+//            'status' => Deal::STATUS_ACTIVE,
+            'orderBy' => 'typeDesc',
+            'pageId' => $pageId,
+            'pageSize' => $perPage
+        ];
+        if (isset($filters['dealType'])) {
+            if ($filters['dealType'] === 'code') {
+                $dealFiler['codeNotNull'] = true;
+            }
+            if ($filters['dealType'] === 'offer') {
+                $dealFiler['order_by'] = 'price_DESC';
+            }
+            if ($filters['dealType'] === 'newest') {
+                $dealFiler['order_by'] = 'id_DESC';
+            }
+
+            if ($filters['dealType'] === 'price') {
+                $dealFiler['priceFrom'] = $filters['minPrice'];
+                $dealFiler['priceTo'] = $filters['maxPrice'];
+                view()->share('priceRange', [$filters['minPrice'], $filters['maxPrice']]);
+            }
+
+        }
+        if (isset($filters['store_id'])) {
+            $dealFiler['storeId'] = $filters['store_id'];
+        }
+        $getDeals = $this->dealRepository->read($dealFiler);
+        $totalDeal = 0;
+        $dealResult = [];
+        if (isset($getDeals['data']) && count($getDeals['data']) > 0) {
+            $dealResult = $getDeals['data'];
+            unset($dealFiler['pageId']);
+            unset($dealFiler['pageSize']);
+            $dealFiler['metrics'] = 'count';
+            $getTotal = $this->dealRepository->read($dealFiler);
+            if (isset($getTotal['data'])) {
+                $totalDeal = $getTotal['data'];
+            }
+        }
+
+        $result = [
+            'per_page' => $perPage,
+            'page_count' => ceil($totalDeal / $perPage),
+            'current_page' => $pageId + 1,
+            'data' => $dealResult
+        ];
+        return $result;
+    }
+
+    /**
+     * @param $content
+     * @return mixed
+     */
+    private function addRelAttribute ($content)
+    {
+        if($content) {
+            $cdnUrl = \App\Utils\Utils::getCdnUrl(0, 0);
+            $blankSrc = ' src="/images/blank.gif" ';
+
+            // $content = preg_replace("/<a((?!.*rel=[\"']).*)href=\"(https:\/\/|http:\/\/|\/\/)(?!couponforless)(.*?)\"(.*?)>(.*?)<\/a>/", "<a$1href=\"$2$3\" rel=\"nofollow noopener\" $4>$5</a>", $content, -1);
+            $content = preg_replace('/(<img (.*)src=")(.*?)(".*>)/', "$1$cdnUrl$3$4", $content);
+            $content = preg_replace('/(<img (.*)class=")(.*?)(".*>)/', '$1lazy $2$3$4', $content);
+            $content = str_replace("src", "data-src", $content);
+            $content = preg_replace('/(<img (.*)src=".*?")(.*\/>)/', "$1$blankSrc$3$4", $content);
+            $content = preg_replace('/(<iframe\s+.*?\s*)(data-src)(=".*?".*?<\/iframe>)/', "$1src$3", $content);
+
+            $doc = new \DOMDocument();
+            @$doc->loadHTML($content);
+            $elements = $doc->getElementsByTagName('a');
+
+            foreach($elements as $el) {
+                if(strpos($el->getAttribute('href'), 'https://couponforless.com') === false)
+                    $el->setAttribute('rel', 'nofollow noopener');
+            }
+
+            $elements = $doc->getElementsByTagName('img');
+            foreach($elements as $el) {
+                if(strpos($el->getAttribute('data-src'), 'https://couponforless.com') !== false){
+                    $dataSrcUrl = str_replace('https://couponforless.com', 'couponforless.com',$el->getAttribute('data-src'));
+                    $el->setAttribute('data-src', $dataSrcUrl);
+                }elseif(strpos($el->getAttribute('data-src'), 'http://couponforless.com') !== false){
+                    $dataSrcUrl = str_replace('http://couponforless.com', 'couponforless.com',$el->getAttribute('data-src'));
+                    $el->setAttribute('data-src', $dataSrcUrl);
+                }
+            }
+
+            $content = $doc->saveHTML();
+        }
+
+        return $content;
+    }
+
+    /**
+     * @param $storeId
+     * @return array
+     */
+    private function _getStoreEmbedCoupons ($storeId) {
+        $storeEmbed = StoreEmbed::with([
+            'coupons' => function ($query) {
+                $query->orderBy('embed_n_coupon.sorder', 'DESC');
+            },
+            'store' => function ($query) {
+                $query->select('id', 'title', 'slug');
+            }
+        ])->where('store_id', '=', $storeId)->first();
+        if (!empty($storeEmbed)) {
+            $storeEmbed = $storeEmbed->toArray();
+            $couponEmbeds = [];
+            if (!empty($storeEmbed['coupons'])) {
+                foreach ($storeEmbed['coupons'] as $coupon) {
+                    $couponEmbeds[] = $coupon['id'];
+                }
+            }
+            if (!empty($couponEmbeds)) {
+                $couponEmbeds = $this->getDataInternalRequests('/service/coupon/find', [
+                    'couponIn' => $couponEmbeds,
+                    'status' => Coupon::STATUS_ACTIVE
+                ]);
+                $storeEmbed['coupons'] = $couponEmbeds;
+            }
+            return $storeEmbed;
+        } else {
+            return [];
+        }
     }
 }

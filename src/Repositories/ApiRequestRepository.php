@@ -40,6 +40,11 @@ class ApiRequestRepository
         return $retVal;
     }
 
+    /**
+     * @param $catalogId
+     * @param $pageId
+     * @return array|mixed
+     */
     public function readCatalogProducts($catalogId, $pageId)
     {
         $retVal = [];

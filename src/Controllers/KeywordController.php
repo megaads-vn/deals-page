@@ -658,19 +658,19 @@ class KeywordController extends Controller {
 
     protected function dealImageProcessing(&$deals)
     {
-        foreach ($deals as $item) {
-            if (preg_match('/(http|https):\/\//i', $item->image)) {
-                if (!@getimagesize($item->image)) {
-                    $item->image = '/images/stores/' . $item->store->image;
-                }
-            }
-            else if (!file_exists(public_path($item->image))) {
-                $item->image = '/images/stores/' . $item->store->image;
-            }
-            else if (!@getimagesize(public_path($item->image))) {
-                $item->image = '/images/stores/' . $item->store->image;
-            }
-        }
+//        foreach ($deals as $item) {
+//            if (preg_match('/(http|https):\/\//i', $item->image)) {
+//                if (!@getimagesize($item->image)) {
+//                    $item->image = '/images/stores/' . $item->store->image;
+//                }
+//            }
+//            else if (!file_exists(public_path($item->image))) {
+//                $item->image = '/images/stores/' . $item->store->image;
+//            }
+//            else if (!@getimagesize(public_path($item->image))) {
+//                $item->image = '/images/stores/' . $item->store->image;
+//            }
+//        }
     }
 
 }

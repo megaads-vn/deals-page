@@ -9,12 +9,12 @@ if (isset($dealFilterActivated) && $dealFilterActivated == 'price') {
         <div class="price-input">
             <div class="field">
                 <span>Min</span>
-                <input type="number" class="input-min" value="{{ isset($priceRange) ? $priceRange[0] : 0 }}">&nbsp;$
+                <input type="number" id="input-min" class="input-min" value="{{ isset($priceRange) ? $priceRange[0] : 0 }}">&nbsp;$
             </div>
             <div class="separator">-</div>
             <div class="field">
                 <span>Max</span>
-                <input type="number" class="input-max" value="{{ isset($priceRange) ? $priceRange[1] : 2500 }}">&nbsp;$
+                <input type="number" id="input-max" class="input-max" value="{{ isset($priceRange) ? $priceRange[1] : 2500 }}">&nbsp;$
             </div>
         </div>
         <div class="field deal-apply-filter-btn">

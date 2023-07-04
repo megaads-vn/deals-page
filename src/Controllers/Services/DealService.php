@@ -7,6 +7,7 @@ use Google\Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Megaads\DealsPage\Jobs\DealProductJob;
+use Megaads\DealsPage\Models\Catalog;
 use Megaads\DealsPage\Models\Category;
 use Megaads\DealsPage\Models\CrawlerDeal;
 use Megaads\DealsPage\Models\Deal;
@@ -297,6 +298,56 @@ class DealService extends BaseService
         return \Response::json($response);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function crawlDeals(Request  $request)
+    {
+        set_time_limit(3600);
+        $catalogQuery = Catalog::query();
+        $perPage = 100;
+        $totalCatalog = $catalogQuery->count();
+        $pageCount = ceil($totalCatalog / $perPage);
+        $pageDone = 0;
+        for ($p = 0; $p < $pageCount; $p++) {
+            $offset = $perPage * $p;
+            $pageDone++;
+            if ($p == 1) break;
+            $result = $catalogQuery->offset($offset)->limit($perPage)->get(['cid']);
+            if (!empty($result)) {
+                foreach ($result as $idx => $item) {
+                    $catalogId = $item->cid;
+                    $crawlResult = $this->apiRequestRepository->readCatalogProducts($catalogId, 1);
+                    if (!empty($crawlResult)) {
+                        if (isset($crawlResult['message']) && $crawlResult['message'] == 'No Valid or Approved Catalog found for your domain') {
+                            $this->catalogRepository->update($catalogId, ['crawl_state' => 'invalid']);
+                        } else {
+                            $bulkInsertData = [];
+                            foreach ($crawlResult as $item) {
+                                $bulkInsertData[] = $this->buildInsertDealItem($item);
+                            }
+                            if (count($bulkInsertData)) {
+                                sendHttpRequest(config('deals-page.app_url') . "/service/deal/bulk-create",
+                                    "POST",
+                                    ["params" => $bulkInsertData],
+                                    [
+                                        "Authorization: Basic YXBpOjEyM0AxMjNh",
+                                        "Accept: application/json, text/plain, */*",
+                                        "Content-Type: application/json;charset=utf-8"
+                                    ]);
+                            }
+                        }
+                    }
+                    sleep(6);
+                }
+            }
+        }
+        return response()->json([
+            'status' => 'successful',
+            'totalPage' => $pageDone
+        ]);
+    }
     /**
      * @param $rawData
      * @return array

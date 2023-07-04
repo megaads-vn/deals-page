@@ -66,6 +66,7 @@ function filterClickEventHanler(e) {
     } else {
         priceRangeInput.classList.add('price-range-hide');
     }
+    return false;
     var hideInput = document.createElement('input');
     hideInput.setAttribute('class', 'hidden-deal-type');
     hideInput.setAttribute('name', 'dealType');
