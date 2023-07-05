@@ -3,6 +3,8 @@
         $storeUrl = route("frontend::store::goStore", ['slug' => $store->slug]);
         $storeImage = isset($store) ? env('APP_URL').'/images/stores/' . $store->coverImage : '';
         $placehoderImage = "/images/blank.gif";
+        $rating = !empty($store->crawl_rating) ? $store->crawl_rating : $store->voteUp;
+        $ratingCount = !empty($store->crawl_rating_count) ? $store->crawl_rating_count : $store->voteDown;
     @endphp
 <div class="contact-info-contain">
     <div class="contact-header">
@@ -36,7 +38,7 @@
                 <label data-id="{{ $store->id }}" class="js-vote" for="star1" title="1 star">1 star</label>
             </div>
             <span class="count-rating store-count-rating">
-                <?= $store->voteUp ?> from <span><?= $store->voteDown ?></span> users
+                {{ $rating }} from <span>{{ $ratingCount }}</span> users
             </span>
             <div class="js-vote-message"></div>
         </div>

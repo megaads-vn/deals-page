@@ -7,7 +7,7 @@
             <small>OFF</small>
         </span>
         @endif
-        <img class="zoom" src="{{ $item->image }}" alt="{{ $item->title }}">
+        <img class="zoom deal-thumb" src="{{ App\Utils\Utils::reSizeImage("/images/stores/" . $store->coverImage, 100, 0) }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
     </a>
     <div class="deal-item-info">
         <a target="_blank" rel="nofollow" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" class="box-top">

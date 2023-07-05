@@ -6,38 +6,10 @@
 @endsection
 @section('content')
     @php
-        use App\Models\Coupon;
-        use App\Utils\Utils;
         use Megaads\Adsense\Utils\Adsense;
-
-        $couponSchema = [
-            'name' => $store->title,
-            'url' => route('frontend::store::listByStore', $store->slug),
-            'rating_count' => $store->voteDown,
-            'rating_value' => $store->voteUp,
-            'deals' => 0,
-            'codes' => 0,
-            'printable' => 0,
-            'coupons' => []
-        ];
         $storeDescription = ($store->description);
-        /* foreach ($listCoupon['result']['data'] as $item) {
-            if ($item['type'] == Coupon::TYPE_COUPON) {
-                $couponSchema['deals']++;
-            } else if ($item['type'] == Coupon::TYPE_COUPONCODE) {
-                $couponSchema['codes']++;
-            } else if ($item['type'] == Coupon::TYPE_PRINTABLE) {
-                $couponSchema['printable']++;
-            }
-            array_push($couponSchema['coupons'], [
-                'name' => $item['title'],
-                'url' => route('frontend::coupon::detail', $item['slug'])
-            ]);
-        }
-
-        $localSchema = str_replace('#meta_title', $_COOKIE['metaTitle'], $localSchema);
-        $localSchema = str_replace('#meta_description', $_COOKIE['metaDescription'], $localSchema);
-        echo $localSchema; */
+        $rating = !empty($store->crawl_rating) ? $store->crawl_rating : $store->voteUp;
+        $ratingCount = !empty($store->crawl_rating_count) ? $store->crawl_rating_count : $store->voteDown;
     @endphp
     <div class="store-desc-wrap is-mobile">
         <div class="store-img">
@@ -71,7 +43,7 @@
             <label data-id="<?= $store->id; ?>" class="js-vote" for="mb-star1" title="1 star">1 star</label>
         </div>
         <span class="count-rating">
-        <?= $store->voteUp ?> from <span><?= $store->voteDown ?></span> users
+        {{ $rating }} from <span>{{ $ratingCount }}</span> users
     </span>
         <div class="js-vote-message"></div>
     </div>
@@ -140,7 +112,7 @@
                         @if (isset($listCoupon) && !empty($listCoupon))
                             @include('frontend.common.widgets.list-coupon', ['coupons' => $listCoupon['result']['data'], 'store' => $store->title, 'date' => '(' .date('M d, Y'). ')', 'recordsCount' => $listCoupon['result']['recordsCount']])
                             <div class="view-more-alldeal">
-                                <a href="{{ route('frontend::store::goStore', [ 'slug' => $store->slug ]) }}" class="view-more-alldeal-link">
+                                <a href="{{ route('frontend::store::listByStore', [ 'slug' => $store->slug ]) }}" class="view-more-alldeal-link">
                                     {{ sprintf('See all %s Coupons', $store->title) }}
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16"> <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/> </svg>
                                 </a>
@@ -166,6 +138,12 @@
     @parent
     <script defer src="/vendor/deals-page/js/price-range.js?v=<?= Config::get('app.version'); ?>"></script>
     <script>
+        var storeImageUrl = '{{ App\Utils\Utils::reSizeImage("/images/stores/" . $store->coverImage, 100, 0) }}';
+        var isLoading = false;
+        var currentPage = {{ $currentPage }};
+        var viewMoreDeal = document.getElementById('js-view-more-deals');
+        var filterType = '{{ $dealFilterActivated }}';
+
         document.addEventListener("DOMContentLoaded", function(event) {
             $('.favorite-related-stores').slick({
                 slidesToShow: 6,
@@ -203,6 +181,14 @@
                     }
                 ]
             });
+
+            const listDealImage = document.getElementsByClassName('deal-thumb');
+            for (const image of listDealImage) {
+                image.addEventListener('error', function() {
+                    image.src = storeImageUrl;
+                });
+            }
+
         });
 
         var favoriteDeals = "{{ isset($favoriteDeals) ? json_encode($favoriteDeals) : '' }}";
@@ -242,16 +228,7 @@
                 content.insertBefore(element, wrapper);
             }
         }
-    </script>
-    <script id="coupon-schema" type="application/ld+json">
-        {{ json_encode($couponSchema) }}
-    </script>
 
-    <script>
-        var isLoading = false;
-        var currentPage = {{ $currentPage }};
-        var viewMoreDeal = document.getElementById('js-view-more-deals');
-        var filterType = '{{ $dealFilterActivated }}';
         function loadmoreDeals(e) {
             e = e || window.event;
             e.preventDefault();
