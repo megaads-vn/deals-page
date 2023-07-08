@@ -189,9 +189,6 @@
 }
 
 @media (max-width: 990px) {
-	#deal-filter-form {
-		display: none;
-	}
 	.container {
 		width: 92%;
 		margin: 0 auto;
@@ -540,4 +537,10 @@ span[ itemprop="ratingCount"] {
 .zoom:hover {
 	transition: transform .5s ease;
 	transform: translate(-50%, -50%) scale(1.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+}
+
+@media (max-width: 760px) {
+    .openfilter  {
+		display: none;
+	}
 }
