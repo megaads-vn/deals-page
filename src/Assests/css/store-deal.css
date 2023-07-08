@@ -189,6 +189,9 @@
 }
 
 @media (max-width: 990px) {
+	#deal-filter-form {
+		display: none;
+	}
 	.container {
 		width: 92%;
 		margin: 0 auto;
@@ -206,6 +209,17 @@
 		width: 100%;
 	}
 
+	#deal-items-wrapper {
+		display: grid;
+		grid-gap: 20px;
+		/*padding: 0 5px;*/
+	}
+	.search-results {
+		padding: 0 15px;
+	}
+	.widget-title {
+		/*padding: 0 5px;*/
+	}
 
 	.deal-item-header,
 	.deal-item-description {
