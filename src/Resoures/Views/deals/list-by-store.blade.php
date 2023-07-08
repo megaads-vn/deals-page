@@ -33,7 +33,7 @@
         <div class="rate">
             <input type="radio" id="mb-star5" <?= round($rating) == 5?'checked':'' ?> name="mb-rate" value="5" />
             <label data-id="<?= $store->id; ?>" class="js-vote" for="mb-star5" title="5 stars">5 stars</label>
-            <input type="radio" id="mb-star4" <?= round($ratingCount) == 4?'checked':'' ?> name="mb-rate" value="4" />
+            <input type="radio" id="mb-star4" <?= round($rating) == 4?'checked':'' ?> name="mb-rate" value="4" />
             <label data-id="<?= $store->id; ?>" class="js-vote" for="mb-star4" title="4 stars">4 stars</label>
             <input type="radio" id="mb-star3" name="mb-rate" value="3" />
             <label data-id="<?= $store->id; ?>" class="js-vote" for="mb-star3" title="3 stars">3 stars</label>
@@ -68,7 +68,7 @@
                             <div class="rate">
                                 <input type="radio" id="star5" <?= round($rating) == 5?'checked':'' ?> name="rate" value="5" />
                                 <label data-id="<?= $store->id; ?>" class="js-vote" for="star5" title="5 stars">5 stars</label>
-                                <input type="radio" id="star4" <?= round($ratingCount) == 4?'checked':'' ?> name="rate" value="4" />
+                                <input type="radio" id="star4" <?= round($rating) == 4?'checked':'' ?> name="rate" value="4" />
                                 <label data-id="<?= $store->id; ?>" class="js-vote" for="star4" title="4 stars">4 stars</label>
                                 <input type="radio" id="star3" name="rate" value="3" />
                                 <label data-id="<?= $store->id; ?>" class="js-vote" for="star3" title="3 stars">3 stars</label>
