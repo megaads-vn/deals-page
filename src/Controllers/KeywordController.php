@@ -188,10 +188,12 @@ class KeywordController extends Controller {
                 });
             }
         }
-        if (empty($keyword['store_id'])) {
-            $query->limit(15);
-        } else {
+        if (!empty($keyword['store_id'])) {
             $query->where('store_id', $keyword['store_id']);
+        } else if (!empty($keyword['related_store_id'])) {
+            $query->where('store_id', $keyword['related_store_id']);
+        } else {
+            $query->limit(15);
         }
 
         $getCoupon = $query->get(['coupon.*', 'store.image as storeImage']);

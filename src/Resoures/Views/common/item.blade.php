@@ -7,7 +7,11 @@
             <small>OFF</small>
         </span>
         @endif
+        @if (isset($store->coverImage))
         <img class="zoom lazy deal-thumb" src="{{ App\Utils\Utils::reSizeImage("/images/stores/" . $store->coverImage, 100, 0) }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
+        @else
+        <img class="zoom lazy deal-thumb" src="{{ $item->image }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
+        @endif
     </a>
     <div class="deal-item-info">
         <a target="_blank" rel="nofollow" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" class="box-top">
