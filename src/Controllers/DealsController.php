@@ -114,14 +114,6 @@ class DealsController extends Controller {
             $this->dealRepository->update($dealId, ["views" => $views + 1]);
             $retVal['dataDeal'] = $dataDeal['data'];
 
-//            $anotherCoupon = $this->dealRepository->getData([
-//                'page_size' => 10,
-//                'status' => Coupon::STATUS_ACTIVE,
-//                'store_id' => $dataDeal->store_id,
-//                'join_store' => 1,
-//                'columns' => ['deal.*', 'store.slug as store_slug', 'store.image as store_image', 'store.title as store_title']
-//            ]);
-//            $retVal['otherCoupon'] = $anotherCoupon;
             if ( $segment == 'c' ) {
                 $retVal['showPopup'] = true;
             }
@@ -364,7 +356,7 @@ class DealsController extends Controller {
      * @param $slug
      * @param $param1
      * @param $param2
-     * @return \Illuminate\Contracts\View\View|void
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|void
      */
     public function storeDeal($slug="", $param1 = 0, $param2 = 0) {
         $canonicalLink = route('frontend::store::listDeal', $slug);
@@ -376,16 +368,11 @@ class DealsController extends Controller {
             return abort(404);
         }
 
-        if(!empty(Request::segment(3)) && Request::segment(3) == 'c'){
-            $dataCoupon = $this->getDataInternalRequests('/service/coupon/find', ['id' => $param1, 'host' => 'local']);
-            $retVal['dataCoupon'] = $dataCoupon;
-            $retVal['relatedCoupon'] = $this->getRelatedCoupon($dataCoupon['storeId'], $param1);
-            $pagination = 0;
-        }
-
+        $dataCoupon = NULL;
+        $relatedCoupon = NULL;
         if(!empty(Request::segment(4)) && Request::segment(4) == 'c'){
-            $dataCoupon = $this->getDataInternalRequests('/service/coupon/find', ['id' => $param2, 'host' => 'local']);
-            $relatedCoupon = $this->getRelatedCoupon($dataCoupon['storeId'], $param2);
+            $dataCoupon = $this->getDataInternalRequests('/service/coupon/find', ['id' => $param1, 'host' => 'local']);
+            $relatedCoupon = $this->getRelatedCoupon($dataCoupon['storeId'], $param1);
         }
 
         if(Request::input('c')){
@@ -404,6 +391,10 @@ class DealsController extends Controller {
             $dealFilters['dealType'] = $_POST['dealType'];
         }
         $dealResult = $this->getDealLists($dealFilters);
+
+        if (count($dealResult['data']) <= 0 && (!isset($dealFilters['dealType']) || (isset($dealFilters['dealType']) && $dealFilters['dealType'] == 'all'))) {
+            return redirect(route('frontend::store::listByStore', ['slug' => $store->slug]));
+        }
         $retVal['listDeals'] = $dealResult['data'];
         $retVal['hasNextPage'] = ($dealResult['current_page'] < $dealResult['page_count']) ? true : false;
         $retVal['currentPage'] = $dealResult['current_page'];
@@ -434,6 +425,8 @@ class DealsController extends Controller {
         $retVal['dealFilterActivated'] = isset($_POST['dealType']) ? $_POST['dealType'] : 'all';
         $retVal['placehoderImage'] = "/images/blank.png";
         $retVal['localSchema'] = ''; //$this->buildSchema($store,$couponResult['result']['data']);
+        $retVal['dataCoupon'] = $dataCoupon;
+        $retVal['relatedCoupon'] = $relatedCoupon;
         return view('deals-page::deals.list-by-store', $retVal);
     }
 
@@ -455,6 +448,11 @@ class DealsController extends Controller {
         }
 
         return response()->json($response);
+    }
+
+    public function redirect($slug)
+    {
+        return redirect(route('frontend::store::listDeal', ['slug' => $slug]), 301);
     }
 
     /**

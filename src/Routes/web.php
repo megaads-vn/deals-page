@@ -12,8 +12,10 @@ Route::group([
     Route::get('/deal/c/{itemId}', 'DealsController@dealDetail')->name('deal::detail::item')->where(['itemId' => '[0-9]+']);
     Route::get('/go-deal/{slug}', 'DealsController@goUrl')->name('deal::action::go')->where(['slug' => '[0-9a-zA-Z\-]+']);
     Route::get('/deals/import', 'DealsController@import');
-    Route::get("/stores/{slug}/deals", ['as' => 'frontend::store::listDeal', 'uses' => "DealsController@storeDeal"]);
-    Route::post("/stores/{slug}/deals", ['as' => 'frontend::store::listDeal', 'uses' => "DealsController@storeDeal"]);
+    Route::get("/stores/{slug}/deals", ['as' => 'frontend::store::listDeal::old', 'uses' => "DealsController@redirect"]);
+    Route::get("/store/{slug}/deals/c/{itemId?}", ['as' => 'frontend::store::listDeal', 'uses' => "DealsController@storeDeal"]);
+    Route::post("/store/{slug}/deals", ['as' => 'frontend::store::listDeal', 'uses' => "DealsController@storeDeal"]);
+    Route::post("/store/{slug}/deals", ['as' => 'frontend::store::listDeal', 'uses' => "DealsController@storeDeal"]);
     Route::get("/stores/deals/load-more", ["as" => 'frontend::store::loadmore::deals', 'uses' => "DealsController@loadMoreDeal"]);
-//    Route::get('/{slug}', 'KeywordController@index')->name('frontend::keyword');
+
 });
