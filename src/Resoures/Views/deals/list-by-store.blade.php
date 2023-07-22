@@ -11,6 +11,7 @@
         $rating = !empty($store->crawl_rating) ? $store->crawl_rating : $store->voteUp;
         $ratingCount = !empty($store->crawl_rating_count) ? $store->crawl_rating_count : $store->voteDown;
     @endphp
+    @mobile
     <div class="store-desc-wrap is-mobile">
         <div class="store-img">
             <a href="{{ route('frontend::store::goStore', [ 'slug' => $store->slug ]) }}" target="_blank">
@@ -19,10 +20,7 @@
         </div>
         <div class="store-desc">
             <div class="store-name-box">
-                <?= $_COOKIE['metaTitle'] ?>
-            </div>
-            <div class="store-desc-detail is-desktop">
-                <div class="more-less-text" data-background-color="#fff" data-lines="1" data-more-text="More &raquo;" style="max-height: 21px; overflow: hidden;">{!! $storeDescription !!}</div>
+                <h1><?= $_COOKIE['metaTitle'] ?></h1>
             </div>
         </div>
         <div class="openfilter is-mobile">
@@ -47,8 +45,10 @@
     </span>
         <div class="js-vote-message"></div>
     </div>
+    @endmobile
     <main id="main" data-role="list-by-store">
         <div class="page-full-width">
+            @notmobile
             <div class="subheader is-desktop">
                 <div class="container">
                     <div class="viewstore-col col-sm-2 hidden-xs">
@@ -57,13 +57,8 @@
                         </a>
                     </div>
                     <div class="viewstore-col col-sm-10 about-store">
-                        <h1>
-                            <span class="store-subtitle"><?= $_COOKIE['metaTitle'] ?></span>
-                        </h1>
+                        <h1><span class="store-subtitle"><?= $_COOKIE['metaTitle'] ?></span></h1>
                         <div style="clear: both"></div>
-                        <div class="is-desktop" style="margin-bottom:15px">
-                            <div class="more-less-text" data-background-color="#fff" data-lines="1" data-more-text="More &raquo;" style="max-height: 21px; overflow: hidden;">{!! $storeDescription !!}</div>
-                        </div>
                         <div class="star-rating">
                             <div class="rate">
                                 <input type="radio" id="star5" <?= round($rating) == 5?'checked':'' ?> name="rate" value="5" />
@@ -85,6 +80,7 @@
                     </div>
                 </div>
             </div>
+            @endnotmobile
             <div class="container main-container">
                 <div class="row">
                     <div class="col-lg-9 col-md-9 col-sm-12 search-results">
