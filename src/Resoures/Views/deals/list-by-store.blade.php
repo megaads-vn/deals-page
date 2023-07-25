@@ -59,6 +59,7 @@
                     <div class="viewstore-col col-sm-10 about-store">
                         <h1><span class="store-subtitle"><?= $_COOKIE['metaTitle'] ?></span></h1>
                         <div style="clear: both"></div>
+                        @if (1==2)
                         <div class="star-rating">
                             <div class="rate">
                                 <input type="radio" id="star5" <?= round($rating) == 5?'checked':'' ?> name="rate" value="5" />
@@ -77,6 +78,7 @@
                         </span>
                             <div class="js-vote-message"></div>
                         </div>
+                            @endif
                     </div>
                 </div>
             </div>
@@ -119,7 +121,12 @@
                     </div>
                     <div class="col-lg-3 col-md-3 col-sm-12 left-menu">
                         @include('frontend.common.widgets.popular-categories')
-                        @include('frontend.common.widgets.contact-info', [ 'store' => json_decode(json_encode($store), true) ])
+                        @include('frontend.common.widgets.contact-info', [
+                                    'store' => json_decode(json_encode($store), true),
+                                    'showRating' => true,
+                                    'hideReview' =>  true,
+                                    'customStyle' => 'text-align:center'
+                                    ])
                         <?= Adsense::display(['divClass' => 'section-top', 'adsenseStyle' => 'width: 285px; height: 216px;']) ?>
                     </div>
                     <div class="clearfix"></div>
