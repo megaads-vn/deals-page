@@ -207,6 +207,9 @@ class DealRepository extends BaseRepository
                     $value = $priceFilter->value;
                     $query->where('price', $operator, $value);
                 }
+                if (isset($filters['advSearch']['storeId'])) {
+                    $query->where('store_id', $filters['advSearch']['storeId']);
+                }
             }
         }
         else

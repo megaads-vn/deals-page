@@ -161,7 +161,8 @@ class DealService extends BaseService
                             "affiliate_link" => $oldItem->url,
                             "store_id" => $oldItem->store_id,
                             "category_id" => $oldItem->category_id,
-                            "discount" => $saleOff
+                            "discount" => $saleOff,
+                            "manufacturer" => ""
                         ];
                         $insertId = $this->dealRepository->create($insertNewItems);
                         if (!empty($insertId)) {
@@ -304,7 +305,7 @@ class DealService extends BaseService
      */
     public function crawlDeals(Request  $request)
     {
-        set_time_limit(3600);
+        set_time_limit(84600);
         $catalogQuery = Catalog::query();
         $perPage = 100;
         $totalCatalog = $catalogQuery->count();
@@ -354,12 +355,16 @@ class DealService extends BaseService
      */
     protected function buildInsertDealItem($rawData) {
         $saleOff = 0;
+        $brandName = str_replace(['.com', '.co.uk', '.org'], '', $rawData['brand']);
+
+        $brandName = $this->convertCamelToSnake($brandName);
+        $storeId = $this->findLocalStore($brandName);
         if ($rawData['salePrice'] > 0 && $rawData['salePrice'] < $rawData['price']) {
             $saleOff = floor((($rawData['price'] - $rawData['salePrice']) / $rawData['price']) * 100);
         }
-        $storeId = 0;
         $categoryIds = '';
-        if (!empty($rawData['manufacturer'])) {
+        if (!empty($rawData['manufacturer']) && $storeId == 0) {
+            $brandName = $rawData['manufacturer'];
             $storeId = $this->findLocalStore($rawData['manufacturer']);
         }
         if (!empty($rawData['category'])) {
@@ -386,9 +391,9 @@ class DealService extends BaseService
             "in_stock" => $rawData["isInstock"],
             "store_id" => $storeId,
             "store_tmp" => $rawData['manufacturer'],
-            "category_id" => $categoryIds
+            "category_id" => $categoryIds,
+            'manufacturer' => $brandName
         ];
-
         return $retVal;
     }
 
@@ -641,5 +646,10 @@ class DealService extends BaseService
             $filename = end($filePaths) . ".jpg";
         }
         return $filename;
+    }
+
+    protected function convertCamelToSnake($string) {
+        $string = strtolower(preg_replace('/(?<!^)[A-Z]/', ' $0', $string));
+        return ucwords($string, ' ');
     }
 }
