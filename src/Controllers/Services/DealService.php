@@ -167,27 +167,41 @@ class DealService extends BaseService
                     \Log::info('DEAL_MIGATION: [DATA=' . count($oldData) . ']');
                     if (!empty($oldData) ) {
                         foreach ($oldData as $oldItem) {
-                            $saleOff = 0;
-                            if ($oldItem->sale_price > 0 && $oldItem->sale_price < $oldItem->regular_price) {
-                                $saleOff = floor((($oldItem->regular_price - $oldItem->sale_price) / $oldItem->regular_price) * 100);
-                            }
                             $insertNewItems = [
                                 "title" => $oldItem->title,
                                 "slug" => $oldItem->slug,
                                 "search_slug" => $oldItem->slug,
-                                "content" => $oldItem->description,
-                                "meta_description" => $oldItem->description,
-                                "type" => "DEAL",
-                                "image" => $oldItem->image_url,
+                                "content" => $oldItem->content,
+                                "meta_title" => $oldItem->meta_title,
+                                "meta_description" => $oldItem->meta_description,
+                                "meta_keywords" => $oldItem->meta_keywords,
+                                "image" => $oldItem->image,
+                                "clicks" => $oldItem->clicks,
                                 "expired_time" => $oldItem->expired_time,
-                                "price" => $oldItem->regular_price,
+                                "price" => $oldItem->price,
                                 "sale_price" => $oldItem->sale_price,
                                 "currency" => "USD",
                                 "affiliate_link" => $oldItem->url,
+                                "origin_link" => $oldItem->origin_link,
+                                "sorder" => $oldItem->sorder,
+                                "sorder_in_category" => $oldItem->sorder_in_category,
+                                "views" => $oldItem->views,
+                                "vote_up" => $oldItem->vote_up,
+                                "vote_down" => $oldItem->vote_down,
                                 "store_id" => $oldItem->store_id,
                                 "category_id" => $oldItem->category_id,
-                                "discount" => $saleOff,
-                                "manufacturer" => ""
+                                "discount" => $oldItem->discount,
+                                "crawl_id" => $oldItem->crawl_id,
+                                "mpn" => $oldItem->mpn,
+                                "sku" => $oldItem->sku,
+                                "manufacturer" => $oldItem->manufacturer,
+                                "in_stock" => $oldItem->manufacturer,
+                                "status" => $oldItem->status,
+                                "type" => $oldItem->type,
+                                "code" => $oldItem->code,
+                                "publish_time" => $oldItem->publish_time,
+                                "create_time" => $oldItem->create_time,
+                                "update_time" => $oldItem->update_time,
                             ];
                             $insertId = \DB::table($destinationTable)->insertGetId($insertNewItems);
                             if (!empty($insertId)) {
