@@ -405,6 +405,10 @@ class DealsController extends Controller {
 
         $this->formatStoreContent($store, $retVal, $breadcrumbs);
 
+        $store->metaTitle = "";
+        $store->metaDescription = "";
+        $store->metaKeywords = "";
+
         $retVal['store'] = $store;
         $defaultMeta = Utils::getDefaultMeta('store', '');
         $defaultMetaTitle = '';
@@ -610,8 +614,12 @@ class DealsController extends Controller {
             }
 
             if ($filters['dealType'] === 'price') {
-                $dealFiler['priceFrom'] = $filters['minPrice'];
-                $dealFiler['priceTo'] = $filters['maxPrice'];
+                if ((double) $filters['minPrice'] > 0) {
+                    $dealFiler['priceFrom'] = (double) $filters['minPrice'];
+                }
+                if ((double) $filters['maxPrice'] > 0) {
+                    $dealFiler['priceTo'] = (double) $filters['maxPrice'];
+                }
                 view()->share('priceRange', [$filters['minPrice'], $filters['maxPrice']]);
             }
 

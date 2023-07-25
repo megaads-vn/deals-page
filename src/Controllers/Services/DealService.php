@@ -181,7 +181,7 @@ class DealService extends BaseService
                                 "price" => $oldItem->price,
                                 "sale_price" => $oldItem->sale_price,
                                 "currency" => "USD",
-                                "affiliate_link" => $oldItem->url,
+                                "affiliate_link" => $oldItem->affiliate_link,
                                 "origin_link" => $oldItem->origin_link,
                                 "sorder" => $oldItem->sorder,
                                 "sorder_in_category" => $oldItem->sorder_in_category,
@@ -205,7 +205,9 @@ class DealService extends BaseService
                             ];
                             $insertId = \DB::table($destinationTable)->insertGetId($insertNewItems);
                             if (!empty($insertId)) {
-                                DealRelation::insert(["object_id" => $insertId, "target_id" => $oldItem->keypage_id]);
+                                DealRelation::where('object_id', $oldItem->id)->update([
+                                    'object_id' => $insertId,
+                                ]);
                             }
                         }
                         $totalPage++;
@@ -364,7 +366,6 @@ class DealService extends BaseService
         for ($p = 0; $p < $pageCount; $p++) {
             $offset = $perPage * $p;
             $pageDone++;
-            if ($p == 1) break;
             $result = $catalogQuery->offset($offset)->limit($perPage)->get(['cid']);
             if (!empty($result)) {
                 foreach ($result as $idx => $item) {

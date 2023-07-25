@@ -245,6 +245,10 @@ class DealRepository extends BaseRepository
 
             if (array_key_exists('priceFrom', $filters) && array_key_exists('priceTo', $filters)) {
                 $query->whereBetween('price', [$filters['priceFrom'], $filters['priceTo']]);
+            } else if (array_key_exists('priceFrom', $filters)) {
+                $query->where('price', '>=', $filters['priceFrom']);
+            } else if (array_key_exists('priceTo', $filters)) {
+                $query->where('price', '<=', $filters['priceTo']);
             }
 
 
