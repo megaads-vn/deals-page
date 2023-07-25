@@ -135,17 +135,36 @@ class DealService extends BaseService
      */
     public function dealMigration(Request $request) {
         set_time_limit(86400);
-        $resposne = $this->getDefaultStatus();
+        $response = $this->getDefaultStatus();
         try {
             $sourceTable = $request->get('source', NULL);
             $destinationTable = $request->get('des', NULL);
             if (!empty($sourceTable) && !empty($destinationTable)) {
-                $total = \DB::table($sourceTable)->count();
+                $sourceQuery = \DB::table($sourceTable);
+                if ($request->has('has_store')) {
+                    $sourceQuery->where('store_id', '<>', 0);
+                }
+                if ($request->has('store_id') && $request->get('store_id') != '') {
+                    $sourceQuery->where('store_id', $request->get('store_id'));
+                }
+                $total = (clone $sourceQuery)->total();
+                if ($request->has('debug') && $request->get('debug') == 1) {
+                    echo "<pre>";
+                    print_r([
+                        'query' => $sourceQuery->toSql()
+                    ]);
+                    echo "</pre>";
+                    die;
+                }
                 $perpage = 300;
                 $pageCount = ceil($total / $perpage);
+                $totalPage = 0;
                 for ($p = 0; $p < $pageCount; $p++) {
+                    \Log::info('DEAL_MIGATION: [PID=' . $p . ']');
                     $offset = $p * $perpage;
-                    $oldData = \DB::table($sourceTable)->limit($perpage)->offset($offset)->get();
+                    $query = (clone $sourceQuery)->limit($perpage)->offset($offset);
+                    $oldData = $query->get();
+                    \Log::info('DEAL_MIGATION: [DATA=' . count($oldData) . ']');
                     if (!empty($oldData) ) {
                         foreach ($oldData as $oldItem) {
                             $saleOff = 0;
@@ -170,18 +189,24 @@ class DealService extends BaseService
                                 "discount" => $saleOff,
                                 "manufacturer" => ""
                             ];
-//                            $insertId = $this->dealRepository->create($insertNewItems);
                             $insertId = \DB::table($destinationTable)->insertGetId($insertNewItems);
                             if (!empty($insertId)) {
                                 DealRelation::insert(["object_id" => $insertId, "target_id" => $oldItem->keypage_id]);
                             }
                         }
+                        $totalPage++;
                     }
                 }
-                if (!empty($oldData)) {
-                    $countInsert = 0;
-
-                    $resposne = $this->getSuccessStatus(["data" => $countInsert]);
+                if ($totalPage > 0) {
+                    $response = [
+                        'status' => 'successful',
+                        'message' => 'Total page ' . $totalPage . ' inserted'
+                    ];
+                } else {
+                    $response = [
+                        'status' => 'successful',
+                        'message' => 'Null data'
+                    ];
                 }
             } else {
                 $resposne['message'] = 'Fail! ';
