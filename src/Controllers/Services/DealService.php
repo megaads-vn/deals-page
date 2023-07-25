@@ -134,42 +134,53 @@ class DealService extends BaseService
      * @return \Illuminate\Http\JsonResponse
      */
     public function dealMigration(Request $request) {
+        set_time_limit(86400);
         $resposne = $this->getDefaultStatus();
         try {
             $sourceTable = $request->get('source', NULL);
-            if (!empty($sourceTable)) {
-                $oldData = \DB::table($sourceTable)->get();
-                if (!empty($oldData)) {
-                    $countInsert = 0;
-                    foreach ($oldData as $oldItem) {
-                        $saleOff = 0;
-                        if ($oldItem->sale_price > 0 && $oldItem->sale_price < $oldItem->regular_price) {
-                            $saleOff = floor((($oldItem->regular_price - $oldItem->sale_price) / $oldItem->regular_price) * 100);
-                        }
-                        $insertNewItems = [
-                            "title" => $oldItem->title,
-                            "slug" => $oldItem->slug,
-                            "search_slug" => $oldItem->slug,
-                            "content" => $oldItem->description,
-                            "meta_description" => $oldItem->description,
-                            "type" => "DEAL",
-                            "image" => $oldItem->image_url,
-                            "expired_time" => $oldItem->expired_time,
-                            "price" => $oldItem->regular_price,
-                            "sale_price" => $oldItem->sale_price,
-                            "currency" => "USD",
-                            "affiliate_link" => $oldItem->url,
-                            "store_id" => $oldItem->store_id,
-                            "category_id" => $oldItem->category_id,
-                            "discount" => $saleOff,
-                            "manufacturer" => ""
-                        ];
-                        $insertId = $this->dealRepository->create($insertNewItems);
-                        if (!empty($insertId)) {
-                            $countInsert++;
-                            DealRelation::insert(["object_id" => $insertId, "target_id" => $oldItem->keypage_id]);
+            $destinationTable = $request->get('des', NULL);
+            if (!empty($sourceTable) && !empty($destinationTable)) {
+                $total = \DB::table($sourceTable)->count();
+                $perpage = 300;
+                $pageCount = ceil($total / $perpage);
+                for ($p = 0; $p < $pageCount; $p++) {
+                    $offset = $p * $perpage;
+                    $oldData = \DB::table($sourceTable)->limit($perpage)->offset($offset)->get();
+                    if (!empty($oldData) ) {
+                        foreach ($oldData as $oldItem) {
+                            $saleOff = 0;
+                            if ($oldItem->sale_price > 0 && $oldItem->sale_price < $oldItem->regular_price) {
+                                $saleOff = floor((($oldItem->regular_price - $oldItem->sale_price) / $oldItem->regular_price) * 100);
+                            }
+                            $insertNewItems = [
+                                "title" => $oldItem->title,
+                                "slug" => $oldItem->slug,
+                                "search_slug" => $oldItem->slug,
+                                "content" => $oldItem->description,
+                                "meta_description" => $oldItem->description,
+                                "type" => "DEAL",
+                                "image" => $oldItem->image_url,
+                                "expired_time" => $oldItem->expired_time,
+                                "price" => $oldItem->regular_price,
+                                "sale_price" => $oldItem->sale_price,
+                                "currency" => "USD",
+                                "affiliate_link" => $oldItem->url,
+                                "store_id" => $oldItem->store_id,
+                                "category_id" => $oldItem->category_id,
+                                "discount" => $saleOff,
+                                "manufacturer" => ""
+                            ];
+//                            $insertId = $this->dealRepository->create($insertNewItems);
+                            $insertId = \DB::table($destinationTable)->insertGetId($insertNewItems);
+                            if (!empty($insertId)) {
+                                DealRelation::insert(["object_id" => $insertId, "target_id" => $oldItem->keypage_id]);
+                            }
                         }
                     }
+                }
+                if (!empty($oldData)) {
+                    $countInsert = 0;
+
                     $resposne = $this->getSuccessStatus(["data" => $countInsert]);
                 }
             } else {
