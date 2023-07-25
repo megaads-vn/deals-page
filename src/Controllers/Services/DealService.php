@@ -147,7 +147,7 @@ class DealService extends BaseService
                 if ($request->has('store_id') && $request->get('store_id') != '') {
                     $sourceQuery->where('store_id', $request->get('store_id'));
                 }
-                $total = (clone $sourceQuery)->total();
+                $total = (clone $sourceQuery)->count();
                 if ($request->has('debug') && $request->get('debug') == 1) {
                     echo "<pre>";
                     print_r([
