@@ -391,7 +391,7 @@ class DealService extends BaseService
                             }
                         }
                     }
-                    sleep(6);
+                    sleep(2);
                 }
             }
         }
@@ -421,6 +421,7 @@ class DealService extends BaseService
         if (!empty($rawData['category'])) {
             $categoryIds = $this->findLocalCategory($rawData['category']);
         }
+
         $retVal = [
             "title" => $rawData["name"],
             "slug" => slugify($rawData["name"]),
@@ -443,7 +444,8 @@ class DealService extends BaseService
             "store_id" => $storeId,
             "store_tmp" => $rawData['manufacturer'],
             "category_id" => $categoryIds,
-            'manufacturer' => $brandName
+            'manufacturer' => $brandName,
+            'raw_data' => json_encode($rawData)
         ];
         return $retVal;
     }
