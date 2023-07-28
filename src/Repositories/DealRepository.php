@@ -289,7 +289,7 @@ class DealRepository extends BaseRepository
             }
 
             if (array_key_exists('order_by', $filters)) {
-                $orderByAttributes = explode('_', $filters['order_by']);
+                $orderByAttributes = explode('::', $filters['order_by']);
                 $sortOrder = $orderByAttributes[1];
                 $field = $orderByAttributes[0];
                 $query->orderBy($field, $sortOrder);

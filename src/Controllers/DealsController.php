@@ -70,7 +70,7 @@ class DealsController extends Controller {
                 'sale_price', 'discount', 'store_id',
                 'expire_time', 'origin_link', 'affiliate_link',
                 'create_time', 'modifier_name', 'modifier_id'],
-            'order_by' => 'discount_DESC'
+            'order_by' => 'discount::DESC'
         ];
         $retVal['brands'] = NULL;
         $retVal['stores'] = $this->getDealStore();
@@ -140,7 +140,7 @@ class DealsController extends Controller {
                 'sale_price', 'discount', 'store_id',
                 'expire_time', 'origin_link', 'affiliate_link',
                 'create_time', 'modifier_name', 'modifier_id'],
-            'order_by' => 'discount_DESC',
+            'order_by' => 'discount::DESC',
             'pageId' => 0,
             'pageSize' => 52
         ];
@@ -328,7 +328,7 @@ class DealsController extends Controller {
                 'sale_price', 'discount', 'store_id',
                 'expire_time', 'origin_link', 'affiliate_link',
                 'create_time', 'modifier_name', 'modifier_id'],
-            'order_by' => 'discount_DESC'
+            'order_by' => 'discount::DESC'
         ];
         $retVal['brands'] = NULL;
         $retVal['stores'] = $this->getDealStore();
@@ -604,13 +604,14 @@ class DealsController extends Controller {
         ];
         if (isset($filters['dealType'])) {
             if ($filters['dealType'] === 'code') {
-                $dealFiler['codeNotNull'] = true;
+//                $dealFiler['codeNotNull'] = true;
+                $dealFiler['order_by'] = 'sale_price::DESC';
             }
             if ($filters['dealType'] === 'offer') {
-                $dealFiler['order_by'] = 'discount_DESC';
+                $dealFiler['order_by'] = 'discount::DESC';
             }
             if ($filters['dealType'] === 'newest') {
-                $dealFiler['order_by'] = 'id_DESC';
+                $dealFiler['order_by'] = 'id::DESC';
             }
 
             if ($filters['dealType'] === 'price') {
