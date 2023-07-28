@@ -407,9 +407,14 @@ class DealService extends BaseService
     protected function buildInsertDealItem($rawData) {
         $saleOff = 0;
         $brandName = str_replace(['.com', '.co.uk', '.org'], '', $rawData['brand']);
-
-        $brandName = $this->convertCamelToSnake($brandName);
-        $storeId = $this->findLocalStore($brandName);
+        $advertiserName = $rawData['advertiserName'];
+        if (!empty($brandName)) {
+            $brandName = $this->convertCamelToSnake($brandName);
+            $storeId = $this->findLocalStore($brandName);
+        } else if (!empty($advertiserName)) {
+            $brandName = $advertiserName;
+            $storeId = $this->findLocalStore($advertiserName);
+        }
         if ($rawData['salePrice'] > 0 && $rawData['salePrice'] < $rawData['price']) {
             $saleOff = floor((($rawData['price'] - $rawData['salePrice']) / $rawData['price']) * 100);
         }
