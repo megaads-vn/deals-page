@@ -605,7 +605,7 @@ class DealsController extends Controller {
         if (isset($filters['dealType'])) {
             if ($filters['dealType'] === 'code') {
 //                $dealFiler['codeNotNull'] = true;
-                $dealFiler['order_by'] = 'sale_price::DESC';
+                $dealFiler['order_by'] = 'price::ASC';
             }
             if ($filters['dealType'] === 'offer') {
                 $dealFiler['order_by'] = 'discount::DESC';
