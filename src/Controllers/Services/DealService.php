@@ -408,7 +408,7 @@ class DealService extends BaseService
         $saleOff = 0;
         $brandName = str_replace(['.com', '.co.uk', '.org'], '', $rawData['brand']);
         $advertiserName = $rawData['advertiserName'];
-        if (!empty($brandName)) {
+        if (!empty($brandName) && !empty($rawData['brand'])) {
             $brandName = $this->convertCamelToSnake($brandName);
             $storeId = $this->findLocalStore($brandName);
         } else if (!empty($advertiserName)) {
