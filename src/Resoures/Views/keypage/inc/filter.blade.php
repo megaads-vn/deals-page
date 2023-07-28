@@ -16,7 +16,7 @@
                    {{ isset($dealFilterActivated) && $dealFilterActivated == 'code' ? 'checked' : '' }}
                    name="deal-filter">
             <span class="deal-filter-item" type="button">
-                                            Code
+                                            {{ isset($codeText) ? $codeText : 'Code'  }}
                                         </span>
         </label>
         <label class="deal-filter-label" for="deal-offer">

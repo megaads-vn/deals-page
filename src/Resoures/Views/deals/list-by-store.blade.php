@@ -90,7 +90,7 @@
                             <div class="widget-title">
                                 {{ sprintf('Top %s Deals (%s)', $store->title, date("M d, Y")) }}
                             </div>
-                            @include('deals-page::keypage.inc.filter')
+                            @include('deals-page::keypage.inc.filter', ['codeText' => 'Best Price'])
                             @if (!empty($listDeals))
                                 <div id="deal-items-wrapper">
                                     @include('deals-page::common.widgets.list-deal', ['listDeal' => $listDeals, 'store' => $store, 'date' => '(' .date('d. M Y'). ')'])

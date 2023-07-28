@@ -23,10 +23,10 @@
         <div class="deal-item-footer">
             <div class="deal-item-price-box">
                 @if ($item->discount <= 0)
-                    <span class="sale-price">{{ $item->currency_code . "" . $item->price }}</span>
+                    <span class="sale-price">{{ $item->currency_code . "" . number_format($item->price, 2, '.', ',') }}</span>
                 @elseif ($item->discount > 0)
-                    <span class="sale-price">{{ $item->currency_code . "" . $item->sale_price }}</span>
-                    <span class="hight-price">{{ $item->currency_code . "" . $item->price }}</span>
+                    <span class="sale-price">{{ $item->currency_code . "" . number_format($item->sale_price, 2, '.', ',') }}</span>
+                    <span class="hight-price">{{ $item->currency_code . "" . number_format($item->price, 2, '.', ',') }}</span>
                 @endif
             </div>
             <div class="deal-item-footer-box">
