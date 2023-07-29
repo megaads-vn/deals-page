@@ -266,6 +266,6 @@ if (!function_exists('reSizeImage')) {
 
 if (!function_exists('getDealStore')) {
     function getDealStore($storeId) {
-        return \Megaads\DealsPage\Models\Deal::where('store_id', $storeId)->limit(5)->get();
+        return \Megaads\DealsPage\Models\Deal::where('store_id', $storeId)->where('status', \Megaads\DealsPage\Models\Deal::STATUS_ACTIVE)->limit(5)->get();
     }
 }
