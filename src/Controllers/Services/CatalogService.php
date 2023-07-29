@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Megaads\DealsPage\Jobs\CatalogJob;
+use Megaads\DealsPage\Models\Catalog;
 use Megaads\DealsPage\Repositories\ApiRequestRepository;
 use Megaads\DealsPage\Repositories\CatalogRepository;
 
@@ -36,26 +37,38 @@ class CatalogService extends BaseService
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkCreate(Request $request) {
+    public function bulkCreate() {
         $response = $this->getDefaultStatus();
-        $pageId = $request->get('pageId', 1);
+        $totalInserted = $this->recursiveCreateCatalog(1);
+        if ($totalInserted > 0) {
+            $response = $this->getSuccessStatus();
+            $response['message'] = 'Inserted ' . $totalInserted;
+        }
+        return Response::json($response);
+    }
+
+    protected function recursiveCreateCatalog($pageId, $total = 0)
+    {
+        if ($pageId == -1) {
+            return $total;
+        }
         $result = $this->apiRequestRepository->readCatalogs($pageId);
-        \Log::info('CATALOG_BULK: PAGE[' . $pageId . ']:: COUNT[' . count($result)  . ']');
         if (!empty($result)) {
             $insertArray = [];
             foreach ($result as $item) {
-                $insertArray[] = $this->buildInsertCatalogs($item);
+                $exists = Catalog::where('cid', $item['cid'])->first();
+                if (empty($exists)) {
+                    $insertArray[] = $this->buildInsertCatalogs($item);
+                }
             }
-            $insertRs = $this->catalogRepository->bulkCreate($insertArray);
-            if ($insertRs) {
-                $pageId += 1;
-                $runAt = Carbon::now()->addMinutes(1);
-                $job = (new CatalogJob($pageId))->delay($runAt);
-                $this->dispatch($job);
-                $response = $this->getSuccessStatus();
-            }
+            $this->catalogRepository->bulkCreate($insertArray);
+            $pageId += 1;
+            $total += count($insertArray);
+            return $this->recursiveCreateCatalog($pageId, $total);
+        } else {
+            $pageId = -1;
+            return $total;
         }
-        return Response::json($response);
     }
 
     /**

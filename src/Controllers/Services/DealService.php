@@ -355,7 +355,7 @@ class DealService extends BaseService
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function crawlDeals(Request  $request)
+    public function crawlDeals(Request $request)
     {
         set_time_limit(84600);
         $catalogQuery = Catalog::query();
