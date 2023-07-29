@@ -91,21 +91,26 @@ class KeywordController extends Controller {
             $allParams = \Request::all();
             if (isset($allParams['dealType'])) {
                 if ($allParams['dealType'] === 'code') {
-                    $dealFiler['codeNotNull'] = true;
+//                    $dealFiler['codeNotNull'] = true;
+                    $dealFiler['order_by'] = 'price::ASC';
                     $filterActivated = 'code';
                 }
                 if ($allParams['dealType'] === 'offer') {
-                    $dealFiler['order_by'] = 'price_DESC';
+                    $dealFiler['order_by'] = 'discount::DESC';
                     $filterActivated = 'offer';
                 }
                 if ($allParams['dealType'] === 'newest') {
-                    $dealFiler['order_by'] = 'id_DESC';
+                    $dealFiler['order_by'] = 'id::DESC';
                     $filterActivated = 'newest';
                 }
 
                 if ($allParams['dealType'] === 'price') {
-                    $dealFiler['priceFrom'] = $allParams['minPrice'];
-                    $dealFiler['priceTo'] = $allParams['maxPrice'];
+                    if ((double) $allParams['minPrice'] > 0) {
+                        $dealFiler['priceFrom'] = (double) $allParams['minPrice'];
+                    }
+                    if ((double) $allParams['maxPrice'] > 0) {
+                        $dealFiler['priceTo'] = (double) $allParams['maxPrice'];
+                    }
                     $filterActivated = 'price';
                     View::share('priceRange', [$allParams['minPrice'], $allParams['maxPrice']]);
                 }

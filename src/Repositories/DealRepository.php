@@ -259,6 +259,11 @@ class DealRepository extends BaseRepository
             if (array_key_exists('status', $filters)) {
                 $query->where('status', $filters['status']);
             }
+
+            if (!array_key_exists('statuses', $filters) && !array_key_exists('status', $filters)) {
+                $query->where('status', Deal::STATUS_ACTIVE);
+            }
+
             if (array_key_exists('createTimeFrom', $filters)) {
                 $createFrom = preg_replace('/\//i', '-', $filters['createTimeFrom']);
                 $createFrom = new \DateTime($createFrom . ' 00:00:00');
