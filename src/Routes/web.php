@@ -17,5 +17,8 @@ Route::group([
     Route::get("/store/{slug}/deals", ['as' => 'frontend::store::listDeal', 'uses' => "DealsController@storeDeal"]);
     Route::post("/store/{slug}/deals", ['as' => 'frontend::store::listDeal', 'uses' => "DealsController@storeDeal"]);
     Route::get("/stores/deals/load-more", ["as" => 'frontend::store::loadmore::deals', 'uses' => "DealsController@loadMoreDeal"]);
-
+    Route::get("/coupon-category/{slug}/deals", ["as" => 'frontend::category::deals', 'uses' => "DealsController@categoryDeals"]);
+    Route::post("/coupon-category/{slug}/deals", ['as' => 'frontend::category::deals', 'uses' => "DealsController@categoryDeals"]);
+    Route::get("/category-store/deals/load-more", ["as" => 'frontend::category::loadmore::deals', 'uses' => "DealsController@loadMoreDeal"]);
+    Route::get("/deals/category/build", "DealsController@buildDealCategory");
 });

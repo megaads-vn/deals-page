@@ -266,6 +266,74 @@ if (!function_exists('reSizeImage')) {
 
 if (!function_exists('getDealStore')) {
     function getDealStore($storeId) {
-        return \Megaads\DealsPage\Models\Deal::where('store_id', $storeId)->where('status', \Megaads\DealsPage\Models\Deal::STATUS_ACTIVE)->limit(5)->get();
+        return \Megaads\DealsPage\Models\Deal::where('store_id', $storeId)
+                        ->where('status', \Megaads\DealsPage\Models\Deal::STATUS_ACTIVE)
+                        ->orderBy('id', 'DESC')
+                        ->limit(5)
+                        ->get();
+    }
+}
+
+if (!function_exists('getDealCategory')) {
+    function getDealCategory($categoryId) {
+        return \Megaads\DealsPage\Models\Deal::from('deals as d')->join('deal_n_category as dc', 'dc.deal_id', '=', 'd.id')
+                        ->where('dc.category_id', $categoryId)
+                        ->where('d.status', \Megaads\DealsPage\Models\Deal::STATUS_ACTIVE)
+                        ->orderBy('d.id', 'DESC')
+                        ->limit(5)
+                        ->get();
+    }
+}
+
+if (!function_exists('getRelatedStore')) {
+    function getRelatedStore($filters = []) {
+        $result = new stdClass;
+        $result->stores = NULL;
+        $result->hasNextPage = false;
+        $pageSize = 12;
+        $params = [
+            'status' => 'enable',
+            'orderBy' => 'couponCountDesc',
+            'pageSize' => $pageSize
+        ];
+        if (isset($filters['categoryId']) && $filters['categoryId'] > 0) {
+            $params['categoryId'] = [$filters['categoryId']];
+        }
+        if (isset($filters['relatedStore']) && $filters['relatedStore'] > 0) {
+            $params['relatedStore'] = $filters['relatedStore'];
+        }
+        if (isset($filters['storeId']) && $filters['storeId'] > 0) {
+            $getCategories = \App\Utils\Utils::getDataInternalRequests('/service/store/find', ['storeCategory' => $filters['storeId']]);
+            if (!empty($getCategories)) {
+                $item = $getCategories[0];
+                $params['categoryId'] = [$item['id']];
+            } else {
+                return $result;
+            }
+        }
+        $dataResponse = \App\Utils\Utils::getInternalRequests('/service/store/find', $params);
+        if(isset($dataResponse['result']['data'])){
+            $result->stores = $dataResponse['result']['data'];
+            if($dataResponse['result']['pagesCount'] <= 1) $result->hasNextPage = false;
+        } else {
+            $result = getRelatedStore();
+        }
+
+        return $result;
+    }
+}
+
+if (!function_exists('getCustomRoute')) {
+    function getCustomRoute($routeType) {
+        $routeName = 'frontend::store::listByStore';
+        switch ($routeType) {
+            case 'categoryDeal':
+                    $routeName = 'frontend::category::deals';
+                break;
+            case 'storeDeal':
+                    $routeName = 'frontend::store::listDeal';
+                break;
+        }
+        return $routeName;
     }
 }
