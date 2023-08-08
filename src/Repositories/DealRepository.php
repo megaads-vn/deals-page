@@ -177,39 +177,48 @@ class DealRepository extends BaseRepository
         if (array_key_exists('advSearch', $filters)) {
             if (array_key_exists('queryStr', $filters['advSearch'])) {
                 $strQuery = $filters['advSearch']['queryStr'];
-                $strQuery = preg_replace('/\[\[sortBy:(.*?)\]\]/i', '', $strQuery);
-                $strQuery = preg_replace('/\[\[price:(.*?)\]\]/i', '', $strQuery);
-                $strQuery = explode('|', $strQuery);
-                foreach ($strQuery as $item) {
-                    preg_match('/(\w+)(\+|\-)(.*)/i', $item, $matches);
-                    if ($matches) {
-                        $field = $matches[1];
-                        $operation = $matches[2];
-                        if ($operation == '+') {
-                            $operation = 'LIKE';
-                        } else if ($operation == '-') {
-                            $operation = 'NOT LIKE';
-                        }
-                        $value = '%' . $matches[3] . '%';
-                        $query->orWhere($field, $operation, $value);
+
+                if (preg_match('/text~([(\w+)+\s+]+)/i', $strQuery, $matches) && isset($matches[1])) {
+                    $strText = $matches[1];
+                    $query->where(function($q) use ($strText) {
+                        $q->where('title', 'LIKE', "%$strText%")
+                            ->orWhere('content', 'LIKE', "%$strText%");
+                    });
+                }
+                if (preg_match('/exc_keyword=\[(.*?)\]/i', $strQuery, $matches) && isset($matches[1])) {
+                    $excludeKeywords = json_decode("[$matches[1]]");
+                    if (count($excludeKeywords) > 0) {
+                        $strExcludeKeyword = join("|", $excludeKeywords);
+                        $query->where(function($q) use ($strExcludeKeyword) {
+                            $q->where('title', 'not regexp', "($strExcludeKeyword)")
+                                ->where('content', 'not regexp', "($strExcludeKeyword)");
+                        });
                     }
                 }
-                preg_match('/\[\[sortBy:(.*?)\]\]/i', $filters['advSearch']['queryStr'], $matchSortBy);
-                if (isset($matchSortBy[1])) {
-                    $sortBy = explode('_', $matchSortBy[1]);
-                    $query->orderBy($sortBy[0], $sortBy[1]);
+                if (preg_match('/inc_keyword=\[(.*?)\]/i', $strQuery, $matches) && isset($matches[1])) {
+                    $includeKeywords = json_decode("[$matches[1]]");
+                    if (count($includeKeywords) > 0) {
+                        $strIncKeywords = join("|", $includeKeywords);
+                        $query->where(function($q) use ($strIncKeywords) {
+                            $q->where('title', 'regexp', "($strIncKeywords)")
+                                ->orWhere('content', 'regexp', "($strIncKeywords)");
+                        });
+                    }
                 }
-               
-                preg_match('/\[\[price:(.*?)\]\]/i', $filters['advSearch']['queryStr'], $matchPrice);
-                if (isset($matchPrice[1])) {
-                    $priceFilter = json_decode($matchPrice[1]);
-                    $operator = $priceFilter->operator;
-                    $value = $priceFilter->value;
-                    $query->where('price', $operator, $value);
+                if (preg_match('/sort_price=\{(.*?)\}/i', $strQuery, $matches) && isset($matches[1])) {
+                    $filterPrice = json_decode('{' . $matches[1] . '}');
+                    if (!empty($filterPrice)) {
+                        $query->where('price', $filterPrice->operator, $filterPrice->value);
+                    }
                 }
-                if (isset($filters['advSearch']['storeId'])) {
-                    $query->where('store_id', $filters['advSearch']['storeId']);
-                }
+
+            }
+            if (isset($filters['advSearch']['storeId'])) {
+                $query->where('store_id', $filters['advSearch']['storeId']);
+            }
+            if (isset($filters['advSearch']['sortBy'])) {
+                $orderByAttributes = explode('::', $filters['advSearch']['sortBy']);
+                $query->orderBy($orderByAttributes[0], $orderByAttributes[1]);
             }
         }
         else

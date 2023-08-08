@@ -544,8 +544,17 @@ span[ itemprop="ratingCount"] {
 .is-mobile .store-img img {
 	width: calc(300px + (23 - 300) * ((100vw - 300px)/ (1920 - 300)));
 }
+#deal-filter-form {
+	position: sticky;
+	top: 83px;
+	background: #fff;
+	z-index: 1000;
+}
 @media (max-width: 760px) {
     .openfilter  {
 		display: none;
+	}
+	#deal-filter-form {
+		top: 90px;
 	}
 }

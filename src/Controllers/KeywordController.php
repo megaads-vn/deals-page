@@ -139,7 +139,6 @@ class KeywordController extends Controller {
                 $totalDeal = $getDeals['data'];
             }
         }
-        $this->dealImageProcessing($dealResult);
         $retVal['keyword'] = $keyword;
         $defaultMetaTitle = getDefaultMeta('keyword', 'metaTitle');
         $defaultMetaTitle = str_replace("{text}", $keyword['keyword'], $defaultMetaTitle);
