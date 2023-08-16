@@ -177,6 +177,7 @@ class DealRepository extends BaseRepository
         if (array_key_exists('advSearch', $filters)) {
             if (array_key_exists('queryStr', $filters['advSearch'])) {
                 $strQuery = $filters['advSearch']['queryStr'];
+                $strQuery = preg_replace('/title\+(.*)$/i', 'text~$1', $strQuery);
 
                 if (preg_match('/text~([(\w+)+\s+]+)/i', $strQuery, $matches) && isset($matches[1])) {
                     $strText = $matches[1];
@@ -302,14 +303,15 @@ class DealRepository extends BaseRepository
                 $query->whereBetween('discount', [$filters['discountMoreThan'], $filters['discountLessThan']]);
             }
 
-            if (array_key_exists('order_by', $filters)) {
-                $orderByAttributes = explode('::', $filters['order_by']);
-                $sortOrder = $orderByAttributes[1];
-                $field = $orderByAttributes[0];
-                $query->orderBy($field, $sortOrder);
-            } else {
-                $query->orderBy('deals.id', 'DESC');
-            }
+        }
+        
+        if (array_key_exists('order_by', $filters)) {
+            $orderByAttributes = explode('::', $filters['order_by']);
+            $sortOrder = $orderByAttributes[1];
+            $field = $orderByAttributes[0];
+            $query->orderBy($field, $sortOrder);
+        } else {
+            $query->orderBy('deals.id', 'DESC');
         }
 
         return $query;
