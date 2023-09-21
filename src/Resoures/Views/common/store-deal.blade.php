@@ -16,5 +16,6 @@
     </div>
 </div>
 <link rel="stylesheet" href="{{ asset('/vendor/deals-page/css/deal.css?v=' . time()) }}">
+<script src="{{ asset('/vendor/deals-page/js/deal-common.js?v=' . time()) }}"></script>
 @endif
 @endif

@@ -180,7 +180,7 @@ class DealsController extends Controller {
     public function goUrl($slug)
     {
         $query = Deal::query();
-        if (is_string($slug)) {
+        if (!is_numeric($slug)) {
             $query->where('slug', $slug);
         } else {
             $query->where('id', $slug);

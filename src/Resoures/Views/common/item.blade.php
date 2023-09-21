@@ -1,6 +1,6 @@
 @php $showStore = isset($showStore) ? $showStore : true; @endphp
 <div class="deal-item-wrapper">
-    <a class="deal-item-image" rel="nofollow" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" rel="nofollow">
+    <a class="deal-item-image js-go-deals" rel="nofollow" href="javascript:void(0);" data-id="{{ $item->id }}" rel="nofollow">
         @if ($item->discount > 0)
         <span class="deal-tag">
             <span>{{ $item->discount }}%</span>
@@ -14,7 +14,7 @@
         @endif
     </a>
     <div class="deal-item-info">
-        <a target="_blank" rel="nofollow" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}" class="box-top">
+        <a target="_blank" rel="nofollow" href="javascript:void(0);" data-id="{{ $item->id }}" class="box-top js-go-deals">
             <h3 class="deal-item-header">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
@@ -45,7 +45,7 @@
                 </div>
             </div>
             <div class="deal-item-action">
-                <a class="deal-item-button" rel="nofollow" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}">Shop Now</a>
+                <a class="deal-item-button js-go-deals" rel="nofollow" href="javascript:void(0);" data-id="{{ $item->id }}">Shop Now</a>
             </div>
         </div>
     </div>
