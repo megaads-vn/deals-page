@@ -368,7 +368,7 @@ class DealsController extends Controller {
         $retVal = [];
         $store = $this->getStore($slug);
         if (empty($store)) {
-            return abort(404);
+            return redirect(route('frontend::store::listByStore', ['slug' => $slug]));
         }
 
         $dataCoupon = NULL;
