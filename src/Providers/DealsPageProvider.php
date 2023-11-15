@@ -11,7 +11,10 @@ use Megaads\DealsPage\Commands\MigrationCreate;
 use Megaads\DealsPage\Middlewares\DealPageAuth;
 use Megaads\DealsPage\Middlewares\DealPageCors;
 use Megaads\DealsPage\Repositories\CatalogRepository;
+use Megaads\DealsPage\Repositories\CategoryRepository;
+use Megaads\DealsPage\Repositories\ConfigRepository;
 use Megaads\DealsPage\Repositories\DealRepository;
+use Megaads\DealsPage\Repositories\StoreRepository;
 use Megaads\DealsPage\Validators\CustomValidator;
 
 class DealsPageProvider extends ServiceProvider
@@ -102,6 +105,15 @@ class DealsPageProvider extends ServiceProvider
         });
         $this->app->singleton('CatalogRepository', function($app) {
             return new CatalogRepository();
+        });
+        $this->app->singleton('CategoryRepository', function($app) {
+            return new CategoryRepository();
+        });
+        $this->app->singleton('ConfigRepository', function($app) {
+            return new ConfigRepository();
+        });
+        $this->app->singleton('StoreRepository', function($app) {
+            return new StoreRepository();
         });
     }
 

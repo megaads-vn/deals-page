@@ -2,6 +2,7 @@
 
 namespace Megaads\DealsPage\Repositories;
 
+use Megaads\DealsPage\Models\Config;
 use Megaads\DealsPage\Models\Deal;
 use Megaads\DealsPage\Models\DealCategory;
 
@@ -315,6 +316,33 @@ class DealRepository extends BaseRepository
         }
 
         return $query;
+    }
+
+    public function getList() {
+        $deals = Deal::select(['id', 'title', 'slug', 'price', 'sale_price', 'image', 'expire_time', 'store_id', 'category_id'])
+        ->orderBy('id', 'desc')
+        ->take(12)
+        ->get();
+        foreach ($deals as $item) {
+            $item->store_name = $item->store->title ?? '';
+            $item->store_slug = $item->store->slug ?? '';
+            $item->category_name = $item->category->title ?? '';
+            $item->category_slug = $item->category->slug ?? '';
+        }
+        
+        return $deals;
+    }
+
+    public function getListFromConfig($key){
+        $config = Config::where('key', $key)->first();
+        $deals = [];
+        if ($config) {
+            $dealIds = json_decode($config->value);
+
+            $deals = Deal::select(['id', 'title', 'slug'])->whereIn('id', $dealIds)->get();
+        }
+
+        return $deals;
     }
 
 }

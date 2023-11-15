@@ -17,12 +17,15 @@ use Megaads\DealsPage\Models\Store;
 use Megaads\DealsPage\Models\DealRelation;
 use App\Utils\Utils;
 use Illuminate\Support\Facades\Input;
+use Megaads\DealsPage\Repositories\CategoryRepository;
 use Megaads\DealsPage\Repositories\DealRepository;
+use Megaads\DealsPage\Repositories\StoreRepository;
 use PHPExcel_Cell;
 use PHPExcel_IOFactory;
 
 class DealsController extends Controller {
 
+    const test = 1111;
     /**
      * Create a new controller instance.
      *
@@ -31,12 +34,16 @@ class DealsController extends Controller {
     private $dealPageTable;
     private $dealPageColumns;
     protected $dealRepository;
+    protected $categoryRepository;
+    protected $storeRepository;
 
     public function __construct() {
         parent::__construct();
         $this->dealPageTable = \Config::get('deals-page.deal_related_page.name', 'store_n_keyword');
         $this->dealPageColumns = \Config::get('deals-page.deal_related_page.name', ['id', 'keyword']);
         $this->dealRepository = new DealRepository();
+        $this->categoryRepository = new CategoryRepository();
+        $this->storeRepository = new StoreRepository();
         view()->share('allDealTitle', 'All Deals');
     }
 
@@ -63,39 +70,21 @@ class DealsController extends Controller {
         return \View::make('deals-page::deals.index', $retVal);
     }
 
-
     public function allDeals() {
-        return redirect('/');
-        $retVal = [];
-        $dealFilter = [
-            'columns' => ['id', 'title', 'slug',
-                'image', 'content', 'price',
-                'sale_price', 'discount', 'store_id',
-                'expire_time', 'origin_link', 'affiliate_link',
-                'create_time', 'modifier_name', 'modifier_id'],
-            'order_by' => 'discount::DESC'
-        ];
-        $retVal['brands'] = NULL;
-        $retVal['stores'] = $this->getDealStore();
-        $findResult = $this->dealRepository->read($dealFilter);
-        if ($findResult['status'] = 'successful') {
-            $retVal['deals'] = $findResult['data'];
-            $dealFilter['metrics'] = 'count';
-            $getTotal = $this->dealRepository->read($dealFilter);
-            $totalCount  = 0;
-            $pageCount = 0;
-            if (isset($getTotal['data'])) {
-                $getTotal = $getTotal['data'];
-                $pageCount = ceil($getTotal / $findResult['pageSize']);
-            }
-            $retVal['pagination'] = [
-                'page_count' => $pageCount,
-                'total_count' => $totalCount,
-            ];
-        }
-        $retVal['title'] = 'All Deals';
-        $retVal['meta']['title'] = 'All Deals';
-        return view('deals-page::deals.alldeals', $retVal);
+        $keyConfig = 'top.product.search';
+        $categories = $this->categoryRepository->getListCategory();
+        $deals = $this->dealRepository->getList();
+        $stories = $this->storeRepository->getListStore();
+        $dealsTopSearch = $this->dealRepository->getListFromConfig($keyConfig);
+        $storiesReview = $this->storeRepository->getListStoreOfReview();
+
+        return view('deals-page::deals.all',[
+            'categories' => $categories,
+            'deals' => $deals,
+            'stories' => $stories,
+            'dealsTopSearch' => $dealsTopSearch,
+            'storiesReview' => $storiesReview,
+        ]);
     }
 
     public function dealDetail($itemId, \Request  $request) {
