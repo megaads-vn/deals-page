@@ -387,6 +387,10 @@ class DealsController extends Controller {
         if (count($dealResult['data']) <= 0 && (!isset($dealFilters['dealType']) || (isset($dealFilters['dealType']) && $dealFilters['dealType'] == 'all'))) {
             return redirect(route('frontend::store::listByStore', ['slug' => $store->slug]));
         }
+
+        $totalDealHidden = $dealResult['total_deal'] - $dealResult['per_page'] * $dealResult['current_page'];
+
+        $retVal['totalDealHidden'] = $totalDealHidden > 0 ? $totalDealHidden : 0;
         $retVal['listDeals'] = $dealResult['data'];
         $retVal['hasNextPage'] = ($dealResult['current_page'] < $dealResult['page_count']) ? true : false;
         $retVal['currentPage'] = $dealResult['current_page'];
@@ -434,9 +438,14 @@ class DealsController extends Controller {
         ];
         $filters = Input::all();
         $result = $this->getDealLists($filters);
+
+        $totalItemHidden = $result['total_deal'] - ($result['current_page'] * $result['per_page']);
+        
         if (!empty($result['data'])) {
             $response = [
                 'status' => 'successful',
+                'total_items_display' => $result['current_page'] * $result['per_page'],
+                'total_items_hidden' => $totalItemHidden > 0 ? $totalItemHidden : 0,
                 'has_next' => ($result['current_page'] < $result['page_count']) ? true : false,
                 'current_page' => $result['current_page'],
                 'data' => view('deals-page::common.widgets.list-deal', ['listDeal' => $result['data']])->render()
@@ -801,7 +810,8 @@ class DealsController extends Controller {
             'per_page' => $perPage,
             'page_count' => ceil($totalDeal / $perPage),
             'current_page' => $pageId + 1,
-            'data' => $dealResult
+            'data' => $dealResult,
+            'total_deal' => $totalDeal
         ];
         return $result;
     }

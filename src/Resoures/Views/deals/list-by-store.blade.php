@@ -98,15 +98,19 @@
                             @endif
                             @if (isset($hasNextPage) && $hasNextPage)
                             <div class="view-more-alldeal">
-                                <a href="" id="js-view-more-deals" class="view-more-alldeal-link" onclick="loadmoreDeals(event);">
-                                    {{ sprintf('Load More %s Products', $store->title) }}
+                                <a href="" id="js-view-more-deals" class="btn btn-load-more view-more-alldeal-link" onclick="loadmoreDeals(event);">
+                                    {{ sprintf('Load More %s Products', count($listDeals) . '/'. $totalDealHidden) }}
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16"> <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/> </svg>
                                     <input type="hidden" id="deal-current-id" value="{{ $currentPage }}" />
                                 </a>
                             </div>
                             @endif
                         </div>
-                        @include('frontend.common.widgets.related-store', ['storeId' => $store->id, 'storeRelated' => $store->relatedTerms])
+                        @include('frontend.common.widgets.related-store', [
+                            'storeId' => $store->id,
+                            'storeRelated' => $store->relatedTerms,
+                            'favoriteRelatedStoresClass' => 'favorite-related-stores-slide'
+                        ])
                         @if (isset($listCoupon) && !empty($listCoupon))
                             @include('frontend.common.widgets.list-coupon', ['coupons' => $listCoupon['result']['data'], 'store' => $store->title, 'date' => '(' .date('M d, Y'). ')', 'recordsCount' => $listCoupon['result']['recordsCount']])
                             <div class="view-more-alldeal">
@@ -125,8 +129,18 @@
                                     'store' => json_decode(json_encode($store), true),
                                     'showRating' => true,
                                     'hideReview' =>  true,
+                                    'hideDeals' =>  true,
                                     'customStyle' => 'text-align:center'
                                     ])
+
+                        @include('frontend.common.widgets.related-store', [
+                            'widgetTitle' => 'Similar Stores',
+                            'storeId' => $store->id,
+                            'storeRelated' => $store->relatedTerms,
+                            'showRating' => true,
+                            'isRatingStore' => true,
+                            'favoriteRelatedStoresClass' => 'favorite-related-stores-similar'
+                            ])
                         <?= Adsense::display(['divClass' => 'section-top', 'adsenseStyle' => 'width: 285px; height: 216px;']) ?>
                     </div>
                     <div class="clearfix"></div>
@@ -148,7 +162,7 @@
         var filterType = '{{ $dealFilterActivated }}';
 
         document.addEventListener("DOMContentLoaded", function(event) {
-            $('.favorite-related-stores').slick({
+            $('.favorite-related-stores-slide').slick({
                 slidesToShow: 6,
                 slidesToScroll: 6,
                 dots: false,

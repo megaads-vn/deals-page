@@ -80,12 +80,13 @@
                         @include('deals-page::common.widgets.popular-categories', [
                                               'dataItems' => $similarSaleCate,
                                               'route' => 'frontend::category::deals',
-                                              'widgetTitle' => 'Similar Cate Sale'
+                                              'widgetTitle' => sprintf('Similar %s Sale', $category->title)
                                               ])
                         @include('frontend.common.widgets.contact-info', [
                                     'store' => json_decode(json_encode($category), true),
                                     'showRating' => true,
                                     'hideReview' =>  true,
+                                    'hideDeals' =>  true,
                                     'customStyle' => 'text-align:center'
                                     ])
                         <?= Adsense::display(['divClass' => 'section-top', 'adsenseStyle' => 'width: 285px; height: 216px;']) ?>

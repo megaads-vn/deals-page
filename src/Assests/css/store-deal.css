@@ -174,7 +174,7 @@
 
 .view-more-alldeal {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
     padding: 4px 0;
 }
@@ -186,6 +186,12 @@
     align-items: center;
     gap: 4px;
     grid-gap: 4px;
+}
+
+.btn-load-more {
+    background: #337ab7;
+    color: #fff;
+    padding: 12px 12px;
 }
 
 @media (max-width: 990px) {
