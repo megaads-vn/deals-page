@@ -109,5 +109,14 @@ use App\Utils\Utils;
                 window.open(`${originUrl}/go-deal/${itemId}`);
             }
         });
+
+        window.addEventListener('load', function () {
+            var categoryImages = document.querySelectorAll('.category-image');
+            categoryImages.forEach(function (image) {
+                if ((typeof image.naturalWidth !== "undefined" && image.naturalWidth === 0) || image.readyState === 'uninitialized') {
+                    image.setAttribute('src', '/images/noimage.png?v=' + <?= Config::get('app.version'); ?>);
+                }
+            });
+        });
 </script>
 @endsection
