@@ -2,6 +2,7 @@
 
 namespace Megaads\DealsPage\Repositories;
 
+use Illuminate\Support\Facades\DB;
 use Megaads\DealsPage\Models\Config;
 use Megaads\DealsPage\Models\Deal;
 use Megaads\DealsPage\Models\DealCategory;
@@ -333,7 +334,7 @@ class DealRepository extends BaseRepository
         return $deals;
     }
 
-    public function getListFromConfig($key){
+    public function getListFromConfig($key) {
         $config = Config::where('key', $key)->first();
         $deals = [];
         if ($config) {
@@ -345,4 +346,7 @@ class DealRepository extends BaseRepository
         return $deals;
     }
 
+    public function getTotalDealActive() {
+        return DB::table('deals')->where('status', Deal::STATUS_ACTIVE)->count();
+    }
 }

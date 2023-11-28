@@ -18,7 +18,7 @@ use App\Utils\Utils;
                 </div>
                 <div class="viewstore-col col-sm-10 about-store">
                     <h1>
-                        <span class="store-subtitle">Dell XPS $150 Coupon 2023: 10 OFF Coupon &amp; Deals</span>
+                        <span class="store-subtitle">All {{ $totalDeals }} Products on Sale</span>
                     </h1>
                     <div style="clear: both"></div>
                     <div class="is-desktop" style="margin-bottom: 15px; position: relative; clear: both;">

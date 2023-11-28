@@ -77,6 +77,7 @@ class DealsController extends Controller {
         $stories = $this->storeRepository->getListStore();
         $dealsTopSearch = $this->dealRepository->getListFromConfig($keyConfig);
         $storiesReview = $this->storeRepository->getListStoreOfReview();
+        $totalDeals = $this->dealRepository->getTotalDealActive();
 
         return view('deals-page::deals.all',[
             'categories' => $categories,
@@ -84,6 +85,7 @@ class DealsController extends Controller {
             'stories' => $stories,
             'dealsTopSearch' => $dealsTopSearch,
             'storiesReview' => $storiesReview,
+            'totalDeals' => $totalDeals,
         ]);
     }
 
