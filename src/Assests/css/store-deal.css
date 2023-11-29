@@ -26,6 +26,105 @@
     position: relative;
 }
 
+#relatedStore.favorite-related-stores-similar {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    background-color: #fff;
+    border: solid 0.5px #e1e1e1;
+    border-radius: 5px;
+}
+
+#relatedStore.favorite-related-stores-similar .related-item {
+    padding: 12px 16px;
+}
+
+#relatedStore.favorite-related-stores-similar .related-item:hover{
+	background: #d5d5d536;
+}
+
+#relatedStore.favorite-related-stores-similar .related-item:not(:last-child){
+	border-bottom: solid 0.5px #e1e1e1;
+}
+
+#relatedStore.favorite-related-stores-similar .related-link {
+    display: grid;
+    grid-template-columns: 64px auto;
+    grid-gap: 10px;
+    padding: 0;
+}
+
+#relatedStore.favorite-related-stores-similar .related-link:hover .store-title-similar,
+#relatedStore.favorite-related-stores-similar .related-link:hover .rating-reviews {
+    color: #337abe !important;
+}
+
+#relatedStore.favorite-related-stores-similar .related-title {
+    display: flex;
+    flex-flow: column;
+}
+
+#relatedStore.favorite-related-stores-similar .store-title-similar {
+	margin: 0 0 3px 0;
+    color: #333;
+    font-weight: 500;
+}
+
+#relatedStore.favorite-related-stores-similar .rating-reviews{
+	font-size: 14px;
+    color: #333;
+}
+
+#relatedStore.favorite-related-stores-similar .related-image img {
+    width: 86%;
+    height: 86%;
+    object-fit: contain;
+    object-position: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 0% !important;
+    transform: translate(-50%, -50%);
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+#relatedStore.favorite-related-stores-similar .review-rating {
+	display: flex;
+    justify-content: flex-end;
+    flex-direction: row-reverse;
+    gap: 3px;
+    align-items: center;
+    margin: 2px 0;
+}
+
+#relatedStore.favorite-related-stores-similar .review-rating-item.active,
+#relatedStore.favorite-related-stores-similar .review-rating-item.active ~ .review-rating-item {
+    background-color: #ffbc59;
+}
+
+#relatedStore.favorite-related-stores-similar .review-rating-item {
+    width: 15px;
+    min-width: 15px;
+    height: 20px;
+    display: block;
+    background-color: #e8e8e8;
+    mask-image: url(/images/review-star.svg);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: url(/images/review-star.svg);
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+}
+
+#relatedStore.favorite-related-stores-similar .related-image {
+    position: relative;
+    display: block;
+    margin-bottom: 10px;
+    overflow: hidden;
+    border-radius: unset;
+    border: unset;
+}
+
 .deal-item-wrapper:hover {
     box-shadow: none;
     -webkit-box-shadow: none;
@@ -304,6 +403,10 @@
 	}
 	.lp-footer-title {
 		font-size: 19px;
+	}
+	
+	#relatedStore.favorite-related-stores-similar .related-link {
+		grid-template-columns: 80px auto;
 	}
 }
 
