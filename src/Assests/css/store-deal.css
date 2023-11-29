@@ -291,6 +291,16 @@
     background: #337ab7;
     color: #fff;
     padding: 12px 12px;
+	width: 236px;
+    justify-content: center;
+}
+.btn-load-more:hover{
+    background: #204d74;
+	color: #fff;
+}
+.btn-load-more:focus{
+    background: #337ab7;
+	color: #fff;
 }
 
 @media (max-width: 990px) {

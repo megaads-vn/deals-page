@@ -251,6 +251,9 @@
             e.preventDefault();
             if (isLoading) return;
             isLoading = true;
+            if(isLoading) {
+                viewMoreDeal.textContent = "Loading ...";
+            }
             // var currentPageId = document.getElementById('deal-current-id').value;
             var dataParams = {
                 store_id: {{ $store->id }},
@@ -277,6 +280,7 @@
                         if (!response.has_next) {
                             viewMoreDeal.style.display = "none";
                         }
+                        viewMoreDeal.textContent = `Load More ${response.total_items_display}/${response.total_items_hidden} Products`
                         currentPage++;
                         document.getElementById("deal-items-wrapper").insertAdjacentHTML("afterend", response.data);
                     }
