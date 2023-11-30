@@ -8,14 +8,14 @@
         </span>
         @endif
         @if (isset($store->coverImage))
-        <img class="zoom lazy deal-thumb js-go-deals" src="{{ App\Utils\Utils::reSizeImage("/images/stores/" . $store->coverImage, 100, 0) }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
+        <img class="zoom lazy deal-thumb js-go-deals" data-id="{{ $item->id }}" src="{{ App\Utils\Utils::reSizeImage("/images/stores/" . $store->coverImage, 100, 0) }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
         @else
-        <img class="zoom lazy deal-thumb js-go-deals" src="{{ $item->image }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
+        <img class="zoom lazy deal-thumb js-go-deals" data-id="{{ $item->id }}" src="{{ $item->image }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
         @endif
     </a>
     <div class="deal-item-info">
         <a target="_blank" rel="nofollow" href="javascript:void(0);" data-id="{{ $item->id }}" class="box-top">
-            <h3 class="deal-item-header js-go-deals">{{ $item->title }}</h3>
+            <h3 class="deal-item-header js-go-deals" data-id="{{ $item->id }}">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
             {!! $item->content !!}
