@@ -1,6 +1,6 @@
 @php $showStore = isset($showStore) ? $showStore : true; @endphp
 <div class="deal-item-wrapper">
-    <a class="deal-item-image js-go-deals" rel="nofollow" href="javascript:void(0);" data-id="{{ $item->id }}" rel="nofollow">
+    <a class="deal-item-image" rel="nofollow" href="javascript:void(0);" data-id="{{ $item->id }}" rel="nofollow">
         @if ($item->discount > 0)
         <span class="deal-tag">
             <span>{{ $item->discount }}%</span>
@@ -8,14 +8,14 @@
         </span>
         @endif
         @if (isset($store->coverImage))
-        <img class="zoom lazy deal-thumb" src="{{ App\Utils\Utils::reSizeImage("/images/stores/" . $store->coverImage, 100, 0) }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
+        <img class="zoom lazy deal-thumb js-go-deals" src="{{ App\Utils\Utils::reSizeImage("/images/stores/" . $store->coverImage, 100, 0) }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
         @else
-        <img class="zoom lazy deal-thumb" src="{{ $item->image }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
+        <img class="zoom lazy deal-thumb js-go-deals" src="{{ $item->image }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
         @endif
     </a>
     <div class="deal-item-info">
-        <a target="_blank" rel="nofollow" href="javascript:void(0);" data-id="{{ $item->id }}" class="box-top js-go-deals">
-            <h3 class="deal-item-header">{{ $item->title }}</h3>
+        <a target="_blank" rel="nofollow" href="javascript:void(0);" data-id="{{ $item->id }}" class="box-top">
+            <h3 class="deal-item-header js-go-deals">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
             {!! $item->content !!}
