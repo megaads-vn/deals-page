@@ -669,6 +669,11 @@ span[ itemprop="ratingCount"] {
 	background: #fff;
 	z-index: 1000;
 }
+.btn-view-more {
+    background: #337ab7;
+    color: #fff;
+    padding: 12px 12px;
+}
 @media (max-width: 760px) {
     .openfilter  {
 		display: none;
