@@ -674,6 +674,20 @@ span[ itemprop="ratingCount"] {
     color: #fff;
     padding: 12px 12px;
 }
+
+#brand_router {
+    background-color: #fff;
+}
+
+#brand_router > * {
+    padding: 12px 16px;
+    display: block;
+}
+
+#brand_router > *:nth-child(n) {
+    border-bottom: 1px solid #e1e1e1;
+}
+
 @media (max-width: 760px) {
     .openfilter  {
 		display: none;

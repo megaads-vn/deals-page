@@ -10,6 +10,15 @@
         $storeDescription = ($store->description);
         $rating = !empty($store->crawl_rating) ? $store->crawl_rating : $store->voteUp;
         $ratingCount = !empty($store->crawl_rating_count) ? $store->crawl_rating_count : $store->voteDown;
+
+        $showReviewLink = false;
+        $showDealLink = false;
+        if (\App\Models\StoreReview::where('store_id', $store->id)->exists()) {
+            $showReviewLink = true;
+        }
+        if (\App\Models\Deal::where('store_id', $store->id)->exists()) {
+            $showDealLink = true;
+        }
     @endphp
     @mobile
     <div class="store-desc-wrap is-mobile">
@@ -78,7 +87,7 @@
                         </span>
                             <div class="js-vote-message"></div>
                         </div>
-                            @endif
+                        @endif
                     </div>
                 </div>
             </div>
@@ -128,8 +137,8 @@
                         @include('frontend.common.widgets.contact-info', [
                                     'store' => json_decode(json_encode($store), true),
                                     'showRating' => true,
-                                    'hideReview' =>  true,
-                                    'hideDeals' =>  true,
+                                    'hideDeals' => true,
+                                    'showCouponLink' => true,
                                     'customStyle' => 'text-align:center'
                                     ])
 
