@@ -3,6 +3,7 @@ use App\Utils\Utils;
 @endphp
 @extends('frontend.layout.master')
 @section('meta')
+    <title>All {{ $totalDeals }} Products on Sale</title>
 <link rel="stylesheet" href="/frontend/css/alldeal.css?v=<?= Config::get('app.version'); ?>">
 @endsection
 
@@ -11,22 +12,22 @@ use App\Utils\Utils;
     <div class="page-full-width">
         <div class="subheader is-desktop">
             <div class="container">
-                <div class="viewstore-col col-sm-2 hidden-xs">
-                    <a rel="nofollow" href="https://couponforless.com/go-store/dell.com" target="_blank" class="store-logo vertical">
-                        <img src="https://cfl.agoz.me/unsafe/100x0/left/top/smart/filters:quality(90)/couponforless.com/images/stores/2013_09_04_021606_dell_coupons.jpg" data-src="https://cfl.agoz.me/unsafe/100x0/left/top/smart/filters:quality(90)/couponforless.com/images/stores/2013_09_04_021606_dell_coupons.jpg" alt="Dell Coupons &amp; Promo codes" class="img-responsive lazy loaded" data-was-processed="true">
-                    </a>
-                </div>
+{{--                <div class="viewstore-col col-sm-2 hidden-xs">--}}
+{{--                    <a rel="nofollow" href="https://couponforless.com/go-store/dell.com" target="_blank" class="store-logo vertical">--}}
+{{--                        <img src="https://cfl.agoz.me/unsafe/100x0/left/top/smart/filters:quality(90)/couponforless.com/images/stores/2013_09_04_021606_dell_coupons.jpg" data-src="https://cfl.agoz.me/unsafe/100x0/left/top/smart/filters:quality(90)/couponforless.com/images/stores/2013_09_04_021606_dell_coupons.jpg" alt="Dell Coupons &amp; Promo codes" class="img-responsive lazy loaded" data-was-processed="true">--}}
+{{--                    </a>--}}
+{{--                </div>--}}
                 <div class="viewstore-col col-sm-10 about-store">
                     <h1>
                         <span class="store-subtitle">All {{ $totalDeals }} Products on Sale</span>
                     </h1>
-                    <div style="clear: both"></div>
-                    <div class="is-desktop" style="margin-bottom: 15px; position: relative; clear: both;">
-                        <div class="more-less-text" data-background-color="#fff" data-lines="1" data-more-text="More »" style="max-height: 20px; overflow: hidden; line-height: 20px; -webkit-line-clamp: 1; height: 20px;">
-                            <p>Enter Dell to shop for all great technology devices. Save more with Dell coupon codes, 20% discount codes, promo codes, free shipping codes, and deals.</p>
-                        </div>
-                        <a href="javascript:void(0)" class="more-less-anchor" style="line-height: 20px; background-color: rgb(255, 255, 255);">...More »</a>
-                    </div>
+{{--                    <div style="clear: both"></div>--}}
+{{--                    <div class="is-desktop" style="margin-bottom: 15px; position: relative; clear: both;">--}}
+{{--                        <div class="more-less-text" data-background-color="#fff" data-lines="1" data-more-text="More »" style="max-height: 20px; overflow: hidden; line-height: 20px; -webkit-line-clamp: 1; height: 20px;">--}}
+{{--                            <p>Enter Dell to shop for all great technology devices. Save more with Dell coupon codes, 20% discount codes, promo codes, free shipping codes, and deals.</p>--}}
+{{--                        </div>--}}
+{{--                        <a href="javascript:void(0)" class="more-less-anchor" style="line-height: 20px; background-color: rgb(255, 255, 255);">...More »</a>--}}
+{{--                    </div>--}}
                 </div>
             </div>
         </div>

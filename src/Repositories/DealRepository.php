@@ -335,15 +335,16 @@ class DealRepository extends BaseRepository
     }
 
     public function getListFromConfig($key) {
-        $config = Config::where('key', $key)->first();
-        $deals = [];
+        $config = Config::where('key', $key)->first(['value']);
+        $result = [];
         if ($config) {
-            $dealIds = json_decode($config->value);
-
-            $deals = Deal::select(['id', 'title', 'slug'])->whereIn('id', $dealIds)->get();
+            $configData = json_decode($config->value);
+            $result = [
+                'boxTitle' => $configData->boxTitle,
+                'items' => $configData->items
+            ];
         }
-
-        return $deals;
+        return $result;
     }
 
     public function getTotalDealActive() {
