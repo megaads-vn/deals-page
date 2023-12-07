@@ -148,7 +148,8 @@
                             'storeRelated' => $store->relatedTerms,
                             'showRating' => true,
                             'isRatingStore' => true,
-                            'favoriteRelatedStoresClass' => 'favorite-related-stores-similar'
+                            'favoriteRelatedStoresClass' => 'favorite-related-stores-similar',
+                            'routeName' => 'store::review'
                             ])
                         <?= Adsense::display(['divClass' => 'section-top', 'adsenseStyle' => 'width: 285px; height: 216px;']) ?>
                     </div>
