@@ -7,7 +7,6 @@
         <input type="checkbox" id="moreProductsSearches">
         <div class="top-products-searches-list">
             @foreach ($boxItems as $item)
-            
                 <a href="{{ $item->link }}"  rel="nofollow" class="top-products-searches-item">
                     <img src="/images/trending.svg" width="16" height="16" alt="{{ $item->name }}">
                     <span>{{ $item->name }}</span>

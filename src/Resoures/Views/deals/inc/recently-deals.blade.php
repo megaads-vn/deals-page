@@ -5,12 +5,12 @@
     <div class="recently-deals-list">
         @foreach ($deals as $item)
             <div class="recently-deals-item">
-                <a class="bx-square deal-product-item-image" href="{{ route('deal::action::go', ['slug' => $item->slug]) }}">
+                <a class="bx-square deal-product-item-image js-go-deals" data-id="{{ $item->id }}" href="javascript:void(0)">
                     <img src="{{ $item->image }}" alt="">
                 </a>
                 <div class="item-info">
                     <h3 class="deal-product-item">
-                        <a href="{{ route('deal::action::go', ['slug' => $item->slug]) }}">{{ $item->title }}</a>
+                        <a class="js-go-deals" data-id="{{ $item->id }}" href="javascript:void(0)">{{ $item->title }}</a>
                     </h3>
                     <div class="price">
                         @if ($item->sale_price > 0)
@@ -43,7 +43,7 @@
                         </div>
     
                     </div>
-                    <a class="get-btn btn-pc" href="{{ route("frontend::store::listByStore", ['slug' => $item->store_slug]) }}">
+                    <a class="get-btn btn-pc js-go-deals" data-id="{{ $item->id }}" href="javascript:void(0)">
                         Shop Now
                     </a>
                 </div>
