@@ -1,4 +1,4 @@
-@if (count($dealsTopSearch) > 0)
+@if (isset($dealsTopSearch['items']) && count($dealsTopSearch['items']) > 0)
     <div class="alldeals-component top-products-searches-wrapper">
         <h2 class="alldeals-component-title">
             {{ $dealsTopSearch['boxTitle'] }}
