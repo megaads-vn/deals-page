@@ -1,6 +1,6 @@
 <div class="alldeals-component top-brands-deals-wrapper">
     <h2 class="alldeals-component-title">
-        Top Brands Deals
+        {{ isset($topBrandBoxTitle) ? $topBrandBoxTitle : 'Top Brands Deals' }}
     </h2>
     <div class="top-brands-deals-list">
         @foreach ($stories as $item)

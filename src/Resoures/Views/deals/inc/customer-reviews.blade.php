@@ -1,6 +1,6 @@
 <div class="alldeals-component customer-reviews-wrapper">
     <h2 class="alldeals-component-title">
-        Customer Reviews
+        {{ isset($topReviewBoxTitle) ? $topReviewBoxTitle : "Customer Reviews" }}
     </h2>
     <div class="customer-reviews-list">
         @foreach ($storiesReview as $item)
