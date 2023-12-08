@@ -38,6 +38,8 @@
     padding: 12px 16px;
 }
 
+
+
 #relatedStore.favorite-related-stores-similar .related-item:hover{
 	background: #d5d5d536;
 }
@@ -695,4 +697,20 @@ span[ itemprop="ratingCount"] {
 	#deal-filter-form {
 		top: 90px;
 	}
+}
+
+.widget-body li + li {
+    border-top: 1px solid #e1e1e1;
+    margin: 0;
+    padding: 0;
+}
+
+.widget-body li a {
+	padding: 7px 0;
+    background: none;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
 }

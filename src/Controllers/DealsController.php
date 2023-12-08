@@ -576,6 +576,8 @@ class DealsController extends Controller {
                             ->groupBy('dc.category_id')
                             ->get(['c.id', 'c.title', 'c.slug']);
 
+        $this->countSimilarCateProduct($similarSaleCate);
+
         return view('deals-page::deals.list-by-category', [
             'slug' => $slug,
             'listDeals' => $listDeals,
@@ -892,6 +894,34 @@ class DealsController extends Controller {
             return $storeEmbed;
         } else {
             return [];
+        }
+    }
+
+    /**
+     * @param $similarCates
+     * @return void
+     */
+    private function countSimilarCateProduct(&$similarCates)
+    {
+        if (!empty($similarCates)) {
+            $cateIds = [];
+            foreach ($similarCates as $item) {
+                $cateIds[] = $item->id;
+            }
+            $countProducts = Deal::from('deals as d')
+                            ->join('deal_n_category as dc', 'dc.deal_id', '=', 'd.id')
+                            ->whereIn('dc.category_id', $cateIds)
+                            ->where('d.status', Deal::STATUS_ACTIVE)
+                            ->groupBy('dc.category_id')
+                            ->select(['dc.category_id', DB::raw('count(`d`.`id`) as active_total')])
+                            ->pluck('active_total', 'category_id');
+            if (!empty($countProducts)) {
+                foreach ($similarCates as &$item) {
+                    if (isset($countProducts[$item->id])) {
+                        $item->total = $countProducts[$item->id];
+                    }
+                }
+            }
         }
     }
 }

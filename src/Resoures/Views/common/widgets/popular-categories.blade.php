@@ -22,7 +22,11 @@ if (!isset($dataItems)) {
         <div class="widget-body">
             <ul class="blog-category-list list-unstyled">
                 @foreach($categories as $category)
-                    <li><a href="<?= route($route, ['slug' => $category->slug]); ?>"><?= $category->title; ?></a></li>
+                    <li>
+                        <a href="<?= route($route, ['slug' => $category->slug]); ?>">
+                            <?= $category->title; ?> {{ isset($category->total) ? '(' . number_format($category->total, 0, '.', ',') . ' Products)' : '' }}
+                        </a>
+                    </li>
                 @endforeach
             </ul>
         </div>
