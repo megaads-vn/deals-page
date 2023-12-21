@@ -36,7 +36,7 @@ class StoreRepository extends BaseRepository
             } while (count($storiesId) <= 20);
         }
         view()->share('topBrandBoxTitle', $topBrandBoxTitle);
-        return Store::select(['id', 'title', 'slug', 'image'])->whereIn('id', $storiesId)->get();
+        return Store::select(['id', 'title', 'slug', 'image', 'vote_down','vote_up'])->whereIn('id', $storiesId)->get();
     }
     
     public function getListStoreOfReview() {
@@ -63,6 +63,6 @@ class StoreRepository extends BaseRepository
             } while (count($storiesId) <= 10);
         }
         view()->share('topReviewBoxTitle', $topReviewBoxTitle);
-        return Store::select(['id', 'title', 'slug', 'image'])->whereIn('id', $storiesId)->get();
+        return Store::select(['id', 'title', 'slug', 'image','vote_down','vote_up'])->whereIn('id', $storiesId)->get();
     }
 }
