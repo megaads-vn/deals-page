@@ -354,8 +354,6 @@ class DealsController extends Controller {
      */
     public function storeDeal($slug="", $param1 = 0, $param2 = 0) {
         $canonicalLink = route('frontend::store::listDeal', $slug);
-        view()->share('canonicalLink', $canonicalLink);
-
         $retVal = [];
         $store = $this->getStore($slug);
         if (empty($store)) {
@@ -415,7 +413,7 @@ class DealsController extends Controller {
             $defaultMetaTitle = str_replace("{text}", $store->title, $defaultMetaTitle);
         }
 
-
+        view()->share('canonicalLink', $canonicalLink);
         $retVal['storeEmbed'] = $this->_getStoreEmbedCoupons($store->id);
         $retVal['title'] = !empty($store->metaTitle)? \App\Utils\Utils::replaceMonthYeah(str_replace("{text}", $store->title, $store->metaTitle)):\App\Utils\Utils::replaceMonthYeah(str_replace("{text}", $store->title, $defaultMetaTitle));
         $retVal['storeNameTracking'] = $store->title;
@@ -521,6 +519,11 @@ class DealsController extends Controller {
 //            return redirect(route('frontend::category::listByCategory', ['slug' => $category->slug]));
 //        }
         $listDeals = $dealResult['data'];
+
+        if (empty($listDeals) || count($listDeals) <= 0) {
+          $canonicalLink = route('frontend::category::listByCategory', $category->slug);
+        }
+
         $hasNextPage = ($dealResult['current_page'] < $dealResult['page_count']) ? true : false;
         $currentPage = $dealResult['current_page'];
 
@@ -578,6 +581,7 @@ class DealsController extends Controller {
 
         $this->countSimilarCateProduct($similarSaleCate);
 
+        view()->share('canonicalLink', $canonicalLink);
         return view('deals-page::deals.list-by-category', [
             'slug' => $slug,
             'listDeals' => $listDeals,
