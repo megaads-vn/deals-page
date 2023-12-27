@@ -17,6 +17,8 @@ use Megaads\DealsPage\Models\Store;
 use Megaads\DealsPage\Models\DealRelation;
 use App\Utils\Utils;
 use Illuminate\Support\Facades\Input;
+use Megaads\DealsPage\Models\StoreCategory;
+use Megaads\DealsPage\Models\StoreReview;
 use Megaads\DealsPage\Repositories\CategoryRepository;
 use Megaads\DealsPage\Repositories\DealRepository;
 use Megaads\DealsPage\Repositories\StoreRepository;
@@ -48,26 +50,47 @@ class DealsController extends Controller {
     }
 
     public function index($slug) {
-        return redirect()->route('frontend::keyword', ['slug' => $slug], 301);
-        $relationPage = \DB::table($this->dealPageTable)->where('slug', $slug)->first($this->dealPageColumns);
-        if (empty($relationPage)) {
+        $getDeal = Deal::from('deals')
+                    ->where('slug', $slug)
+                    ->where('status', Deal::STATUS_ACTIVE)
+                    ->first();
+        if (empty($getDeal)) {
             abort(404);
         }
-        $dealIds = DealRelation::where('target_id', $relationPage->id)->pluck('object_id');
-        if(count($dealIds) <= 0) {
-            abort(404);
-        }
-        $retVal = [];
-        $deals = Deal::with(['store', 'categories'])
-            ->whereIn('id', $dealIds)
-            ->get(['id', 'title', 'slug', 'content', 'meta_title', 'meta_description', 'meta_keywords', 'price', 'store_id', 'sale_price',
-                'image', 'currency', 'create_time', 'expire_time', 'affiliate_link', 'origin_link', 'discount']);
+        $otherStoreDeal = $this->getOtherDealsOfStore($getDeal);
+        $relatedDeal = $this->getRelatedDeal($getDeal->id);
+        $relatedCateDeal = $this->getRelatedCateDeal($getDeal->id);
+        $relatedStoreReviews = $this->relatedStoreReview($getDeal->id);
+        $categories = $getDeal->categories()->first(['id', 'title', 'slug']);
+        $store = $getDeal->store()->first(['id', 'title', 'slug', 'vote_up', 'vote_down']);
 
-        $retVal['deals'] = $deals;
-        $retVal['page'] = $relationPage;
-        $retVal['meta'] = ['title' => $relationPage->keyword];
-        $retVal['title'] = $relationPage->keyword;
-        return \View::make('deals-page::deals.index', $retVal);
+        $breadcrumbs = [];
+        if (!empty($categories)) {
+            $breadcrumbs = [
+                [
+                    'title' => $categories->title,
+                    'url' => route('frontend::category::listByCategory', ['slug' => $categories->slug])
+                ]
+            ];
+        }
+        $breadcrumbs = [
+            [
+                'title' => $getDeal->title,
+                'url' => ''
+            ]
+        ];
+
+        $retVal['detailItem'] = $getDeal;
+        $retVal['dealCategories'] = $categories;
+        $retVal['dealStore'] = $store;
+        $retVal['otherStoreDeal'] = $otherStoreDeal;
+        $retVal['relatedDeal'] = $relatedDeal;
+        $retVal['relatedCateDeal'] = $relatedCateDeal;
+        $retVal['relatedStoreReviews'] = $relatedStoreReviews;
+        $retVal['meta'] = ['title' => $getDeal->title];
+        $retVal['title'] = $getDeal->title;
+        $retVal['breadcrumbs'] = $breadcrumbs;
+        return \View::make('deals-page::deals.detail', $retVal);
     }
 
     public function allDeals() {
@@ -927,5 +950,114 @@ class DealsController extends Controller {
                 }
             }
         }
+    }
+
+    /**
+     * @param $currentDeal
+     * @return array
+     */
+    private function getOtherDealsOfStore($currentDeal)
+    {
+        $retVal = [];
+        $totalDeals = 0;
+        if (isset($currentDeal->store_id)) {
+            $storeId = $currentDeal->store_id;
+            $query = Deal::from('deals')
+                    ->where('status', Deal::STATUS_ACTIVE)
+                    ->where('store_id', $storeId);
+            $totalDeals = (clone $query)->count();
+            $deals = $query->limit(15)
+                    ->get();
+            if (!empty($deals)) {
+                $retVal = $deals;
+            }
+        }
+        view()->share('storeTotalDeals', $totalDeals);
+        return $retVal;
+    }
+
+    /**
+     * @param $categoryId
+     * @return void
+     */
+    private function getRelatedDeal($dealId)
+    {
+        $retVal = [];
+        $totalDeal = 0;
+        $category = DealCategory::where('deal_id', $dealId)->first(['category_id']);
+        if (!empty($category)) {
+            $query = Deal::from('deals as d')
+                        ->join('deal_n_category as c', 'c.deal_id', '=', 'd.id')
+                        ->where('status', 'active')
+                        ->where('d.id', '<>', $dealId)
+                        ->where('c.category_id', $category->category_id);
+            $totalDeal = (clone $query)->count();
+            $relatedItems = $query->orderBy('d.id', 'DESC')
+                        ->limit(15)
+                        ->get();
+            if (!empty($relatedItems)) {
+                $retVal = $relatedItems;
+            }
+        }
+        view()->share('totalRelatedDeal', $totalDeal);
+        return $retVal;
+    }
+
+    /**
+     * @param $dealId
+     * @return array
+     */
+    private function getRelatedCateDeal($dealId)
+    {
+        $retVal = [];
+        $totalDeal = 0;
+        $parentCategory = Category::from('category as c')
+                    ->join('deal_n_category as dc', 'dc.category_id', '=', 'c.id')
+                    ->where('dc.deal_id', $dealId)
+                    ->first(['c.parent_id']);
+        if (!empty($parentCategory)) {
+            $parentCateId = $parentCategory->parent_id;
+            $categoryHasDeal = Category::from('category as c')
+                                ->join('deal_n_category as dc', 'dc.category_id', '=', 'c.id')
+                                ->where('c.parent_id', $parentCateId)
+                                ->groupBy('dc.category_id')
+                                ->limit(15)
+                                ->get(['c.id', 'c.title', 'c.slug', 'c.image']);
+            if (!empty($categoryHasDeal)) {
+                $retVal = $categoryHasDeal;
+            }
+        }
+        return $retVal;
+    }
+
+    /**
+     * @param $dealId
+     * @return array
+     */
+    private function relatedStoreReview($dealId)
+    {
+        $retVal = [];
+        $totalDeal = 0;
+        $category = DealCategory::where('deal_id', $dealId)
+            ->first(['category_id']);
+        if (!empty($category)) {
+            $storeByCate = StoreCategory::from('store_n_category as s')
+                    ->where('s.category_id', $category->category_id)
+                    ->pluck('s.store_id');
+            if (!empty($storeByCate)) {
+                $storeHasReviews = Store::from('store as s')
+                                    ->join('store_reviews as sr', 'sr.store_id', '=', 's.id')
+                                    ->whereIn('sr.store_id', $storeByCate->toArray())
+                                    ->limit(15)
+                                    ->groupBy('sr.store_id')
+                                    ->get(['s.id', 's.title', 's.slug', 's.image', 's.vote_up', 's.vote_down']);
+
+                if (!empty($storeHasReviews)) {
+                    $retVal = $storeHasReviews;
+                }
+            }
+        }
+
+        return $retVal;
     }
 }

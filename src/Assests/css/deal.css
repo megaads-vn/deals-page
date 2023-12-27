@@ -2,9 +2,11 @@
 	width: 75%;
 }
 
-.list-deal-wrapper {
+.list-deal-wrapper,
+.product-detail-wapper {
 	--itemImage: 180px;
 }
+
 .lp-breadcrumb {
 	width: 100%;
 }

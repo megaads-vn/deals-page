@@ -60,7 +60,8 @@ class DealService extends BaseService
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function create(Request $request) {
+    public function create(Request $request)
+    {
         $response = $this->getDefaultStatus();
         try {
             $params = $request->all();
@@ -85,7 +86,8 @@ class DealService extends BaseService
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request) {
+    public function update(Request $request)
+    {
         $response = $this->getDefaultStatus();
         try {
             $params = $request->all();
@@ -109,7 +111,8 @@ class DealService extends BaseService
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function delete(Request $request) {
+    public function delete(Request $request)
+    {
         $response = $this->getDefaultStatus();
         try {
             if ($request->has('id')) {
@@ -133,7 +136,8 @@ class DealService extends BaseService
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function dealMigration(Request $request) {
+    public function dealMigration(Request $request)
+    {
         set_time_limit(86400);
         $response = $this->getDefaultStatus();
         try {
@@ -165,7 +169,7 @@ class DealService extends BaseService
                     $query = (clone $sourceQuery)->limit($perpage)->offset($offset);
                     $oldData = $query->get();
                     \Log::info('DEAL_MIGATION: [DATA=' . count($oldData) . ']');
-                    if (!empty($oldData) ) {
+                    if (!empty($oldData)) {
                         foreach ($oldData as $oldItem) {
                             $insertNewItems = [
                                 "title" => $oldItem->title,
@@ -238,7 +242,8 @@ class DealService extends BaseService
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkCreate(Request $request) {
+    public function bulkCreate(Request $request)
+    {
         $response = $this->getDefaultStatus();
         try {
             if ($request->has('params')) {
@@ -251,9 +256,9 @@ class DealService extends BaseService
                         continue;
                     }
                     $findExists = Deal::query()
-                            ->where('slug', $item['slug'])
-                            ->orWhere('origin_link', $item['origin_link'])
-                            ->first(['id']);
+                        ->where('slug', $item['slug'])
+                        ->orWhere('origin_link', $item['origin_link'])
+                        ->first(['id']);
                     if (empty($findExists)) {
                         $resultId = $this->dealRepository->create($item);
                         $insertResult[$resultId] = $item['category_id'];
@@ -287,7 +292,8 @@ class DealService extends BaseService
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkCreateWithSchedule(Request $request) {
+    public function bulkCreateWithSchedule(Request $request)
+    {
         $response = $this->getDefaultStatus();
         try {
             $catalogPage = 0;
@@ -295,7 +301,7 @@ class DealService extends BaseService
                 $catalogPage = \Cache::get('dealCrawler::catalogPage');
             }
             $count = $this->catalogRepository->read(['crawl_state' => 'processing', 'metrics' => 'count', 'columns' => ['id', 'cid', 'crawl_page']]);
-            if ($count <= 0 ) {
+            if ($count <= 0) {
                 $response = $this->getSuccessStatus();
                 $response['message'] = 'All Done';
                 return \Response::json($response);
@@ -400,11 +406,13 @@ class DealService extends BaseService
             'totalPage' => $pageDone
         ]);
     }
+
     /**
      * @param $rawData
      * @return array
      */
-    protected function buildInsertDealItem($rawData) {
+    protected function buildInsertDealItem($rawData)
+    {
         $saleOff = 0;
         $brandName = str_replace(['.com', '.co.uk', '.org'], '', $rawData['brand']);
         $advertiserName = $rawData['advertiserName'];
@@ -450,7 +458,8 @@ class DealService extends BaseService
             "store_tmp" => $rawData['manufacturer'],
             "category_id" => $categoryIds,
             'manufacturer' => $brandName,
-            'raw_data' => json_encode($rawData)
+            'raw_data' => json_encode($rawData),
+            'upc_or_ean' => $rawData['upCorEAN']
         ];
         return $retVal;
     }
@@ -459,16 +468,17 @@ class DealService extends BaseService
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function removeDuplicateDeals(Request $request) {
+    public function removeDuplicateDeals(Request $request)
+    {
         $response = $this->getDefaultStatus();
         try {
             $fields = $request->get('fields', 'slug');
             $totalDuplicate = Deal::query()
-                                    ->having(\DB::raw('COUNT(*)'), '>', 1)
-                                    ->select([$fields, \DB::raw('COUNT(*) AS total')])
-                                    ->groupBy($fields)
-                                    ->orderBy('total', 'DESC')
-                                    ->get();
+                ->having(\DB::raw('COUNT(*)'), '>', 1)
+                ->select([$fields, \DB::raw('COUNT(*) AS total')])
+                ->groupBy($fields)
+                ->orderBy('total', 'DESC')
+                ->get();
             $totalDeleted = 0;
             foreach ($totalDuplicate as $item) {
                 $ids = Deal::where($fields, $item->$fields)->pluck('id');
@@ -500,8 +510,8 @@ class DealService extends BaseService
         if (isset($diskSpace['free_percent']) && $diskSpace['free_percent'] >= 3) {
             // Get Image.
             $dealImages = Deal::where('crawl_image', 'processing')
-                            ->limit(300)
-                            ->pluck('image', 'id');
+                ->limit(300)
+                ->pluck('image', 'id');
             if (!empty($dealImages)) {
                 $updatedResult = 0;
                 foreach ($dealImages as $id => $imageUrl) {
@@ -528,13 +538,21 @@ class DealService extends BaseService
         return response()->json($res);
     }
 
+    public function fetchOriginLinkContent(Request $request)
+    {
+        $url = $request->get('url');
+        $data = $this->urlGetContents($url, 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:17.0) Gecko/20100101 Firefox/17.0');
+        return response()->json($data);
+    }
+
     /**
      * @param $manufactureName
      * @return int
      */
-    protected function findLocalStore($manufactureName) {
+    protected function findLocalStore($manufactureName)
+    {
         $retVal = 0;
-        $findStore = Store::where('title', 'like',"%" . trim($manufactureName) . "%")->get(['id']);
+        $findStore = Store::where('title', 'like', "%" . trim($manufactureName) . "%")->get(['id']);
         if (!empty($findStore) && count($findStore) > 0) {
             $retVal = $findStore[0]->id;
         }
@@ -545,7 +563,8 @@ class DealService extends BaseService
      * @param $categoryName
      * @return string
      */
-    protected function findLocalCategory($categoryName) {
+    protected function findLocalCategory($categoryName)
+    {
         $retVal = '';
         $listName = explode('>', $categoryName);
         $findCategory = Category::where('title', 'like', "%" . trim($listName[0]) . "%")->pluck('id');
@@ -567,7 +586,8 @@ class DealService extends BaseService
      * @param $params
      * @return array
      */
-    protected function buildData($params) {
+    protected function buildData($params)
+    {
         $retVal = [];
         foreach ($params as $key => $val) {
             $formatKey = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $key));
@@ -606,7 +626,8 @@ class DealService extends BaseService
     /**
      * @return array
      */
-    protected function checkDiskSpace() {
+    protected function checkDiskSpace()
+    {
         $total_space = disk_total_space("/");
         $free_space = disk_free_space("/");
 
@@ -622,7 +643,8 @@ class DealService extends BaseService
      * @param $bytes
      * @return string
      */
-    protected function formatSizeUnits($bytes) {
+    protected function formatSizeUnits($bytes)
+    {
         if ($bytes >= 1073741824) {
             $bytes = number_format($bytes / 1073741824, 2) . ' GB';
         } elseif ($bytes >= 1048576) {
@@ -653,7 +675,7 @@ class DealService extends BaseService
             if (!file_exists($filePath)) {
                 mkdir($filePath, 0777);
             }
-            $fullPathImage = $filePath . "/"  . $imageName;
+            $fullPathImage = $filePath . "/" . $imageName;
             if (file_exists($fullPathImage)) {
                 $retVal = "/frontend/images/deals/" . $imageName;
             } else {
@@ -675,7 +697,8 @@ class DealService extends BaseService
      * @param $url
      * @return bool
      */
-    private function isValidUrl($url) {
+    private function isValidUrl($url)
+    {
         // Kiểm tra xem URL có bắt đầu bằng một trong các giao thức sau không
         if (preg_match('/^(http:\/\/|https:\/\/|ftp:\/\/|ftps:\/\/|mailto:|tel:|data:|irc:|ircs:|news:|nntp:)/i', $url)) {
             // Kiểm tra xem URL có chứa tên miền hoặc địa chỉ IP của máy chủ không
@@ -706,7 +729,8 @@ class DealService extends BaseService
         return $filename;
     }
 
-    protected function convertCamelToSnake($string) {
+    protected function convertCamelToSnake($string)
+    {
         $string = strtolower(preg_replace('/(?<!^)[A-Z]/', ' $0', $string));
         return ucwords($string, ' ');
     }

@@ -16,6 +16,7 @@ Route::group([
     Route::any('/deal/crawler', 'DealService@crawlDeals');
     Route::get('/deal/remove-duplicate', 'DealService@removeDuplicateDeals');
     Route::get('/deal/download-image', 'DealService@downDealImage');
+    Route::get('/deal/fetch-origin-content', 'DealService@fetchOriginLinkContent');
 
     Route::get('/catalog', 'CatalogService@find')->name('catalog::find');
     Route::any('/catalog/bulk-create', 'CatalogService@bulkCreate')->name('catalog::bulk::create');

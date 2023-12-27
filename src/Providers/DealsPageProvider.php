@@ -6,6 +6,7 @@ use Illuminate\Routing\Route;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Support\ServiceProvider;
+use Megaads\DealsPage\Commands\DealAssetsCommand;
 use Megaads\DealsPage\Commands\MigrateExecution;
 use Megaads\DealsPage\Commands\MigrationCreate;
 use Megaads\DealsPage\Middlewares\DealPageAuth;
@@ -22,6 +23,7 @@ class DealsPageProvider extends ServiceProvider
     protected $commands = [
         MigrationCreate::class,
         MigrateExecution::class,
+        DealAssetsCommand::class
     ];
 
     public function boot()
