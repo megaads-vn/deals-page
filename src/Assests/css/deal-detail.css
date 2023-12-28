@@ -182,7 +182,7 @@
 }
 
 .product-page .product-info-right .product-info-desc .text-out {
-    max-height: 105px;
+    height: auto;
     overflow: hidden;
     transition: all .5s;
 }
@@ -193,6 +193,28 @@
 .manufacturer span,
 .upc-or-ean span {
     font-weight: 600;
+}
+
+.product-info-desc {
+    display: block;
+    position: relative;
+}
+.product-info-desc .see-more-text {
+    display: block;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    color: #1373eb;
+    cursor: pointer;
+    background: #fff;
+    padding: 3px 11px;
+    opacity: 0.8;
+    width: 100%;
+    text-align: right;
+}
+
+.product-info-desc .disable-see-more {
+    display: none;
 }
 
 @media screen and (max-width: 820px) {

@@ -67,7 +67,8 @@
                             <div class="get-btn btn-pc js-go-deals" data-id="{{ $detailItem->id }}">Shop Now</div>
                             <div class="product-info-desc">
                                 <div class="title">Description:</div>
-                                <div class="text-out" style="height: 42px;">
+                                <span id="see-more-btn" class="see-more-text js-click-see-more">See More...</span>
+                                <div id="text-out-desc" class="text-out" style="height: 42px;">
                                     <div class="text">
                                         {{ strip_tags($detailItem->content) }}
                                     </div>
@@ -208,12 +209,18 @@
 
         document.addEventListener("click", function (e) {
             var elClass = e.target.getAttribute("class");
+            console.log("elClass=", elClass);
             var parentElClass = e.target.parentElement.getAttribute('class');
             var element;
             if (elClass && elClass.indexOf("js-go-deals") !== -1) {
                 element = e.target;
             } else if (parentElClass && parentElClass.indexOf("js-go-deals") !== -1) {
                 element = e.target.parentElement;
+            } else if (elClass && elClass.indexOf("js-click-see-more") !== -1) {
+                const textOutEl = document.getElementById('text-out-desc');
+                const seeMoreBtn = document.getElementById('see-more-btn');
+                e.target.classList.add('disable-see-more');
+                textOutEl.removeAttribute('style');
             }
 
             if (element) {
