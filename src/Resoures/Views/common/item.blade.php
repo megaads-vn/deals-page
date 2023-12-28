@@ -1,6 +1,6 @@
 @php $showStore = isset($showStore) ? $showStore : true; @endphp
 <div class="deal-item-wrapper">
-    <a class="deal-item-image" rel="nofollow" href="javascript:void(0);" data-id="{{ $item->id }}" rel="nofollow">
+    <a class="deal-item-image" rel="nofollow" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}" rel="nofollow">
         @if ($item->discount > 0)
         <span class="deal-tag">
             <span>{{ $item->discount }}%</span>
@@ -8,14 +8,14 @@
         </span>
         @endif
         @if (isset($store->coverImage))
-        <img class="zoom lazy deal-thumb js-go-deals" data-id="{{ $item->id }}" src="{{ App\Utils\Utils::reSizeImage("/images/stores/" . $store->coverImage, 100, 0) }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
+        <img class="zoom lazy deal-thumb" src="{{ App\Utils\Utils::reSizeImage("/images/stores/" . $store->coverImage, 100, 0) }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
         @else
-        <img class="zoom lazy deal-thumb js-go-deals" data-id="{{ $item->id }}" src="{{ $item->image }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
+        <img class="zoom lazy deal-thumb" src="{{ $item->image }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
         @endif
     </a>
     <div class="deal-item-info">
-        <a target="_blank" rel="nofollow" href="javascript:void(0);" data-id="{{ $item->id }}" class="box-top">
-            <h3 class="deal-item-header js-go-deals" data-id="{{ $item->id }}">{{ $item->title }}</h3>
+        <a target="_blank" rel="nofollow" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}" class="box-top">
+            <h3 class="deal-item-header">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
             {!! $item->content !!}
@@ -31,12 +31,12 @@
             </div>
             <div class="deal-item-footer-box">
                 @if (!empty($item->store) && $showStore)
-                    <a target="_blank" href="{{ route('frontend::store::listByStore', ['slug' => $item->store->slug]) }}" class="name">
+                    <a target="_blank" href="{{ route('frontend::store::listByStore', ['slug' => $item->store->slug]) }}" title="{{ $item->store->name }}" class="name">
                         Store: <span>{{ $item->store->name }}</span>
                     </a>
                 @endif
                 @if (!empty($item->category))
-                    <a target="_blank" href="{{ route('frontend::category::listByCategory', ['slug' => $item->category->slug]) }}" class="name">
+                    <a target="_blank" href="{{ route('frontend::category::listByCategory', ['slug' => $item->category->slug]) }}" title="{{ $item->category->title }}" class="name">
                         Category: <span>{{ $item->category->title }}</span>
                     </a>
                 @endif

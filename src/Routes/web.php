@@ -8,7 +8,7 @@ Route::group([
     Route::get('/deals/{slug}', 'DealsController@index')->name('deal::detail');
     Route::get('/deals/{slug}/c/{itemId}','DealsController@listByStore')->where(['itemId' => '[0-9]+'])->name('deal::list::by::store::item');
 
-    Route::get('/deal/{itemId}','DealsController@dealDetail')->name('deal::detail');
+    Route::get('/deal/{itemId}','DealsController@dealDetail')->name('deal::detail:old');
     Route::get('/deal/c/{itemId}', 'DealsController@dealDetail')->name('deal::detail::item')->where(['itemId' => '[0-9]+']);
     Route::get('/go-deal/{slug}', 'DealsController@goUrl')->name('deal::action::go')->where(['slug' => '[0-9a-zA-Z\-]+']);
     Route::get('/deals/import', 'DealsController@import');

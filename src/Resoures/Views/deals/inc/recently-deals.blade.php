@@ -5,12 +5,12 @@
     <div class="recently-deals-list">
         @foreach ($deals as $item)
             <div class="recently-deals-item">
-                <a class="bx-square deal-product-item-image js-go-deals" data-id="{{ $item->id }}" href="javascript:void(0)">
-                    <img src="{{ $item->image }}" alt="">
+                <a class="bx-square deal-product-item-image" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}">
+                    <img src="{{ $item->image }}" alt="{{ $item->title }}">
                 </a>
                 <div class="item-info">
                     <h3 class="deal-product-item">
-                        <a class="js-go-deals" data-id="{{ $item->id }}" href="javascript:void(0)">{{ $item->title }}</a>
+                        <a href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}" >{{ $item->title }}</a>
                     </h3>
                     <div class="price">
                         @if ($item->sale_price > 0)
@@ -29,12 +29,12 @@
                     <div>
                         @if ($item->store_name)
                             <div class="deal-expires">
-                               Store: <a target="_blank" href="{{ route("frontend::store::listByStore", ['slug' => $item->store_slug]) }}">{{ $item->store_name }}</a>
+                               Store: <a target="_blank" href="{{ route("frontend::store::listByStore", ['slug' => $item->store_slug]) }}" title="{{ $item->store_name }}">{{ $item->store_name }}</a>
                             </div>
                         @endif
                         @if ($item->category_name)
                             <div class="deal-expires">
-                                Category: <a target="_blank" href="{{ route('frontend::category::listByCategory',['slug' => $item->category_slug]) }}">{{ $item->category_name }}</a>
+                                Category: <a target="_blank" href="{{ route('frontend::category::listByCategory',['slug' => $item->category_slug]) }}" title="{{ $item->category_name }}">{{ $item->category_name }}</a>
                             </div>
                         @endif
     
