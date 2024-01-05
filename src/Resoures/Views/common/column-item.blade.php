@@ -1,3 +1,4 @@
+<?php $showAllDealBtn = isset($showAllDealBtn) ? $showAllDealBtn : true; ?>
 <div class="alldeals-component recently-deals-wrapper {{ isset($customWrapper) ? $customWrapper : '' }}">
     <h{{ isset($heading) ? $heading : 2 }} class="alldeals-component-title">
         {{ isset($boxTitle) ? $boxTitle : '' }}
@@ -5,14 +6,14 @@
     <div class="recently-deals-list">
         @foreach ($deals as $item)
             <div class="recently-deals-item">
-                <span class="bx-square deal-product-item-image js-go-deals" data-id="{{ $item->id }}">
+                <a class="bx-square deal-product-item-image" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}">
                     <img src="{{ $item->image }}" alt="{{ $item->title }}" width="275" height="275">
-                </span>
+                </a>
                 <div class="item-info">
                     <h3 class="deal-product-item">
-                        <span class="deal-product-item-link js-go-deals" data-id="{{ $item->id }}" href="javascript:void(0)">
+                        <a class="deal-product-item-link" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}">
                             {{ $item->title }}
-                        </span>
+                        </a>
                     </h3>
                     <div class="price">
                         @if ($item->sale_price > 0)
@@ -50,7 +51,7 @@
             </div>
         @endforeach
     </div>
-    @if (isset($totalDeals))
+    @if (isset($totalDeals) && $showAllDealBtn)
     <div class="home-deal-button">
         <a class="all-deal" href="{{ isset($seeAllUrl) ? $seeAllUrl : '/alldeals' }}">
             See all ({{$totalDeals}})

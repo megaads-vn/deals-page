@@ -10,7 +10,7 @@
                 </a>
                 <div class="item-info">
                     <h3 class="deal-product-item">
-                        <a href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}" >{{ $item->title }}</a>
+                        <a class="deal-product-item-link" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}" >{{ $item->title }}</a>
                     </h3>
                     <div class="price">
                         @if ($item->sale_price > 0)

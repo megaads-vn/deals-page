@@ -23,7 +23,15 @@
         </div>
         <div class="container app-alldeals-wrapper">
             @include('deals-page::deals.inc.top-silder', ['categories' => $categories])
-            @include('deals-page::deals.inc.recently-deals', ['deals' => $deals])
+            @include('deals-page::common.column-item', [
+                        'boxTitle' => 'More Deals From Store',
+                        'deals' => $deals,
+                        'totalDeals' => $totalDeals,
+                        'customWrapper' => 'more-store-deals',
+                        'heading' => 3,
+                       'showAllDealBtn' => false
+                       // 'seeAllUrl' => !empty($dealStore) ? route('frontend::store::listDeal', ['slug' => $dealStore->slug]) : '/alldeals'
+                     ])
             @include('deals-page::deals.inc.top-brands-deals', ['stories' => $stories])
             @include('deals-page::deals.inc.top-products-searches', ['dealsTopSearch' => $dealsTopSearch])
             @include('frontend.home.customer-reviews', [

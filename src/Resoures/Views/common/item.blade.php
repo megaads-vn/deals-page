@@ -45,7 +45,7 @@
                 </div>
             </div>
             <div class="deal-item-action">
-                <a class="deal-item-button js-go-deals" rel="nofollow" href="javascript:void(0);" data-id="{{ $item->id }}">Shop Now</a>
+                <span class="deal-item-button js-go-deals" rel="nofollow" data-id="{{ $item->id }}">Shop Now</span>
             </div>
         </div>
     </div>

@@ -13,6 +13,9 @@
             .deal-button-filter-wrapper {padding-left: 10px}
             .keydeal-heading { font-size: 21px; margin-top: 12px; line-height: 1.3; }
         }
+        span.deal-item-button {
+            cursor: pointer;
+        }
     </style>
     <link rel="stylesheet" href="/frontend/css/slick.css?v=<?= Config::get('app.version'); ?>">
     <link rel="stylesheet" href="{{ asset('/vendor/deals-page/css/deal.css?v=' . time()) }}">
@@ -154,6 +157,15 @@
 
         document.addEventListener("DOMContentLoaded", function(event) {
             resetSlider('.favorite-related-stores');
+        });
+        document.addEventListener("click", function(e) {
+            var elClass = e.target.getAttribute("class");
+            if (elClass.indexOf("js-go-deals") !== -1) {
+                var itemId = e.target.getAttribute('data-id');
+                var originUrl = window.location.origin;
+                var fullUrl = `${originUrl}/go-deal/${itemId}`;
+                window.open(`${originUrl}/go-deal/${itemId}`);
+            }
         });
     </script>
 @endsection
