@@ -158,14 +158,5 @@
         document.addEventListener("DOMContentLoaded", function(event) {
             resetSlider('.favorite-related-stores');
         });
-        document.addEventListener("click", function(e) {
-            var elClass = e.target.getAttribute("class");
-            if (elClass.indexOf("js-go-deals") !== -1) {
-                var itemId = e.target.getAttribute('data-id');
-                var originUrl = window.location.origin;
-                var fullUrl = `${originUrl}/go-deal/${itemId}`;
-                window.open(`${originUrl}/go-deal/${itemId}`);
-            }
-        });
     </script>
 @endsection
