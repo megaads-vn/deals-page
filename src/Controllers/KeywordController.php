@@ -1,6 +1,7 @@
 <?php
 namespace Megaads\DealsPage\Controllers;
 
+use App\Models\StoreKeyword;
 use Carbon\Carbon;
 use Megaads\DealsPage\Models\Category;
 use Megaads\DealsPage\Models\Config;
@@ -43,6 +44,28 @@ class KeywordController extends Controller {
         if (empty($keyword)) {
             return abort(404);
         }
+        $similarSearch = [];
+        if (isset($keyword['similar_box']) && !empty($keyword['similar_box'])) {
+            $similarSearchObj = json_decode($keyword['similar_box'], true);
+            $similarSearchData = $similarSearchObj['data'];
+            foreach ($similarSearchData as $slug => $value) {
+                $buildItem = [
+                    'keyword' => $value,
+                    'slug' =>  $slug
+                ];
+                array_push($similarSearch, $buildItem);
+            }
+        }
+        $retVal['alsoSearch'] = StoreKeyword::alsoSearch($keyword['store_id']);
+        $retVal['popularSearchTitle'] = 'Popular Search';
+        if (count($similarSearch) <= 0) {
+            $retVal['popularSearch'] = StoreKeyword::popularSearch($keyword['store_id']);
+            $retVal['relevantSearch'] = StoreKeyword::relevantSearch($keyword['store_id']);
+        } else {
+            $retVal['popularSearch'] = json_decode(json_encode($similarSearch), false);
+            $retVal['relevantSearch'] = [];
+            $retVal['popularSearchTitle'] = 'Similar Search';
+        }
         $storeId = -1;
         $relationIds = DealRelation::query()->where('target_id', $keyword->id)->pluck('object_id');
         $store = NULL;
@@ -68,7 +91,6 @@ class KeywordController extends Controller {
         } else {
             return response()->redirectToRoute("frontend::keyword", ['slug' => $slug], 301);
         }
-
         $canonicalLink = route('frontend::keyword', $slug);
 
         View::share('canonicalLink', $canonicalLink);
@@ -148,11 +170,13 @@ class KeywordController extends Controller {
         $retVal['meta'] = ['title' => $keyword['keyword']];
         $retVal['total'] = $totalDeal;
         $this->getRecommendedCoupon($retVal, $keyword);
-        $this->getRelatedStores($retVal, $keyword['store_id']);
-        $this->getRelatedCategories($retVal,$keyword['store_id']);
-        $this->getSimilarSearch($retVal, $keyword);
+//        $this->getRelatedStores($retVal, $keyword['store_id']);
+//        $this->getRelatedCategories($retVal,$keyword['store_id']);
+//        $this->getSimilarSearch($retVal, $keyword);
         $this->contentTemplate($retVal, $keyword);
         $this->getTodayDeals($retVal, $keyword);
+        $this->getDealBrief($retVal, $keyword);
+
 
         return response()->make(view('deals-page::keypage.index', $retVal));
     }
@@ -478,17 +502,50 @@ class KeywordController extends Controller {
     private function getTodayDeals(&$retVal, $keyword)
     {
         $dealFilters = [
-            'pageSize' => 3,
+            'pageSize' => 5,
             'orderBy' => 'id_DESC',
             'columns' => ['id', 'title', 'slug']
         ];
-        if (isset($keyword['store_id'])) {
+        if (!empty($keyword['deal_filter'])){
+            $dealFilters['advSearch']['queryStr'] = trim($keyword['deal_filter']);
+        }elseif (isset($keyword['store_id'])) {
             $dealFilters['storeId'] = $keyword['store_id'];
         }
         $result = $this->dealRepository->read($dealFilters);
         if (count($result['data']) > 0) {
             $retVal['todayDeals'] = $result['data'];
         }
+    }
+
+    private function getDealBrief(&$retVal, $keyword){
+        $data = [
+        ];
+        $dealFilters = [
+            'pageSize' => 1,
+            'columns' => ['id', 'discount', 'sale_price']
+        ];
+        if (!empty($keyword['deal_filter'])){
+            $dealFilters['advSearch']['queryStr'] = trim($keyword['deal_filter']);
+            $dealFilters['order_by'] = 'discount::DESC';
+            $result = $this->dealRepository->read($dealFilters);
+            if (count($result['data']) > 0) {
+                $deal = $result['data'][0];
+                $data['offer'] = $deal->discount;
+            }
+            $dealFilters['order_by'] = 'price::DESC';
+            $result = $this->dealRepository->read($dealFilters);
+            if (count($result['data']) > 0) {
+                $deal = $result['data'][0];
+                $data['highPrice'] = $deal->sale_price;
+            }
+            $dealFilters['order_by'] = 'price::ASC';
+            $result = $this->dealRepository->read($dealFilters);
+            if (count($result['data']) > 0) {
+                $deal = $result['data'][0];
+                $data['lowPrice'] = $deal->sale_price;
+            }
+        }
+        $retVal['brief'] = $data;
     }
     /**
      * =================================================================================================================

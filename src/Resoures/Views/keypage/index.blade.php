@@ -83,6 +83,15 @@
                         @include('deals-page::keypage.inc.contentTemplate', [
                         'contentTemplate' => $contentTemplate
                         ])
+                        @if(isset($brief['lowPrice']))
+                            <div><b>Lowest Price: ${{$brief['lowPrice']}}</b></div>
+                        @endif
+                        @if(isset($brief['highPrice']))
+                            <div><b>Highest Price: ${{$brief['highPrice']}}</b></div>
+                        @endif
+                        @if(isset($brief['offer']))
+                            <div><b>Best Offer: {{$brief['offer']}}%</b></div>
+                        @endif
                     @endif
                     @if (isset($statistic))
                         @include('frontend.keyword.inc.statistic', [
