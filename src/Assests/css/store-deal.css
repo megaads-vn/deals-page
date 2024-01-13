@@ -201,13 +201,17 @@
     margin: 5px 0 10px;
     overflow-wrap: break-word;
     text-transform: capitalize;
-    padding-right: 15px;
     cursor: pointer;
 	padding-right: 16px;
 }
 
 .deal-item-description {
-	padding-right: 16px;
+    padding-right: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
 .deal-item-footer {

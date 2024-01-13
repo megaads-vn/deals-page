@@ -151,14 +151,15 @@ class KeywordController extends Controller {
         $getDeals = $this->dealRepository->read($dealFiler);
         $totalDeal = 0;
         $dealResult = [];
+        $pageCount = 0;
         if (isset($getDeals['data']) && count($getDeals['data']) > 0) {
             $dealResult = $getDeals['data'];
             unset($dealFiler['pageId']);
             unset($dealFiler['pageSize']);
             $dealFiler['metrics'] = 'count';
             $getTotal = $this->dealRepository->read($dealFiler);
-            if (isset($getDeals['data'])) {
-                $totalDeal = $getDeals['data'];
+            if (isset($getTotal['data'])) {
+                $totalDeal = $getTotal['data'];
             }
         }
         $retVal['keyword'] = $keyword;
