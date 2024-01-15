@@ -99,6 +99,9 @@
                         'statistic' => $statistic
                         ])
                     @endif
+                        @if (isset($popularSearch))
+                            @include('frontend.common.widgets.keyword', ['title' => $popularSearchTitle, 'keywords' => $popularSearch])
+                        @endif
                     @if (isset($todayDeals))
                         @include('deals-page::common.today-deals', ['title' => $keyword['keyword'] . ' Today','todayDeals' => $todayDeals])
                     @endif
