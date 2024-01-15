@@ -92,6 +92,7 @@
                         @if(isset($brief['offer']))
                             <div><b>Best Offer: {{$brief['offer']}}%</b></div>
                         @endif
+                        <br/>
                     @endif
                     @if (isset($statistic))
                         @include('frontend.keyword.inc.statistic', [

@@ -58,10 +58,7 @@ class KeywordController extends Controller {
         }
         $retVal['alsoSearch'] = StoreKeyword::alsoSearch($keyword['store_id']);
         $retVal['popularSearchTitle'] = 'Popular Search';
-        if (count($similarSearch) <= 0) {
-            $retVal['popularSearch'] = StoreKeyword::popularSearch($keyword['store_id']);
-            $retVal['relevantSearch'] = StoreKeyword::relevantSearch($keyword['store_id']);
-        } else {
+        if (count($similarSearch) > 0) {
             $retVal['popularSearch'] = json_decode(json_encode($similarSearch), false);
             $retVal['relevantSearch'] = [];
             $retVal['popularSearchTitle'] = 'Similar Search';
