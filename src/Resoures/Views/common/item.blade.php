@@ -31,13 +31,15 @@
             </div>
             <div class="deal-item-footer-box">
                 @if (!empty($item->store) && $showStore)
+                    Store:
                     <a target="_blank" href="{{ route('frontend::store::listByStore', ['slug' => $item->store->slug]) }}" title="{{ $item->store->name }}" class="name">
-                        Store: <span>{{ $item->store->name }}</span>
+                        <span>{{ $item->store->name }}</span>
                     </a>
                 @endif
                 @if (!empty($item->category))
+                    Category:
                     <a target="_blank" href="{{ route('frontend::category::listByCategory', ['slug' => $item->category->slug]) }}" title="{{ $item->category->title }}" class="name">
-                        Category: <span>{{ $item->category->title }}</span>
+                        <span>{{ $item->category->title }}</span>
                     </a>
                 @endif
                 <div>

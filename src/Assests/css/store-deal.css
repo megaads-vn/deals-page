@@ -1,3 +1,15 @@
+h1 {
+    font-size: calc(21px + (25 - 21) * ((100vw - 300px) / (1920 - 300)));
+}
+
+h2 {
+    font-size: calc(19px + (23 - 19) * ((100vw - 300px) / (1920 - 300)));
+}
+
+h3 {
+    font-size: calc(17px + (21 - 17) * ((100vw - 300px) / (1920 - 300)));
+}
+
 .lp-results {
 	width: 75%;
 }
@@ -195,7 +207,7 @@
 .deal-item-header {
     color: #337ab7;
     display: block;
-    font-size: 23px;
+    font-size: calc(17px + (21 - 17) * ((100vw - 300px) / (1920 - 300)));
     line-height: 26px;
     font-weight: 600;
     margin: 5px 0 10px;
