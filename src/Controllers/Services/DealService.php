@@ -294,25 +294,18 @@ class DealService extends BaseService
      */
     public function bulkCreateWithSchedule(Request $request)
     {
+        set_time_limit(30);
         $response = $this->getDefaultStatus();
         try {
-            $catalogPage = 0;
-            if (\Cache::has('dealCrawler::catalogPage')) {
-                $catalogPage = \Cache::get('dealCrawler::catalogPage');
-            }
-            $count = $this->catalogRepository->read(['crawl_state' => 'processing', 'metrics' => 'count', 'columns' => ['id', 'cid', 'crawl_page']]);
-            if ($count <= 0) {
-                $response = $this->getSuccessStatus();
-                $response['message'] = 'All Done';
-                return \Response::json($response);
-            }
-            $catalog = $this->catalogRepository->read(['crawl_page' => $catalogPage, 'crawl_state' => 'processing', 'metrics' => 'first', 'columns' => ['id', 'cid', 'crawl_page', 'name']]);
+            $today = date('Y-m-d 00:00:00');
+            $catalog = $this->catalogRepository->read(['metrics' => 'first', 'updated_to' => $today,'columns' => ['id', 'cid', 'crawl_page', 'name']]);
+
             if (!empty($catalog)) {
                 $catalogId = $catalog->cid;
-                $pageId = $catalog->crawl_page + 1;
-                $reqResult = $this->apiRequestRepository->readCatalogProducts($catalogId, $pageId);
-                $expireAt = Carbon::now()->addDay(30);
-                \Cache::put('dealCrawler::catalogPage', $catalogPage, $expireAt);
+                $startGetCatalog = microtime(true);
+                $reqResult = $this->apiRequestRepository->readCatalogProducts($catalogId, 1);
+                $getCatalogTimeElapsed = microtime(true) - $startGetCatalog;
+//                \Log::info('MEASURE_GET_CATALOG= ' . $getCatalogTimeElapsed . ' secs');
                 $totalDeals = 0;
                 if (!empty($reqResult)) {
                     $bulkInsertData = [];
@@ -326,27 +319,16 @@ class DealService extends BaseService
                         $bulkInsertData[] = $this->buildInsertDealItem($item);
                     }
                     $totalDeals = count($bulkInsertData);
-                    sendHttpRequest(config('deals-page.app_url') . "/service/deal/bulk-create",
-                        "POST",
-                        ["params" => $bulkInsertData],
-                        [
-                            "Authorization: Basic YXBpOjEyM0AxMjNh",
-                            "Accept: application/json, text/plain, */*",
-                            "Content-Type: application/json;charset=utf-8"
-                        ]);
-                    $this->catalogRepository->update($catalog->id, ['crawl_page' => $catalog->crawl_page + 1]);
+                    if ($totalDeals > 0) {
+                        $this->bulkCreateItem($bulkInsertData);
+                    }
+                    $this->catalogRepository->update($catalog->id, ['update_time' => date('Y-m-d H:i:s')]);
                 } else {
-                    $this->catalogRepository->update($catalog->id, ['crawl_page' => 0, 'crawl_state' => 'done']);
+                    $this->catalogRepository->update($catalog->id, ['crawl_page' => 0, 'crawl_state' => 'done', 'update_time' => date('Y-m-d H:i:s')]);
                 }
                 $response = $this->getSuccessStatus();
-                $response['catalogPage'] = $catalogPage;
                 $response['cataLog'] = $catalog->name;
                 $response['totalDeal'] = $totalDeals;
-                $response['message'] = 'Job was set!';
-            } else {
-                $expireAt = Carbon::now()->addDay(30);
-                \Cache::put('dealCrawler::catalogPage', $catalogPage + 1, $expireAt);
-                $response = $this->getSuccessStatus();
                 $response['message'] = 'Job was set!';
             }
 
@@ -733,5 +715,53 @@ class DealService extends BaseService
     {
         $string = strtolower(preg_replace('/(?<!^)[A-Z]/', ' $0', $string));
         return ucwords($string, ' ');
+    }
+
+    /**
+     * @param $params
+     * @return void
+     */
+    protected function bulkCreateItem($params) {
+        try {
+            \Log::info('BULK_CREATE_DEAL');
+            $insertResult = [];
+            $startCreate = microtime(true);
+            foreach ($params as $item) {
+                if (!isset($item['slug']) || empty($item['slug'])) {
+                    \Log::info('EMPTY_DEAL_SLUG: ' . json_encode($item));
+                    continue;
+                }
+                $findExists = Deal::query()
+                    ->where('slug', $item['slug'])
+                    ->orWhere('origin_link', $item['origin_link'])
+                    ->first(['id']);
+                if (empty($findExists)) {
+                    $resultId = $this->dealRepository->create($item);
+                    $insertResult[$resultId] = $item['category_id'];
+                }
+            }
+            $timeElapsedSecsCreate = microtime(true) - $startCreate;
+//            \Log::info('MEASURE_CREATE=' . $timeElapsedSecsCreate . ' secs');
+            if (count($insertResult) > 0) {
+                $startAddRelation = microtime(true);
+                foreach ($insertResult as $dealId => $strCategoryId) {
+                    $categoryIds = explode(',', $strCategoryId);
+                    $bulkCateInsert = [];
+                    foreach ($categoryIds as $cId) {
+                        $bulkCateInsert = [
+                            'deal_id' => $dealId,
+                            'category_id' => trim($cId)
+                        ];
+                    }
+                    if (count($bulkCateInsert) > 0) {
+                        DealCategory::insert($bulkCateInsert);
+                    }
+                }
+                $timeElapsedSecsRelation = microtime(true) - $startAddRelation;
+//                \Log::info('MEASURE_RELATION=' . $timeElapsedSecsRelation . ' secs');
+            }
+        } catch (\Exception $exception) {
+            \Log::error('CREATE_DEAL_ITEMS: ' . $exception->getMessage() . '. Line: ' . $exception->getLine() . '. File: ' . $exception->getFile());
+        }
     }
 }

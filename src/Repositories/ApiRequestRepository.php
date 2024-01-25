@@ -45,7 +45,7 @@ class ApiRequestRepository
      * @param $pageId
      * @return array|mixed
      */
-    public function readCatalogProducts($catalogId, $pageId)
+    public function readCatalogProducts($catalogId, $pageId, $pageSize = 100)
     {
         $retVal = [];
         $requestConig = Config::get('deals-page.service');
@@ -56,7 +56,7 @@ class ApiRequestRepository
             "token" => $requestConig['token'],
             "siteName" => Config::get('deals-page.site_name'),
             "page" => $pageId,
-            "pageSize" => 500,
+            "pageSize" => $pageSize,
             "cid" => $catalogId,
         ];
         $resResult = sendHttpRequest($fullRequest, "GET", $params);

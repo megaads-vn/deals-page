@@ -116,6 +116,12 @@ class CatalogRepository extends BaseRepository
         if (array_key_exists("crawl_state", $filters)) {
             $query->where('crawl_state', $filters['crawl_state']);
         }
+        if (array_key_exists('updated_from', $filters)) {
+            $query->where('update_time', '>=', $filters['updated_from']);
+        }
+        if (array_key_exists('updated_to', $filters)) {
+            $query->where('update_time', '<', $filters['updated_to']);
+        }
         if (array_key_exists('order_by', $filters)) {
             $orderByAttributes = explode('_', $filters['order_by']);
             $sortOrder = $orderByAttributes[1];
