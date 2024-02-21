@@ -4,13 +4,13 @@ namespace Megaads\DealsPage\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Author;
-use App\Models\Category;
 use App\Models\Coupon;
 use App\Models\StoreContact;
 use App\Models\StoreEmbed;
 use App\Models\StoreKeyword;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
+use Megaads\DealsPage\Models\Category;
 use Megaads\DealsPage\Models\Deal;
 use Megaads\DealsPage\Models\DealCategory;
 use Megaads\DealsPage\Models\Store;
@@ -49,7 +49,12 @@ class DealsController extends Controller {
         view()->share('allDealTitle', 'All Deals');
     }
 
-    public function index($slug) {
+    /**
+     * @param $slug
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function index($slug)
+    {
         $getDeal = Deal::from('deals')
                     ->where('slug', $slug)
                     ->where('status', Deal::STATUS_ACTIVE)
@@ -66,18 +71,20 @@ class DealsController extends Controller {
 
         $breadcrumbs = [];
         if (!empty($categories)) {
-            $breadcrumbs = [
-                [
-                    'title' => $categories->title,
-                    'url' => route('frontend::category::listByCategory', ['slug' => $categories->slug])
-                ]
+            $breadcrumbs[] = [
+                'title' => $categories->title,
+                'url' => route('frontend::category::deals', ['slug' => $categories->slug])
             ];
         }
-        $breadcrumbs = [
-            [
-                'title' => $getDeal->title,
-                'url' => ''
-            ]
+        if (!empty($store)) {
+            $breadcrumbs[] = [
+                'title' => $store->title,
+                'url' => route('frontend::store::listDeal', ['slug' => $store->slug])
+            ];
+        }
+        $breadcrumbs[] = [
+            'title' => $getDeal->title,
+            'url' => ''
         ];
 
         $retVal['detailItem'] = $getDeal;
@@ -93,7 +100,11 @@ class DealsController extends Controller {
         return \View::make('deals-page::deals.detail', $retVal);
     }
 
-    public function allDeals() {
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\View\View
+     */
+    public function allDeals()
+    {
         $keyConfig = 'top.product.search';
         $categories = $this->categoryRepository->getListCategory();
         $deals = $this->dealRepository->getList();
@@ -112,7 +123,13 @@ class DealsController extends Controller {
         ]);
     }
 
-    public function dealDetail($itemId, \Request  $request) {
+    /**
+     * @param $itemId
+     * @param \Request $request
+     * @return \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function dealDetail($itemId, \Request  $request)
+    {
         return redirect('/');
         $segment = request()->segment(2);
         $filterDeal = [
@@ -143,7 +160,13 @@ class DealsController extends Controller {
 
     }
 
-    public function listByStore($slug, \Request $request) {
+    /**
+     * @param $slug
+     * @param \Request $request
+     * @return \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function listByStore($slug, \Request $request)
+    {
         return redirect('/');
         $retVal = [];
         $findStore = Store::query()->where('slug', $slug)->first(['id', 'title', 'slug']);
@@ -191,6 +214,10 @@ class DealsController extends Controller {
         return view('deals-page::deals.alldeals', $retVal);
     }
 
+    /**
+     * @param $slug
+     * @return \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|void
+     */
     public function goUrl($slug)
     {
         $query = Deal::query();
@@ -210,6 +237,10 @@ class DealsController extends Controller {
         }
     }
 
+    /**
+     * @param $item
+     * @return string
+     */
     private function saveDealsImage($item) {
         $imageUrl = $item->imageUrl;
         $imageUrl = explode('?', $imageUrl)[0];
@@ -234,7 +265,15 @@ class DealsController extends Controller {
         return "/" . $dealsPath . "/" . $imageName;
     }
 
-    protected function addXcust($url, $storeId, $couponId = 0, $type = 'coupon') {
+    /**
+     * @param $url
+     * @param $storeId
+     * @param $couponId
+     * @param $type
+     * @return mixed|string
+     */
+    protected function addXcust($url, $storeId, $couponId = 0, $type = 'coupon')
+    {
         $uId = app('session')->get('uId');
         if (!$uId) {
             $uId = substr(str_shuffle(str_repeat("0123456789abcdefghijklmnopqrstuvwxyz", 29)), 0, 29);
@@ -280,7 +319,11 @@ class DealsController extends Controller {
         return $url;
     }
 
-    private function getDataFromReferer() {
+    /**
+     * @return array
+     */
+    private function getDataFromReferer()
+    {
         $retVal = [];
         try {
             $referer = app('session')->get('referer');
@@ -297,7 +340,12 @@ class DealsController extends Controller {
         return $retVal;
     }
 
-    protected function netGoTracking($params = []) {
+    /**
+     * @param $params
+     * @return void
+     */
+    protected function netGoTracking($params = [])
+    {
         try {
             $refererUrl = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : '';
             $params = array_merge($params, [
@@ -322,7 +370,11 @@ class DealsController extends Controller {
         }
     }
 
-    protected function getDealStore() {
+    /**
+     * @return null
+     */
+    protected function getDealStore()
+    {
         $retVal = NULL;
         $dealStoreIds = Deal::query()->where('store_id', '>', 0)->distinct()->pluck('store_id');
         if (count($dealStoreIds) > 0) {
@@ -337,7 +389,8 @@ class DealsController extends Controller {
      * @param $slug
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\View\View
      */
-    protected function showDeal($itemId, $slug = '') {
+    protected function showDeal($itemId, $slug = '')
+    {
         $retVal = [];
         $dealFilter = [
             'columns' => ['id', 'title', 'slug',
@@ -375,14 +428,16 @@ class DealsController extends Controller {
      * @param $param2
      * @return \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|void
      */
-    public function storeDeal($slug="", $param1 = 0, $param2 = 0) {
+    public function storeDeal($slug="", $param1 = 0, $param2 = 0)
+    {
         $canonicalLink = route('frontend::store::listDeal', $slug);
         $retVal = [];
         $store = $this->getStore($slug);
         if (empty($store)) {
             return redirect(route('frontend::store::listByStore', ['slug' => $slug]));
         }
-
+        $relatedStore = $this->getRelatedStoreDeal($store->id);
+        $relatedCategory = $this->getRelatedCategoryDealById($store->id);
         $dataCoupon = NULL;
         $relatedCoupon = NULL;
         if(!empty(Request::segment(4)) && Request::segment(4) == 'c'){
@@ -450,10 +505,16 @@ class DealsController extends Controller {
         $retVal['localSchema'] = ''; //$this->buildSchema($store,$couponResult['result']['data']);
         $retVal['dataCoupon'] = $dataCoupon;
         $retVal['relatedCoupon'] = $relatedCoupon;
+        $retVal['relatedStore'] = $relatedStore;
+        $retVal['relatedCategory'] = $relatedCategory;
         return view('deals-page::deals.list-by-store', $retVal);
     }
 
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Throwable
+     */
     public function loadMoreDeal()
     {
         $response = [
@@ -478,12 +539,22 @@ class DealsController extends Controller {
         return response()->json($response);
     }
 
+    /**
+     * @param $slug
+     * @return \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function redirect($slug)
     {
         return redirect(route('frontend::store::listDeal', ['slug' => $slug]), 301);
     }
 
 
+    /**
+     * @param $slug
+     * @param $param1
+     * @param $param2
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\View\View|null
+     */
     public function categoryDeals($slug="", $param1=0, $param2=0)
     {
         \View::share('isShowStore', true);
@@ -582,7 +653,13 @@ class DealsController extends Controller {
                             ->where('sc.category_id', '=', $category->id)
                             ->groupBy('d.store_id')
                             ->pluck('sc.store_id');
-
+        if (empty($listDeals) && !empty($saleStoreIds)) {
+            $buildResult = $this->rebuildCategoryDealByStore($saleStoreIds, $category->id);
+            if ($buildResult) {
+                $dealResult = $this->getDealLists($dealFilters);
+                $listDeals = $dealResult['data'];
+            }
+        }
         $responseResult = \App\Utils\Utils::getInternalRequests('/service/store/find', [
             'status' => 'enable',
             'ids' => join(",", $saleStoreIds),
@@ -623,6 +700,9 @@ class DealsController extends Controller {
     }
 
 
+    /**
+     * @return void
+     */
     public function buildDealCategory()
     {
         set_time_limit(86400);
@@ -1058,6 +1138,94 @@ class DealsController extends Controller {
             }
         }
 
+        return $retVal;
+    }
+
+    /**
+     * @param $storeId
+     * @return null
+     */
+    private function getRelatedStoreDeal($storeId)
+    {
+        $retVal = NULL;
+        $categoryId = StoreCategory::query()->where('store_id', $storeId)->first(['category_id']);
+        if (!empty($categoryId)) {
+            $storeIds = StoreCategory::query()
+                    ->where('store_id', '<>', $storeId)
+                    ->where('category_id', $categoryId->category_id)
+                    ->pluck('store_id');
+            if (!empty($storeIds)) {
+                $storeIds = $storeIds->toArray();
+                $defaultField = array("id", "title", "slug", "type", "description", "sorder", "image as coverImage",
+                    "auto_text as autoText", "website as websiteUrl", "affiliate_link as affiliateUrl", "origin_link as originUrl",
+                    "related_store as relatedTerms", "status", "vote_up as voteUp", "vote_down as voteDown", "meta_title as metaTitle",
+                    "meta_description as metaDescription", "meta_keywords as metaKeywords", "views", "clicks", "creator_id as creatorId",
+                    "create_name as creatorName", "modifier_id as modifierId", "modifier_name as modifierName", "create_time as createTime",
+                    "update_time as modifyTime", "coupon_count as couponCount", "inactive_affiliate as isInactiveAffiliate","content",
+                    "config", "crawl_rating", "crawl_rating_count");
+                $store = Store::has('deals')
+                        ->whereIn('id', $storeIds)
+                        ->get($defaultField);
+
+                if (!empty($store)) {
+                    $retVal = $store->toArray();
+                }
+            }
+        }
+        return $retVal;
+    }
+
+    /**
+     * @param $storeIds
+     * @param $categoryId
+     * @return bool
+     */
+    private function rebuildCategoryDealByStore($storeIds, $categoryId)
+    {
+        $retVal = false;
+        try {
+            $dealIds = Deal::where('status', Deal::STATUS_ACTIVE)
+                ->whereIn('store_id', $storeIds)
+//                ->limit(100)
+                ->pluck('id');
+
+            $insertData = [];
+            if (!empty($dealIds)) {
+                foreach ($dealIds->toArray() as $item) {
+                    $insertData[] = [
+                        'category_id' => $categoryId,
+                        'deal_id' => $item
+                    ];
+                }
+            }
+            if (count($insertData) > 0) {
+                DealCategory::insert($insertData);
+                $retVal = true;
+            }
+        } catch (\Exception $ex) {
+            \Log::error('BUILD_CATEGORY_DEAL: ' . $ex->getMessage() . ' Line ' . $ex->getLine() . '. File ' . $ex->getFile());
+        }
+        return $retVal;
+    }
+
+    /**
+     * @param $storeId
+     * @return null
+     */
+    private function getRelatedCategoryDealById($storeId)
+    {
+        $retVal = NULL;
+        $categoryId = StoreCategory::query()->where('store_id', $storeId)->first(['category_id']);
+        $relatedCategory = Category::from('category as c')
+                            ->join('deal_n_category as dc', 'dc.category_id', '=', 'c.id')
+                            ->join('category as c1', 'c1.parent_id', '=', 'c.parent_id')
+                            ->where('c1.id', $categoryId->category_id)
+                            ->where('c.status', Category::STATUS_ENABLE)
+                            ->groupBy('dc.category_id')
+                            ->get(['c.id', 'c.title', 'c.slug']);
+        if (!empty($relatedCategory)) {
+            $retVal = $relatedCategory->toArray();
+        }
         return $retVal;
     }
 }

@@ -117,8 +117,9 @@
                         </div>
                         @include('frontend.common.widgets.related-store', [
                             'storeId' => $store->id,
-                            'storeRelated' => $store->relatedTerms,
-                            'favoriteRelatedStoresClass' => 'favorite-related-stores-slide'
+                            'dealStores' => $relatedStore,
+                            'favoriteRelatedStoresClass' => 'favorite-related-stores-slide',
+                            'routeName' => 'frontend::store::listDeal'
                         ])
                         @if (isset($listCoupon) && !empty($listCoupon))
                             @include('frontend.common.widgets.list-coupon', ['coupons' => $listCoupon['result']['data'], 'store' => $store->title, 'date' => '(' .date('M d, Y'). ')', 'recordsCount' => $listCoupon['result']['recordsCount']])
@@ -129,7 +130,11 @@
                                 </a>
                             </div>
                         @endif
-                        @include('frontend.common.widgets.random-box', ['widgetTitle' => 'Related Categories',  'storeItem' => json_decode(json_encode($store), true)])
+                        @include('frontend.common.widgets.random-box', [
+                            'widgetTitle' => 'Related Categories',
+                            'categoryData' => $relatedCategory,
+                            'categoryRouteName' => 'frontend::category::deals',
+                            'forceShow' => true])
                         <div class="clear"></div>
                     </div>
                     <div class="col-lg-3 col-md-3 col-sm-12 left-menu">
