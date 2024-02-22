@@ -134,6 +134,7 @@
                             'widgetTitle' => 'Related Categories',
                             'categoryData' => $relatedCategory,
                             'categoryRouteName' => 'frontend::category::deals',
+                            'typeText' => 'Deals',
                             'forceShow' => true])
                         <div class="clear"></div>
                     </div>
@@ -163,7 +164,7 @@
             </div>
         </div>
     </main>
-    {!! Breadcrumbs::render('store_page', $breadcrumbs) !!}
+    {!! Breadcrumbs::render('store_deals_page', $breadcrumbs) !!}
 @endsection
 
 @section('js')

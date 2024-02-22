@@ -96,7 +96,7 @@
             </div>
         </div>
     </main>
-    {!! Breadcrumbs::render('category_page', $breadcrumbs) !!}
+    {!! Breadcrumbs::render('category_deal_page', $breadcrumbs) !!}
 @endsection
 
 @section('js')
