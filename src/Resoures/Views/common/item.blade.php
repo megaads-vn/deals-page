@@ -18,7 +18,7 @@
             <h3 class="deal-item-header">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
-            {!! $item->content !!}
+            {{ strip_tags($item->content) }}
         </div>
         <div class="deal-item-footer">
             <div class="deal-item-price-box">
