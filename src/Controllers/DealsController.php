@@ -70,22 +70,31 @@ class DealsController extends Controller {
         $store = $getDeal->store()->first(['id', 'title', 'slug', 'vote_up', 'vote_down']);
 
         $breadcrumbs = [];
+        $canonicalLink = url()->current();
+        
         if (!empty($categories)) {
             $breadcrumbs[] = [
                 'title' => $categories->title,
                 'url' => route('frontend::category::deals', ['slug' => $categories->slug])
             ];
         }
+        
         if (!empty($store)) {
             $breadcrumbs[] = [
                 'title' => $store->title,
                 'url' => route('frontend::store::listDeal', ['slug' => $store->slug])
             ];
+            $canonicalLink = route('frontend::store::listDeal', ['slug' => $store->slug]);
         }
         $breadcrumbs[] = [
             'title' => $getDeal->title,
             'url' => ''
         ];
+        
+        if (empty($store) && !empty($categories)) {
+            $canonicalLink = route('frontend::category::deals', ['slug' => $categories->slug]);
+        }
+        view()->share('canonicalLink', $canonicalLink);
 
         $retVal['detailItem'] = $getDeal;
         $retVal['dealCategories'] = $categories;
