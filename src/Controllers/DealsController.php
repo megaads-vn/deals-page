@@ -70,7 +70,7 @@ class DealsController extends Controller {
         $store = $getDeal->store()->first(['id', 'title', 'slug', 'vote_up', 'vote_down']);
 
         $breadcrumbs = [];
-        $canonicalLink = url()->current();
+        $canonicalLink = route('deal::all');
         
         if (!empty($categories)) {
             $breadcrumbs[] = [
