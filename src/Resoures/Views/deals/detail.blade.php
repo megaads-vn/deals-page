@@ -31,11 +31,11 @@
                             </h1>
                             <div class="product-cate-store-link">
                                 @if(isset($dealCategories) && !empty($dealCategories))
-                                    <a href="{{ route('frontend::store::listDeal', ['slug' => $dealCategories->slug]) }}" title="{{ $dealCategories->title  }}}">{{ $dealCategories->title }}</a>
+                                    <a href="{{ route('frontend::category::deals', ['slug' => $dealCategories->slug]) }}" title="{{ $dealCategories->title  }}}">{{ $dealCategories->title }}</a>
                                     <span class="vertical-line"> | </span>
                                 @endif
                                 @if(isset($dealStore) && !empty($dealStore))
-                                    <a href="{{ route('frontend::category::deals', ['slug' => $dealStore->slug]) }}" title="{{ $dealStore->title  }}}">{{ $dealStore->title }}</a>
+                                    <a href="{{ route('frontend::store::listDeal', ['slug' => $dealStore->slug]) }}" title="{{ $dealStore->title  }}}">{{ $dealStore->title }}</a>
 {{--                                    <span class="vertical-line"> | </span>--}}
                                 @endif
                             </div>
