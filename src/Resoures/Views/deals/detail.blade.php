@@ -31,20 +31,22 @@
                             </h1>
                             <div class="product-cate-store-link">
                                 @if(isset($dealCategories) && !empty($dealCategories))
-                                    <a href="{{ route('frontend::category::listByCategory', ['slug' => $dealCategories->slug]) }}" title="{{ $dealCategories->title  }}}">{{ $dealCategories->title }}</a>
+                                    <a href="{{ route('frontend::store::listDeal', ['slug' => $dealCategories->slug]) }}" title="{{ $dealCategories->title  }}}">{{ $dealCategories->title }}</a>
                                     <span class="vertical-line"> | </span>
                                 @endif
                                 @if(isset($dealStore) && !empty($dealStore))
-                                    <a href="{{ route('frontend::store::listByStore', ['slug' => $dealStore->slug]) }}" title="{{ $dealStore->title  }}}">{{ $dealStore->title }}</a>
+                                    <a href="{{ route('frontend::category::deals', ['slug' => $dealStore->slug]) }}" title="{{ $dealStore->title  }}}">{{ $dealStore->title }}</a>
 {{--                                    <span class="vertical-line"> | </span>--}}
                                 @endif
                             </div>
                             <div class="manufacturer">
                               <span>Manufacturer:</span> {{ $detailItem->manufacturer }}
                             </div>
+                            @if(!empty($detailItem->upc_or_ean))
                             <div class="upc-or-ean">
                               <span>UPC or EAN:</span> {{ $detailItem->upc_or_ean }}
                             </div>
+                            @endif
                             <div class="product-price">
                                 <div class="product-price-reverse">
                                     @if ($detailItem->discount > 0)
