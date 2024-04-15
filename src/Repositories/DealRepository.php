@@ -30,7 +30,7 @@ class DealRepository extends BaseRepository
 
     /**
      * @param $filters
-     * @return array|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|void|null
+     * @return array
      */
     public function read($filters)
     {
@@ -183,10 +183,10 @@ class DealRepository extends BaseRepository
 
                 if (preg_match('/text~([(\w+)+\s+]+)/i', $strQuery, $matches) && isset($matches[1])) {
                     $strText = $matches[1];
-                    $query->where(function($q) use ($strText) {
-                        $q->where('title', 'LIKE', "%$strText%")
-                            ->orWhere('content', 'LIKE', "%$strText%");
-                    });
+                    $query->where('title', 'LIKE', "%$strText%");
+                    // $query->where(function($q) use ($strText) {
+                    //         ->orWhere('content', 'LIKE', "%$strText%");
+                    // });
                 }
                 if (preg_match('/exc_keyword=\[(.*?)\]/i', $strQuery, $matches) && isset($matches[1])) {
                     $excludeKeywords = json_decode("[$matches[1]]");
@@ -213,6 +213,10 @@ class DealRepository extends BaseRepository
                     if (!empty($filterPrice)) {
                         $query->where('price', $filterPrice->operator, $filterPrice->value);
                     }
+                }
+                if (preg_match('/store_id=(\d+)/i', $strQuery, $matches) && isset($matches[1])) {
+                    $storeId = $matches[1];
+                    $query->where('store_id', $storeId);
                 }
 
             }
