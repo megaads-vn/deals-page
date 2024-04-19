@@ -1099,6 +1099,7 @@ class DealsController extends Controller {
     private function getRelatedCateDeal($dealId)
     {
         $retVal = [];
+        $defaultImage = 'vendor/deals-page/images/category-default-logo.png';
         $totalDeal = 0;
         $parentCategory = Category::from('category as c')
                     ->join('deal_n_category as dc', 'dc.category_id', '=', 'c.id')
@@ -1112,7 +1113,15 @@ class DealsController extends Controller {
                                 ->groupBy('dc.category_id')
                                 ->limit(15)
                                 ->get(['c.id', 'c.title', 'c.slug', 'c.image']);
-            if (!empty($categoryHasDeal)) {
+            
+            if (!empty($categoryHasDeal)) { 
+                foreach ($categoryHasDeal as &$item) {
+                    if (empty($item->image)) {
+                        $item->image = $defaultImage;
+                    } else if (!empty($item->image) && !file_exists(public_path($item->image))) {
+                        $item->image = $defaultImage;
+                    }
+                }
                 $retVal = $categoryHasDeal;
             }
         }

@@ -412,15 +412,16 @@ class KeywordController extends Controller {
         $contentTemplateTrans['[title]'] = isset($store) ? $store['title'] : '';
         $retVal['contentTemplate'] = $this->getContentTemplate(
             $contentTemplateTrans,
-            "keypage.contentTemplate"
+            "deals.keypage"
         );
+        
         if (!empty(trim(strip_tags($keyword['content'])))){
             $keyword['content'] =  strtr($keyword['content'],$contentTemplateTrans);
             $keyword['content'] =  replaceMonthYear($keyword['content']);
         }else{
             $retVal['contentTemplateFAQ'] = $this->getContentTemplate(
                 $contentTemplateTrans,
-                "keypage.contentTemplateFAQ"
+                "deals.keypageFAQ"
             );
             $retVal['contentTemplateFAQ'] = $this->parseContentTemplateFAQ($retVal['contentTemplateFAQ']);
             $retVal['contentTemplateFAQ'] = replaceMonthYear($retVal['contentTemplateFAQ']);
