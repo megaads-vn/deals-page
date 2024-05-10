@@ -257,7 +257,7 @@ class DealService extends BaseService
                     }
                     $findExists = Deal::query()
                         ->where('slug', $item['slug'])
-                        ->orWhere('origin_link', $item['origin_link'])
+                        // ->orWhere('origin_link', $item['origin_link'])
                         ->first(['id']);
                     if (empty($findExists)) {
                         $resultId = $this->dealRepository->create($item);
@@ -733,7 +733,7 @@ class DealService extends BaseService
                 }
                 $findExists = Deal::query()
                     ->where('slug', $item['slug'])
-                    ->orWhere('origin_link', $item['origin_link'])
+                    // ->orWhere('origin_link', $item['origin_link'])
                     ->first(['id']);
                 if (empty($findExists)) {
                     $resultId = $this->dealRepository->create($item);
