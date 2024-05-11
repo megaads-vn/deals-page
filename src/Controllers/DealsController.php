@@ -680,13 +680,13 @@ class DealsController extends Controller {
         if ($responseResult['status'] === 'successful') {
             $stores = $responseResult['result']['data'];
         }
-
-        $similarSaleCate = \DB::table('category as c')
-                            ->join('deal_n_category as dc', 'dc.category_id', '=', 'c.id')
-                            ->where('c.depth', $category->depth)
-                            ->where('c.id', '<>', $category->id)
-                            ->groupBy('dc.category_id')
-                            ->get(['c.id', 'c.title', 'c.slug']);
+        $similarSaleCate = [];
+        // $similarSaleCate = \DB::table('category as c')
+        //                     ->join('deal_n_category as dc', 'dc.category_id', '=', 'c.id')
+        //                     ->where('c.depth', $category->depth)
+        //                     ->where('c.id', '<>', $category->id)
+        //                     ->groupBy('dc.category_id')
+        //                     ->get(['c.id', 'c.title', 'c.slug']);
 
         $this->countSimilarCateProduct($similarSaleCate);
 
@@ -1056,7 +1056,7 @@ class DealsController extends Controller {
                     ->where('store_id', $storeId);
             $totalDeals = (clone $query)->count();
             $deals = $query->limit(15)
-                    ->get();
+                    ->get(['id', 'title', 'slug', 'image', 'price', 'sale_price', 'discount', 'expire_time']);
             if (!empty($deals)) {
                 $retVal = $deals;
             }
@@ -1073,20 +1073,33 @@ class DealsController extends Controller {
     {
         $retVal = [];
         $totalDeal = 0;
+        $cacheKey = 'totalRelatedDeal::' . $dealId;
         $category = DealCategory::where('deal_id', $dealId)->first(['category_id']);
         if (!empty($category)) {
-            $query = Deal::from('deals as d')
-                        ->join('deal_n_category as c', 'c.deal_id', '=', 'd.id')
-                        ->where('status', 'active')
-                        ->where('d.id', '<>', $dealId)
-                        ->where('c.category_id', $category->category_id);
-            $totalDeal = (clone $query)->count();
-            $relatedItems = $query->orderBy('d.id', 'DESC')
-                        ->limit(15)
-                        ->get();
-            if (!empty($relatedItems)) {
-                $retVal = $relatedItems;
+            $queryDealNCate = DealCategory::where('category_id', $category->category_id)
+                                ->where('deal_id', '<>', $dealId);
+            if (Cache::has($key)) {
+                $totalDeal = Cache::get($key);
+            } else {
+                $totalDeal = $queryDealNCate->count();
+                $expireTime = Carbon::now()->addHours(14);
+                Cache::put($key, $totalDeal, $expireTime);
             }
+            if ($totalQuery > 0) {
+                $getDealNCate = $queryDealNCate->orderBy('deal_id', 'DESC')
+                            ->limit(30)
+                            ->pluck('deal_id');
+                if (!empty($getDealNCate)) {
+                    $getDealNCate = $getDealNCate->toArray();
+                    $deals = Deal::whereIn('id', $getDealNCate)
+                            ->where('status', Deal::STATUS_ACTIVE)
+                            ->limit(15)
+                            ->get(['id', 'title', 'slug', 'image', 'price', 'sale_price', 'discount', 'expire_time']);
+                    if (!empty($deals)) {
+                        $retVal = $deals;
+                    }
+                } 
+            }  
         }
         view()->share('totalRelatedDeal', $totalDeal);
         return $retVal;
