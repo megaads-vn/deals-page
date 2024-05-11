@@ -1078,14 +1078,14 @@ class DealsController extends Controller {
         if (!empty($category)) {
             $queryDealNCate = DealCategory::where('category_id', $category->category_id)
                                 ->where('deal_id', '<>', $dealId);
-            if (Cache::has($key)) {
-                $totalDeal = Cache::get($key);
+            if (\Cache::has($cacheKey)) {
+                $totalDeal = \Cache::get($cacheKey);
             } else {
+                
                 $totalDeal = $queryDealNCate->count();
-                $expireTime = Carbon::now()->addHours(14);
-                Cache::put($key, $totalDeal, $expireTime);
+                \Cache::put($cacheKey, $totalDeal, 24 * 60);
             }
-            if ($totalQuery > 0) {
+            if ($totalDeal > 0) {
                 $getDealNCate = $queryDealNCate->orderBy('deal_id', 'DESC')
                             ->limit(30)
                             ->pluck('deal_id');
