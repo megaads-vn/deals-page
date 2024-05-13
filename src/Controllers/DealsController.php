@@ -681,14 +681,20 @@ class DealsController extends Controller {
             $stores = $responseResult['result']['data'];
         }
         $similarSaleCate = [];
-        // $similarSaleCate = \DB::table('category as c')
-        //                     ->join('deal_n_category as dc', 'dc.category_id', '=', 'c.id')
-        //                     ->where('c.depth', $category->depth)
-        //                     ->where('c.id', '<>', $category->id)
-        //                     ->groupBy('dc.category_id')
-        //                     ->get(['c.id', 'c.title', 'c.slug']);
+        $allDealCategories = \DB::table('deal_n_category')
+                            ->where('category_id', '<>',$category->id)
+                            ->where('category_id', '<>', 0)
+                            ->select(\DB::raw('DISTINCT category_id'))
+                            ->pluck('category_id');
+        if (!empty($allDealCategories)) {
+            $similarSaleCate = \DB::table('category as c')
+                                ->where('c.depth', $category->depth)
+                                ->whereIn('c.id', $allDealCategories)
+                                ->select(['c.id', 'c.title', 'c.slug'])
+                                ->get();
+            $this->countSimilarCateProduct($similarSaleCate);
+        }
 
-        $this->countSimilarCateProduct($similarSaleCate);
 
         view()->share('canonicalLink', $canonicalLink);
         return view('deals-page::deals.list-by-category', [
