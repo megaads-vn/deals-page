@@ -1,6 +1,8 @@
 <?php
  return [
      "enable" => true,
+     "store_wildcard" => true,
+     "use_redirect_domain" => true,
      "site_name" => "couponforless",
      "app_url" => "https://couponforless.com",
      "layouts" => [

@@ -50,7 +50,11 @@ class DealsPageProvider extends ServiceProvider
 //        $this->registrySingleton();
 
         //Registry common middlewares
-        $this->registerCommonMiddleware('Megaads\DealsPage\Middlewares\KeypageRouting');
+        if (config('deals-page.store_wildcard', false)) {
+            $this->registerCommonMiddleware('Megaads\DealsPage\Middlewares\WildcardDetector');
+        } else {
+            $this->registerCommonMiddleware('Megaads\DealsPage\Middlewares\KeypageRouting');
+        }
 
         //Regitry queue callback
         $this->afterQueueDone();
