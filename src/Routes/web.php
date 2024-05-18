@@ -15,6 +15,7 @@ Route::group([
     Route::get("/stores/{slug}/deals", ['as' => 'frontend::store::listDeal::old', 'uses' => "DealsController@redirect"]);
     Route::get("/store/{slug}/deals/c/{itemId?}", ['as' => 'frontend::store::listDeal', 'uses' => "DealsController@storeDeal"]);
     Route::get("/store/{slug}/deals", ['as' => 'frontend::store::listDeal', 'uses' => "DealsController@storeDeal"]);
+    Route::get("/deals", ['as' => 'frontend::store::listDeal', 'uses' => "DealsController@storeDeal"]);
     Route::post("/store/{slug}/deals", ['as' => 'frontend::store::listDeal', 'uses' => "DealsController@storeDeal"]);
     Route::get("/stores/deals/load-more", ["as" => 'frontend::store::loadmore::deals', 'uses' => "DealsController@loadMoreDeal"]);
     Route::get("/coupon-category/{slug}/deals", ["as" => 'frontend::category::deals', 'uses' => "DealsController@categoryDeals"]);

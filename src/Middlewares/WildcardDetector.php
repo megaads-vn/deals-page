@@ -18,10 +18,15 @@ class WildcardDetector
     public function handle($request, Closure $next)
     {
         $url = $request->url();
-        $pageType = $this->checkCurrentRequestType(parse_url($url));
+        $parsedUrl = parse_url($url);
+        
         $routeMatch = \Route::getRoutes()->match($request);
         $getAction = $routeMatch->getAction();
         list($controller, $method) = explode('@', $getAction['controller']);
+        $redirectTo = $this->detectRedirectUrl($parsedUrl);
+        if (!empty($redirectTo)) {
+            return redirect()->away($redirectTo, 302);
+        }
         return $next($request);
     }
 
@@ -78,57 +83,16 @@ class WildcardDetector
      * @param array $parsedUrl
      * @return string
      */
-    protected function detectRedirectUrl($url) {
+    protected function detectRedirectUrl($parsedUrl) {
         // Parse the URL
-        $parsedUrl = parse_url($url);
-        $retVal = '';
-        if (isset($parsedUrl['path']) && !empty($parsedUrl['path'])) {
-            $patternKeypage = '~^/[^/]+$~';
-            $patternReview = '~^/store/[^/]+/reviews$~';
-            $patternDeal = '~^/store/[^/]+/deals$~';
-            $patternStore = '~^/store/[^/]+$~';
-            $pattern = '/store\/([^\/]+)/';
-            $store = '';
-            $subdomain = $this->getSubdomainFromCurrentHostNamt($parsedUrl);
-            if (empty($subdomain)) {
-                // match keypage
-                if (preg_match($patternKeypage, $parsedUrl['path'], $matches)) {
-                    if (isset($matches[0])) {
-                        $slug = str_replace('/', '', $matches[0]);
-                        $item = \DB::table('store_n_keyword as snk')
-                                    ->leftJoin('store as s', 's.id', '=', 'snk.store_id')
-                                    ->where('snk.slug', '=', $slug)
-                                    ->first(['s.slug']);
-                        if ($item) {
-                            $store = $this->getStoreFromDomain($item->slug);
-                            $retVal = $parsedUrl['scheme'] . '://' . $store . '.' . $parsedUrl['host'] . $parsedUrl['path'];
-                        }
-                    }
-                }
-                
-                
-                if (empty($retVal) && preg_match($pattern, $parsedUrl['path'], $matches)) {
-                    if (isset($matches[1])) {
-                        $store = $this->getStoreFromDomain($matches[1]);
-                    }
-                }
-                // match store
-                if (!empty($store) && preg_match($patternStore, $parsedUrl['path'])) {
-                    $retVal = $parsedUrl['scheme'] . '://' . $store . '.' . $parsedUrl['host'];
-                } 
-                // match review
-                if (!empty($store) && preg_match($patternReview, $parsedUrl['path'])) {
-                    $retVal = $parsedUrl['scheme'] . '://' . $store . '.' . $parsedUrl['host'] . '/reviews';
-                } 
-                // match deal
-                if (!empty($store) && preg_match($patternDeal, $parsedUrl['path'])) {
-                    $retVal = $parsedUrl['scheme'] . '://' . $store . '.' . $parsedUrl['host'] . '/deals';
-                } 
-            }
+        $retVal = ""; 
+        $pattern = '/store\/([^\/]+)/';
+        $subdomain = $this->getSubdomainFromCurrentHostName($parsedUrl);
+        $pageType = $this->checkCurrentRequestType($parsedUrl);
 
-        }
-        if (!empty($retVal)) {
-            $retVal .= isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '';
+        if ($subdomain && isset($parsedUrl['path']) && preg_match($pattern, $parsedUrl['path']) && $pageType == 'deal') {
+            $buildUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . '/deals';
+            $retVal = preg_replace($pattern, '', $buildUrl);
         }
         return $retVal;
     }
@@ -159,5 +123,20 @@ class WildcardDetector
             $subdomain = preg_replace('/'.$appUrl.'/', '', $host);
             $subdomain = rtrim($subdomain, '.');
             return $subdomain;
+    }
+
+    /**
+     * Call DealsController@storeDeal
+     * 
+     * @param Store $store
+     * @param Request $request
+     * @return mixed
+     */
+    private function callDealAction(Store $store, $request) {
+        if (class_exists('Megaads\DealsPage\Controllers\DealsController')) {
+            $controller = app()->make('Megaads\DealsPage\Controllers\DealsController');
+            $response = app()->call([$controller, 'storeDeal'], ['slug' => $store->slug, 'request' => $request]);   
+            return $response;
+        }
     }
 }

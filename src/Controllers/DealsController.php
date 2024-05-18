@@ -24,6 +24,7 @@ use Megaads\DealsPage\Repositories\DealRepository;
 use Megaads\DealsPage\Repositories\StoreRepository;
 use PHPExcel_Cell;
 use PHPExcel_IOFactory;
+use Illuminate\Http\Request as HttpRequest;
 
 class DealsController extends Controller {
 
@@ -437,8 +438,15 @@ class DealsController extends Controller {
      * @param $param2
      * @return \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|void
      */
-    public function storeDeal($slug="", $param1 = 0, $param2 = 0)
+    public function storeDeal(HttpRequest $request, $slug="", $param1 = 0, $param2 = 0)
     {
+        $storeDomain = Utils::getSubdomainFromCurrentHostName($request->url());
+        $routeParameters = \Route::current()->parameters();
+        if (isset($routeParameters['slug'])) {
+            $slug = $routeParameters['slug'];
+        } else if (!isset($routeParameters['slug']) && $storeDomain) {
+            $slug = $storeDomain;
+        }
         $canonicalLink = route('frontend::store::listDeal', $slug);
         $retVal = [];
         $store = $this->getStore($slug);
