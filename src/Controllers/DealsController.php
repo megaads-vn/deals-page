@@ -448,6 +448,9 @@ class DealsController extends Controller {
             $slug = $storeDomain;
         }
         $canonicalLink = route('frontend::store::listDeal', $slug);
+        if (config('app.wildcard_store_domain', false)) {
+            $canonicalLink = $request->url();
+        }
         $retVal = [];
         $store = $this->getStore($slug);
         if (empty($store)) {
