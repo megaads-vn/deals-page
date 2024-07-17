@@ -6,6 +6,8 @@ use Closure;
 use Megaads\DealsPage\Models\Keypage;
 use Megaads\DealsPage\Models\Store;
 use Megaads\DealsPage\Models\Deal;
+use Illuminate\Support\Facades\Redis;
+use App\Utils\Utils;    
 
 class WildcardDetector
 {
@@ -17,7 +19,12 @@ class WildcardDetector
      * @return mixed
      */
     public function handle($request, Closure $next)
-    {
+    {   
+        $cacheExists = $this->isInterceptorCached($request->url());
+        if ($cacheExists) {
+            header('X-Cache-State: HIT');
+            return $next($request);
+        }
         $url = $request->url();
         
         $parsedUrl = parse_url($url);
@@ -165,5 +172,45 @@ class WildcardDetector
             $response = app()->call([$controller, 'storeDeal'], ['slug' => $store->slug, 'request' => $request]);   
             return $response;
         }
+    }
+
+    private function isInterceptorCached($url)
+    {
+        $interceptorConfig = config('interceptor.enable', false);  
+        if (!$interceptorConfig) return false;
+        $interceptorConnection = config('interceptor.cacheConnection', 'cache');
+        $interceptorAppName = config('interceptor.appName', 'interceptor');
+        $saveToFile = config('interceptor.saveToFile', false);
+        $deviceDetected = $this->deviceDetected();
+        $key = $interceptorAppName . '::' . $deviceDetected . '::' . $url;
+        $retVal = false;
+        
+        if ($saveToFile === false) {
+            try {
+                $redis = Redis::connection($interceptorConnection);
+                $keyExists = $redis->exists($key);
+                if ($keyExists) {
+                    $retVal = true;
+                }
+            } catch (\Exception $ex) {}
+        } else {
+            $directory = storage_path('cache/interceptor/' . $interceptorAppName);
+            $filename = md5($key);
+            $filePath = $directory . '/' . $filename;
+            if (file_exists($filePath)) {
+                $retVal = true;
+            }
+        }
+        return $retVal; 
+    }
+
+    private function deviceDetected() {
+        $retVal = 'desktop';
+        if (Utils::isMobile()) {
+            $retVal = 'mobile';
+        } else if (Utils::isTablet()) {
+            $retVal = 'tablet';
+        }
+        return $retVal;
     }
 }
