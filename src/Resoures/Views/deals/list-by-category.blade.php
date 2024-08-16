@@ -6,7 +6,6 @@
 @endsection
 @section('content')
     @php
-        use Megaads\Adsense\Utils\Adsense;
         $categoryDescription = ($category->description);
         $pageTitle = sprintf('Top %s Sale %s %s', $category->title, date('M'), date('Y'))
     @endphp
@@ -89,7 +88,6 @@
                                     'hideDeals' =>  true,
                                     'customStyle' => 'text-align:center'
                                     ])
-                        <?= Adsense::display(['divClass' => 'section-top', 'adsenseStyle' => 'width: 285px; height: 216px;']) ?>
                     </div>
                     <div class="clearfix"></div>
                 </div>

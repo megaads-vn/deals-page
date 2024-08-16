@@ -6,7 +6,6 @@
 @endsection
 @section('content')
     @php
-        use Megaads\Adsense\Utils\Adsense;
         $storeDescription = ($store->description);
         $rating = !empty($store->crawl_rating) ? $store->crawl_rating : $store->voteUp;
         $ratingCount = !empty($store->crawl_rating_count) ? $store->crawl_rating_count : $store->voteDown;
@@ -157,7 +156,6 @@
                             'favoriteRelatedStoresClass' => 'favorite-related-stores-similar',
                             'routeName' => 'store::review'
                             ])
-                        <?= Adsense::display(['divClass' => 'section-top', 'adsenseStyle' => 'width: 285px; height: 216px;']) ?>
                     </div>
                     <div class="clearfix"></div>
                 </div>
