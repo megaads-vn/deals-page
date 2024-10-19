@@ -33,7 +33,7 @@ class WildcardDetector
         list($controller, $method) = explode('@', $getAction['controller']);
         $redirectTo = $this->detectRedirectUrl($parsedUrl);
         if (!empty($redirectTo)) {
-            return redirect()->away($redirectTo, 302);
+            return redirect()->away($redirectTo, 301);
         }
         return $next($request);
     }

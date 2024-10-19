@@ -1,7 +1,12 @@
 <?php
+$locale = '';
+if (config('localization.enable') && !empty(env('APP_LANG', ''))) {
+    $locale = env('APP_LANG') . "/";
+}
 
 Route::group([
-    'namespace' => '\Megaads\DealsPage\Controllers'
+    'namespace' => '\Megaads\DealsPage\Controllers',
+    'prefix' => $locale
 ], function() {
      Route::get('/alldeals', 'DealsController@allDeals')->name('deal::all')->middleware('interceptor');;
 //    Route::get('/deals/{slug}-deals', 'DealsController@index')->name('deal::detail')->where(['slug' => '[0-9a-zA-Z\-]+']);
