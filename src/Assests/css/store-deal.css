@@ -730,3 +730,9 @@ span[ itemprop="ratingCount"] {
     text-overflow: ellipsis;
     display: block;
 }
+
+@media (max-width: 990px) {
+    .deal-item-wrapper {
+max-width: calc(100vw - 32px);
+    }
+}
