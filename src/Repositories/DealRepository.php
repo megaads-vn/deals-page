@@ -374,7 +374,7 @@ class DealRepository extends BaseRepository
             mkdir($absolutePath, 0775, true);
         }
     
-        $imageName = $item->id . '-' . time() . '-' . $item->slug . '.' . $this->getImageExtension($imageUrl);
+        $imageName = $item->id . '-' . date('Ymd') . '-' . $item->slug . '.' . $this->getImageExtension($imageUrl);
         $fullImageSavedPath = $absolutePath . "/" . $imageName;
     
         if (!file_exists($fullImageSavedPath)) {
