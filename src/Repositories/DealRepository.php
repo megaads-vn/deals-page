@@ -324,11 +324,13 @@ class DealRepository extends BaseRepository
     }
 
     public function getList() {
-        $deals = Deal::select(['id', 'title', 'slug', 'price', 'sale_price', 'image', 'expire_time', 'store_id', 'category_id'])
-        ->orderBy('id', 'desc')
-        ->take(12)
-        ->get();
+        set_time_limit(3600);
+        $deals = Deal::select(['id', 'title', 'slug', 'price', 'sale_price', 'image', 'expire_time', 'store_id', 'category_id', 'origin_image'])
+                    ->orderBy('id', 'desc')
+                    ->take(12)
+                    ->get();
         foreach ($deals as $item) {
+            $this->saveDealsImage($item);
             $item->store_name = $item->store->title ?? '';
             $item->store_slug = $item->store->slug ?? '';
             $item->category_name = $item->category->title ?? '';
@@ -353,5 +355,61 @@ class DealRepository extends BaseRepository
 
     public function getTotalDealActive() {
         return DB::table('deals')->where('status', Deal::STATUS_ACTIVE)->count();
+    }
+
+    /**
+     * @param $item
+     * @return string
+     */
+    private function saveDealsImage(&$item) {
+        $fullImagePublicPath = public_path($item->image);
+        if (preg_match('/^http/i', $item->image) === 0 && file_exists($fullImagePublicPath)) {
+            return $item->image;
+        }
+        $imageUrl = preg_match('/^http/i', $item->image) === 0 ? $item->origin_image : $item->image;
+    
+        $dealsPath = "frontend/images/deals";
+        $absolutePath = public_path($dealsPath);
+        if (!file_exists($absolutePath)) {
+            mkdir($absolutePath, 0775, true);
+        }
+    
+        $imageName = $item->id . '-' . time() . '-' . $item->slug . '.' . $this->getImageExtension($imageUrl);
+        $fullImageSavedPath = $absolutePath . "/" . $imageName;
+    
+        if (!file_exists($fullImageSavedPath)) {
+            $this->saveImageFromUrl($imageUrl, $fullImageSavedPath);
+        }
+    
+        $item->image = "/" . $dealsPath . "/" . $imageName;
+        $item->origin_image = $imageUrl;
+        $item->save();
+    }
+    
+    private function saveImageFromUrl($url, $savePath) {
+        $ch = curl_init($url);
+        $fp = fopen($savePath, 'wb');
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_exec($ch);
+        curl_close($ch);
+        fclose($fp);
+    }
+    
+    private function getImageExtension($url) {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        $data = curl_exec($ch);
+        curl_close($ch);
+    
+        if (preg_match('/Content-Type:\s*image\/(\w+)/i', $data, $matches)) {
+            return $matches[1];
+        }
+    
+        return 'jpg'; // Default to jpg if the MIME type cannot be determined
     }
 }

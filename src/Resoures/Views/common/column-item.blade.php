@@ -7,7 +7,7 @@
         @foreach ($deals as $item)
             <div class="recently-deals-item">
                 <a class="bx-square deal-product-item-image" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}">
-                    <img src="{{ $item->image }}" alt="{{ $item->title }}" width="275" height="275">
+                    <img src="{{ App\Utils\Utils::reSizeImage($item->image, 275, 0) }}" alt="{{ $item->title }}" width="275" height="275">
                 </a>
                 <div class="item-info">
                     <h3 class="deal-product-item">
