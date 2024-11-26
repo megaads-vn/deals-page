@@ -362,6 +362,10 @@ class DealRepository extends BaseRepository
      * @return string
      */
     private function saveDealsImage(&$item) {
+        $parsedImageUrl = parse_url($item->image);
+        if (isset($parsedImageUrl['path']) && ends_with($parsedImageUrl['path'], ['.jpg', '.jpeg', '.png', '.gif'])) {
+            return $item->image;
+        }
         $fullImagePublicPath = public_path($item->image);
         if (preg_match('/^http/i', $item->image) === 0 && file_exists($fullImagePublicPath)) {
             return $item->image;
@@ -376,7 +380,8 @@ class DealRepository extends BaseRepository
     
         $imageName = $item->id . '-' . date('Ymd') . '-' . $item->slug . '.' . $this->getImageExtension($imageUrl);
         $fullImageSavedPath = $absolutePath . "/" . $imageName;
-    
+        $imageUrlParsed = parse_url($imageUrl);
+        
         if (!file_exists($fullImageSavedPath)) {
             $this->saveImageFromUrl($imageUrl, $fullImageSavedPath);
         }

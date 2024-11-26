@@ -14,7 +14,7 @@
                     <div class="product-page">
                         <div class="product-image">
                             <a href="#" class="product-logo-link">
-                                <img src="{{ $detailItem->image }}" class="img-responsive" alt="{{ $detailItem->title }}">
+                                <img src="{{ App\Utils\Utils::resizeImage($detailItem->image, 400, 0) }}" class="img-responsive" alt="{{ $detailItem->title }}">
                             </a>
                         </div>
                         <div class="product-info-right">
