@@ -39,6 +39,8 @@ $routeName = getCustomRoute(isset($customRouteType) ? $customRouteType : '');
     var ralatedStoreStoreId = {{ (isset($storeId) && $storeId)? $storeId : 'null' }};
     var ralatedStorePageId = 1;
     var isLoading = false;
+    var appUrl = '{{ env('APP_DOMAIN') }}' ;
+    var appLang = '{{ env('APP_LANG') }}' ;
 
     function validURL(str) {
         var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
@@ -86,7 +88,22 @@ $routeName = getCustomRoute(isset($customRouteType) ? $customRouteType : '');
     }
 
     function relatedStoreTemplate(store) {
-        return `<div class="related-item">›&nbsp;<a class="related-link" href="/store/${store.slug}" target="_blank" title="${store.title}">${store.title}&nbsp;Coupons</a></div>`;
+        var storeUrl = `https://${store.slug}.${appUrl}`;
+        if (appLang !== '') {
+            storeUrl = `https://${store.slug}.${appUrl}/${appLang}`;
+        }
+        var divEl = document.createElement('div');
+        divEl.className = 'related-item';
+         
+        var aEl = document.createElement('a');
+        aEl.className = 'related-link';
+        aEl.target = '_blank';
+        aEl.href = storeUrl;
+        aEl.title = store.title;
+        aEl.innerHTML = store.title + ' Coupons';
+
+        divEl.appendChild(aEl);
+        return divEl;
     };
 
     function loadMoreRelatedStore() {
