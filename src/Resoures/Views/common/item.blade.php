@@ -1,6 +1,6 @@
 @php $showStore = isset($showStore) ? $showStore : true; @endphp
 <div class="deal-item-wrapper">
-    <a class="deal-item-image" rel="nofollow" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}" rel="nofollow">
+    <a class="deal-item-image" rel="follow noopener" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}" rel="nofollow">
         @if ($item->discount > 0)
         <span class="deal-tag">
             <span>{{ $item->discount }}%</span>
@@ -14,7 +14,7 @@
         @endif
     </a>
     <div class="deal-item-info">
-        <a target="_blank" rel="nofollow" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}" class="box-top">
+        <a target="_blank" rel="follow noopener" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}" class="box-top">
             <h3 class="deal-item-header">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
@@ -32,13 +32,13 @@
             <div class="deal-item-footer-box">
                 @if (!empty($item->store) && $showStore)
                     Store:&nbsp;
-                    <a target="_blank" href="{{ route('frontend::store::listByStore', ['slug' => $item->store->slug]) }}" title="{{ $item->store->name }}" class="name">
+                    <a rel="follow noopener" target="_blank" href="{{ route('frontend::store::listByStore', ['slug' => $item->store->slug]) }}" title="{{ $item->store->name }}" class="name">
                         <span>{{ $item->store->name }}</span>
                     </a>
                 @endif
                 @if (!empty($item->category))
                     Category:&nbsp;
-                    <a target="_blank" href="{{ route('frontend::category::listByCategory', ['slug' => $item->category->slug]) }}" title="{{ $item->category->title }}" class="name">
+                    <a rel="follow noopener" target="_blank" href="{{ route('frontend::category::listByCategory', ['slug' => $item->category->slug]) }}" title="{{ $item->category->title }}" class="name">
                         <span>{{ $item->category->title }}</span>
                     </a>
                 @endif
