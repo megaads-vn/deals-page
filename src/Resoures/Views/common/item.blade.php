@@ -1,6 +1,6 @@
 @php $showStore = isset($showStore) ? $showStore : true; @endphp
 <div class="deal-item-wrapper">
-    <a class="deal-item-image" rel="follow noopener" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}" rel="nofollow">
+    <a class="deal-item-image" rel="follow noopener" href="{{ dealPageDealUrl($item->slug) }}" title="{{ $item->title }}" rel="follow">
         @if ($item->discount > 0)
         <span class="deal-tag">
             <span>{{ $item->discount }}%</span>
@@ -10,11 +10,11 @@
         @if (isset($store->coverImage))
         <img class="zoom lazy deal-thumb" src="{{ App\Utils\Utils::reSizeImage("/images/stores/" . $store->coverImage, 100, 0) }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
         @else
-        <img class="zoom lazy deal-thumb" src="{{ $item->image }}" data-src="{{ $item->image }}" alt="{{ $item->title }}" />
+        <img class="zoom lazy deal-thumb" src="{{ App\Utils\Utils::reSizeImage($item->image, 400, 500) }}" data-src="{{ App\Utils\Utils::reSizeImage($item->image, 400, 500) }}" alt="{{ $item->title }}" />
         @endif
     </a>
     <div class="deal-item-info">
-        <a target="_blank" rel="follow noopener" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}" class="box-top">
+        <a target="_blank" rel="follow noopener" href="{{ dealPageDealUrl($item->slug) }}" title="{{ $item->title }}" class="box-top">
             <h3 class="deal-item-header">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
@@ -32,7 +32,7 @@
             <div class="deal-item-footer-box">
                 @if (!empty($item->store) && $showStore)
                     Store:&nbsp;
-                    <a rel="follow noopener" target="_blank" href="{{ route('frontend::store::listByStore', ['slug' => $item->store->slug]) }}" title="{{ $item->store->name }}" class="name">
+                    <a rel="follow noopener" target="_blank" href="{{ dealPageStoreUrl($item->store->slug) }}" title="{{ $item->store->name }}" class="name">
                         <span>{{ $item->store->name }}</span>
                     </a>
                 @endif

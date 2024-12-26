@@ -6,12 +6,12 @@
     <div class="recently-deals-list">
         @foreach ($deals as $item)
             <div class="recently-deals-item">
-                <a class="bx-square deal-product-item-image" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}">
+                <a class="bx-square deal-product-item-image" href="{{ dealPageDealUrl($item->slug) }}" title="{{ $item->title }}">
                     <img src="{{ App\Utils\Utils::reSizeImage($item->image, 275, 0) }}" alt="{{ $item->title }}" width="275" height="275">
                 </a>
                 <div class="item-info">
                     <h3 class="deal-product-item">
-                        <a class="deal-product-item-link" href="{{ route('deal::detail', ['slug' => $item->slug]) }}" title="{{ $item->title }}">
+                        <a class="deal-product-item-link" href="{{ dealPageDealUrl($item->slug) }}" title="{{ $item->title }}">
                             {{ $item->title }}
                         </a>
                     </h3>
@@ -32,7 +32,7 @@
                     <div>
                         @if ($item->store_name)
                             <div class="deal-expires">
-                                Store: <a target="_blank" href="{{ route("frontend::store::listByStore", ['slug' => $item->store_slug]) }}">{{ $item->store_name }}</a>
+                                Store: <a target="_blank" href="{{ dealPageStoreUrl($item->store_slug) }}">{{ $item->store_name }}</a>
                             </div>
                         @endif
                         @if ($item->category_name)

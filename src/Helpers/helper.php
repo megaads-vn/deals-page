@@ -337,3 +337,55 @@ if (!function_exists('getCustomRoute')) {
         return $routeName;
     }
 }
+
+if (!function_exists('dealPageDealUrl')) {
+    function dealPageDealUrl($dealSlug) {
+        $dealUrl = route('deal::detail', ['slug' => $dealSlug]);
+        if (config('app.wildcard_store_domain', false)) {
+            $appDomain = env('APP_DOMAIN');
+            $appLang = env('APP_LANG');
+            $storeDealCacheKey = 'deal_w_store_slug';
+            $foundUrl = false;
+            if (\Cache::has($storeDealCacheKey)) {
+                $couponByStore = \Cache::get($storeDealCacheKey);
+                if (isset($couponByStore[$dealSlug])) {
+                    $storeSlug = $couponByStore[$dealSlug];
+                    $dealUrl = 'https://' . $storeSlug . '.' . $appDomain . (!empty($appLang) ? '/' . $appLang : '' ) . '/deals/' . $dealSlug;
+                    $foundUrl = true;
+                }
+            }
+            if (!$foundUrl) {
+                $dealUrl = dealPageBaseUrl('/deals/' . $dealSlug);
+            }
+        }
+        return $dealUrl;
+    }
+}
+
+if (!function_exists('dealPageStoreUrl')) {
+    function dealPageStoreUrl($storeSlug) {
+        $storeUrl = route('frontend::store::listByStore', ['storeSlug' => $storeSlug]);
+        if (config('app.wildcard_store_domain', false)) {
+            $appDomain = env('APP_DOMAIN');
+            $appLang = env('APP_LANG');
+            $storeUrl = 'https://' . $storeSlug . '.' . $appDomain;
+            if ($appLang !== '') {
+                $storeUrl .= '/' . $appLang;
+            }
+        }
+        return $storeUrl;
+    }
+}
+
+if (!function_exists('dealPageBaseUrl')) {
+    function dealPageBaseUrl($path = '', $params = [], $ignoreLocale = false) {
+        $baseUrl = env('APP_URL');
+        if (env('APP_LANG') !== '' && !$ignoreLocale) {
+            $baseUrl .= '/' . env('APP_LANG');
+        }
+        if (!empty($params)) {
+            $path .= '?' . http_build_query($params);
+        }
+        return $baseUrl . $path;
+    }
+}

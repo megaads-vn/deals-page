@@ -85,7 +85,7 @@
                                 'totalDeals' => $storeTotalDeals,
                                 'customWrapper' => 'more-store-deals',
                                 'heading' => 3,
-                                'seeAllUrl' => !empty($dealStore) ? route('frontend::store::listDeal', ['slug' => $dealStore->slug]) : '/alldeals'
+                                'seeAllUrl' => !empty($dealStore) ? route('frontend::store::listDeal', ['slug' => $dealStore->slug]) : dealPageBaseUrl('/alldeals')
                              ])
                     @endif
                     @if (isset($relatedDeal) && count($relatedDeal) > 0)
@@ -101,7 +101,7 @@
                                  [
                                      'categories' => $relatedCateDeal,
                                      'cateSlideBoxTitle' => 'Related Cate Deals',
-                                     'seeAllUrl' => !empty($dealCategories) ? route('frontend::category::deals', ['slug' => $dealCategories->slug]) : '/alldeals'
+                                     'seeAllUrl' => !empty($dealCategories) ? route('frontend::category::deals', ['slug' => $dealCategories->slug]) : dealPageBaseUrl('/alldeals')
                                  ])
                     @endif
                     @if (isset($relatedStoreReviews) && count($relatedStoreReviews) > 0)
