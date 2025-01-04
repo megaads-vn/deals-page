@@ -344,12 +344,14 @@ if (!function_exists('dealPageDealUrl')) {
         if (config('app.wildcard_store_domain', false)) {
             $appDomain = env('APP_DOMAIN');
             $appLang = env('APP_LANG');
+            $localeKey = env('APP_LOCALE');
             $storeDealCacheKey = 'deal_w_store_slug';
+            $storeDealCacheKey = $localeKey . '_' . $storeDealCacheKey;
             $foundUrl = false;
             if (\Cache::has($storeDealCacheKey)) {
-                $couponByStore = \Cache::get($storeDealCacheKey);
-                if (isset($couponByStore[$dealSlug])) {
-                    $storeSlug = $couponByStore[$dealSlug];
+                $dealByStore = \Cache::get($storeDealCacheKey);
+                if (isset($dealByStore[$dealSlug])) {
+                    $storeSlug = $dealByStore[$dealSlug];
                     $dealUrl = 'https://' . $storeSlug . '.' . $appDomain . (!empty($appLang) ? '/' . $appLang : '' ) . '/deals/' . $dealSlug;
                     $foundUrl = true;
                 }
