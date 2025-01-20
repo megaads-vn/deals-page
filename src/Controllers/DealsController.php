@@ -1124,10 +1124,12 @@ class DealsController extends Controller {
                             ->pluck('deal_id');
                 if (!empty($getDealNCate)) {
                     $getDealNCate = $getDealNCate->toArray();
-                    $deals = Deal::whereIn('id', $getDealNCate)
-                            ->where('status', Deal::STATUS_ACTIVE)
+                    $deals = Deal::from('deals as d')
+                            ->join('store as s', 's.id', '=', 'd.store_id')
+                            ->whereIn('d.id', $getDealNCate)
+                            ->where('d.status', Deal::STATUS_ACTIVE)
                             ->limit(15)
-                            ->get(['id', 'title', 'slug', 'image', 'price', 'sale_price', 'discount', 'expire_time']);
+                            ->get(['d.id', 'd.title', 'd.slug', 'd.image', 'd.price', 'd.sale_price', 'd.discount', 'd.expire_time', 's.slug as store_slug']);
                     if (!empty($deals)) {
                         $retVal = $deals;
                     }
