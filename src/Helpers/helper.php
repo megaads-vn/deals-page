@@ -339,21 +339,26 @@ if (!function_exists('getCustomRoute')) {
 }
 
 if (!function_exists('dealPageDealUrl')) {
-    function dealPageDealUrl($dealSlug) {
+    function dealPageDealUrl($dealSlug, $storeSlug = '') {
         $dealUrl = route('deal::detail', ['slug' => $dealSlug]);
         if (config('app.wildcard_store_domain', false)) {
             $appDomain = env('APP_DOMAIN');
             $appLang = env('APP_LANG');
             $localeKey = env('APP_LOCALE');
-            $storeDealCacheKey = 'deal_w_store_slug';
-            $storeDealCacheKey = $localeKey . '_' . $storeDealCacheKey;
-            $foundUrl = false;
-            if (\Cache::has($storeDealCacheKey)) {
-                $dealByStore = \Cache::get($storeDealCacheKey);
-                if (isset($dealByStore[$dealSlug])) {
-                    $storeSlug = $dealByStore[$dealSlug];
-                    $dealUrl = 'https://' . $storeSlug . '.' . $appDomain . (!empty($appLang) ? '/' . $appLang : '' ) . '/deals/' . $dealSlug;
-                    $foundUrl = true;
+            if ($storeSlug !== '') {
+                $dealUrl = 'https://' . $storeSlug . '.' . $appDomain . (!empty($appLang) ? '/' . $appLang : '' ) . '/deals/' . $dealSlug;
+                $foundUrl = true;
+            } else {
+                $storeDealCacheKey = 'deal_w_store_slug';
+                $storeDealCacheKey = $localeKey . '_' . $storeDealCacheKey;
+                $foundUrl = false;
+                if (\Cache::has($storeDealCacheKey)) {
+                    $dealByStore = \Cache::get($storeDealCacheKey);
+                    if (isset($dealByStore[$dealSlug])) {
+                        $storeSlug = $dealByStore[$dealSlug];
+                        $dealUrl = 'https://' . $storeSlug . '.' . $appDomain . (!empty($appLang) ? '/' . $appLang : '' ) . '/deals/' . $dealSlug;
+                        $foundUrl = true;
+                    }
                 }
             }
             if (!$foundUrl) {

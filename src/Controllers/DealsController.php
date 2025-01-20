@@ -56,19 +56,34 @@ class DealsController extends Controller {
      */
     public function index($slug)
     {
-        $getDeal = Deal::from('deals')
-                    ->where('slug', $slug)
-                    ->where('status', Deal::STATUS_ACTIVE)
-                    ->first();
+        $currentDomain = Request::getHost();
+        if (\Cache::has($slug)) {
+            $getDeal = \Cache::get($slug);
+        } else {
+            $getDeal = Deal::from('deals')
+                        ->where('slug', $slug)
+                        ->where('status', Deal::STATUS_ACTIVE)
+                        ->first(['id', 'title', 'slug', 'image', 'content', 'price', 'sale_price', 'discount', 'store_id', 'expire_time', 'origin_link', 'affiliate_link']);
+        }
         if (empty($getDeal)) {
             abort(404);
         }
+
         $otherStoreDeal = $this->getOtherDealsOfStore($getDeal);
         $relatedDeal = $this->getRelatedDeal($getDeal->id);
         $relatedCateDeal = $this->getRelatedCateDeal($getDeal->id);
         $relatedStoreReviews = $this->relatedStoreReview($getDeal->id);
+
         $categories = $getDeal->categories()->first(['id', 'title', 'slug']);
         $store = $getDeal->store()->first(['id', 'title', 'slug', 'vote_up', 'vote_down']);
+        $appUrl = env('APP_URL');
+        $appUrl = parse_url($appUrl);
+        $storeUrl = $store->slug . '.' . $appUrl['host'];
+
+        if ($storeUrl !== $currentDomain) {
+            \Cache::put($slug, $getDeal, 30);
+            return redirect()->to('https://' . $storeUrl . '/deals/' . $slug);
+        }
 
         $breadcrumbs = [];
         $canonicalLink = route('deal::all');
@@ -1068,12 +1083,13 @@ class DealsController extends Controller {
         $totalDeals = 0;
         if (isset($currentDeal->store_id)) {
             $storeId = $currentDeal->store_id;
-            $query = Deal::from('deals')
-                    ->where('status', Deal::STATUS_ACTIVE)
-                    ->where('store_id', $storeId);
+            $query = Deal::from('deals as d')
+                    ->join('store as s', 's.id', '=', 'd.store_id')
+                    ->where('d.status', Deal::STATUS_ACTIVE)
+                    ->where('d.store_id', $storeId);
             $totalDeals = (clone $query)->count();
             $deals = $query->limit(15)
-                    ->get(['id', 'title', 'slug', 'image', 'price', 'sale_price', 'discount', 'expire_time']);
+                    ->get(['d.id', 'd.title', 'd.slug', 'd.image', 'd.price', 'd.sale_price', 'd.discount', 'd.expire_time', 's.slug as store_slug']);
             if (!empty($deals)) {
                 $retVal = $deals;
             }

@@ -55,4 +55,5 @@
 @section('style')
     @parent
     <link rel="stylesheet" href="{{ asset('/vendor/deals-page/css/all-deals.css?v=' . time()) }}" />
+
 @endsection

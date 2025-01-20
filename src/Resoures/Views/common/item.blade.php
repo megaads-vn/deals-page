@@ -1,6 +1,7 @@
 @php $showStore = isset($showStore) ? $showStore : true; @endphp
+@php $storeSlug = !empty($item->store) ? $item->store->slug : ''; @endphp
 <div class="deal-item-wrapper">
-    <a class="deal-item-image" rel="follow noopener" href="{{ dealPageDealUrl($item->slug) }}" title="{{ $item->title }}" rel="follow">
+    <a class="deal-item-image" rel="follow noopener" href="{{ dealPageDealUrl($item->slug, $storeSlug) }}" title="{{ $item->title }}" rel="follow">
         @if ($item->discount > 0)
         <span class="deal-tag">
             <span>{{ $item->discount }}%</span>
@@ -14,7 +15,7 @@
         @endif
     </a>
     <div class="deal-item-info">
-        <a target="_blank" rel="follow noopener" href="{{ dealPageDealUrl($item->slug) }}" title="{{ $item->title }}" class="box-top">
+        <a target="_blank" rel="follow noopener" href="{{ dealPageDealUrl($item->slug, $storeSlug) }}" title="{{ $item->title }}" class="box-top">
             <h3 class="deal-item-header">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
