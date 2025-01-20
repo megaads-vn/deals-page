@@ -78,7 +78,7 @@ class DealsController extends Controller {
         $store = $getDeal->store()->first(['id', 'title', 'slug', 'vote_up', 'vote_down']);
         $appUrl = env('APP_URL');
         $appUrl = parse_url($appUrl);
-        $storeUrl = $store->slug . '.' . $appUrl['host'];
+        $storeUrl = !empty($store) && isset($store->slug) ? ($store->slug . '.' . $appUrl['host']) : $currentDomain;
 
         if ($storeUrl !== $currentDomain) {
             \Cache::put($slug, $getDeal, 30);
