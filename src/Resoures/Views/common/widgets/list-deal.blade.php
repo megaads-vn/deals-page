@@ -1,10 +1,9 @@
-@if (isset($listDeal))
+@if (isset($listDeal) && count($listDeal) > 0)
     @forelse ($listDeal as $index => $item)
         @include('deals-page::common.item', ['item' => $item])
     @empty
         <div style="padding: 5px 0 15px; font-size: 17px; margin-bottom: 25px; color: #444;">{{ __("There isn't any deal in here") }}</div>
     @endif
-@endif
 <script>
     document.addEventListener("click", function(e) {
         var elClass = e.target.getAttribute("class");
@@ -16,3 +15,4 @@
         }
     });
 </script>
+@endif
