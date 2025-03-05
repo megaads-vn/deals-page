@@ -1,5 +1,6 @@
 @php $showStore = isset($showStore) ? $showStore : true; @endphp
 @php $storeSlug = !empty($item->store) ? $item->store->slug : ''; @endphp
+@php $internalLinkAttr = isset($internalLinkAttr) ? $internalLinkAttr : ''; @endphp
 <div class="deal-item-wrapper">
     <a class="deal-item-image" rel="follow noopener" href="{{ dealPageDealUrl($item->slug, $storeSlug) }}" title="{{ $item->title }}" rel="follow">
         @if ($item->discount > 0)
@@ -32,23 +33,23 @@
             </div>
             <div class="deal-item-footer-box">
                 @if (!empty($item->store) && $showStore)
-                    Store:&nbsp;
-                    <a rel="follow noopener" target="_blank" href="{{ dealPageStoreUrl($item->store->slug) }}" title="{{ $item->store->name }}" class="name">
+                    {{ __('Store:') }}&nbsp;
+                    <a {{ $internalLinkAttr }} rel="follow noopener" target="_blank" href="{{ dealPageStoreUrl($item->store->slug) }}" title="{{ $item->store->name }}" class="name">
                         <span>{{ $item->store->name }}</span>
                     </a>
                 @endif
                 @if (!empty($item->category))
-                    Category:&nbsp;
+                    {{ __('Category:') }}&nbsp;
                     <a rel="follow noopener" target="_blank" href="{{ route('frontend::category::listByCategory', ['slug' => $item->category->slug]) }}" title="{{ $item->category->title }}" class="name">
                         <span>{{ $item->category->title }}</span>
                     </a>
                 @endif
                 <div>
-                    Expired: {{ App\Utils\Utils::timeOnGoing($item->expired_time) }}
+                    {{ sprintf(__('Expired: %s'), App\Utils\Utils::timeOnGoing($item->expired_time)) }}
                 </div>
             </div>
             <div class="deal-item-action">
-                <span class="deal-item-button js-go-deals" rel="nofollow" data-id="{{ $item->id }}">Shop Now</span>
+                <span class="deal-item-button js-go-deals" rel="nofollow" data-id="{{ $item->id }}">{{ __('Shop Now') }}</span>
             </div>
         </div>
     </div>

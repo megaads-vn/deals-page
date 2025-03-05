@@ -1,6 +1,7 @@
 @if (isset($listDeal) && count($listDeal) > 0)
+    @php $internalLinkAttr = (isset($is_internal_link) && $is_internal_link) ? 'data-internal' : ''; @endphp
     @forelse ($listDeal as $index => $item)
-        @include('deals-page::common.item', ['item' => $item])
+        @include('deals-page::common.item', ['item' => $item, 'internalLinkAttr' => $internalLinkAttr])
     @empty
         <div style="padding: 5px 0 15px; font-size: 17px; margin-bottom: 25px; color: #444;">{{ __("There isn't any deal in here") }}</div>
     @endif
