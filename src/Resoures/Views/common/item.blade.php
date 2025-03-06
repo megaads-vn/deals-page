@@ -2,7 +2,7 @@
 @php $storeSlug = !empty($item->store) ? $item->store->slug : ''; @endphp
 @php $internalLinkAttr = isset($internalLinkAttr) ? $internalLinkAttr : ''; @endphp
 <div class="deal-item-wrapper">
-    <a class="deal-item-image" rel="follow noopener" href="{{ dealPageDealUrl($item->slug, $storeSlug) }}" title="{{ $item->title }}" rel="follow">
+    <a {!! $internalLinkAttr !!} class="deal-item-image" rel="follow noopener" href="{{ dealPageDealUrl($item->slug, $storeSlug) }}" title="{{ $item->title }}" rel="follow">
         @if ($item->discount > 0)
         <span class="deal-tag">
             <span>{{ $item->discount }}%</span>
@@ -16,7 +16,7 @@
         @endif
     </a>
     <div class="deal-item-info">
-        <a target="_blank" rel="follow noopener" href="{{ dealPageDealUrl($item->slug, $storeSlug) }}" title="{{ $item->title }}" class="box-top">
+        <a {!! $internalLinkAttr !!} target="_blank" rel="follow noopener" href="{{ dealPageDealUrl($item->slug, $storeSlug) }}" title="{{ $item->title }}" class="box-top">
             <h3 class="deal-item-header">{{ $item->title }}</h3>
         </a>
         <div class="deal-item-description">
@@ -40,7 +40,7 @@
                 @endif
                 @if (!empty($item->category))
                     {{ __('Category:') }}&nbsp;
-                    <a rel="follow noopener" target="_blank" href="{{ route('frontend::category::listByCategory', ['slug' => $item->category->slug]) }}" title="{{ $item->category->title }}" class="name">
+                    <a {!! $internalLinkAttr !!} rel="follow noopener" target="_blank" href="{{ route('frontend::category::listByCategory', ['slug' => $item->category->slug]) }}" title="{{ $item->category->title }}" class="name">
                         <span>{{ $item->category->title }}</span>
                     </a>
                 @endif

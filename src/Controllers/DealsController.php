@@ -536,7 +536,7 @@ class DealsController extends Controller {
         $retVal['breadcrumbs'] = $breadcrumbs;
         $retVal['author'] = $author;
         $retVal['dealFilterActivated'] = isset($_POST['dealType']) ? $_POST['dealType'] : 'all';
-        $retVal['placehoderImage'] = "/images/blank.png";
+        $retVal['placehoderImage'] = env('APP_URL') . "/images/blank.png";
         $retVal['localSchema'] = ''; //$this->buildSchema($store,$couponResult['result']['data']);
         $retVal['dataCoupon'] = $dataCoupon;
         $retVal['relatedCoupon'] = $relatedCoupon;
