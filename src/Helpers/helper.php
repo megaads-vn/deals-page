@@ -396,3 +396,33 @@ if (!function_exists('dealPageBaseUrl')) {
         return $baseUrl . $path;
     }
 }
+
+if (!function_exists('getListDealByStoreUrl')) {
+    function getListDealByStoreUrl($storeSlug) {
+        $retVal = route('frontend::store::listDeal', ['slug' => $storeSlug]);
+        if (config('app.wildcard_store_domain', false)) {
+            $appDomain = env('APP_DOMAIN');
+            $appLang = env('APP_LANG');
+            $retVal = 'https://' . $storeSlug . '.' . $appDomain  . '/deals';
+            if ($appLang !== '') {
+                $retVal .= '/' . $appLang;
+            }
+        }
+        return $retVal;
+    }
+}
+
+if (!function_exists('getCategoryDealUrl')) {
+    function getCategoryDealUrl($categorySlug) {
+        $retVal = route('frontend::category::deals', ['slug' => $categorySlug]);
+        if (config('app.wildcard_store_domain', false)) {
+            $appDomain = env('APP_DOMAIN');
+            $appLang = env('APP_LANG');
+            $retVal = 'https://' . $appDomain . '/coupon-category/' . $categorySlug . '/deals';
+            if ($appLang !== '') {
+                $retVal .= '/' . $appLang;
+            }
+        }
+        return $retVal;
+    }
+}

@@ -35,6 +35,11 @@ class WildcardDetector
         if (!empty($redirectTo)) {
             return redirect()->away($redirectTo, 301);
         }
+        $isGoToOrigin = false;
+        $url = $this->replaceToOriginDomain($url, $isGoToOrigin);
+        if ($isGoToOrigin) {
+            return redirect()->away($url, 301);
+        }
         return $next($request);
     }
 
@@ -210,6 +215,20 @@ class WildcardDetector
             $retVal = 'mobile';
         } else if (Utils::isTablet()) {
             $retVal = 'tablet';
+        }
+        return $retVal;
+    }
+    
+    private function replaceToOriginDomain($currentUrl, &$isRedirect) {
+        $retVal = $currentUrl;
+        $parseCurrentUrl = parse_url($currentUrl);
+        $baseUrl = env('APP_URL');
+        $parseUrl = parse_url($baseUrl);
+        $host = $parseUrl['host'];
+        preg_match("/https?:\/\/(.*?)\.{$host}/i", $currentUrl, $matched);
+        if (preg_match('/coupon-category/', $currentUrl) && isset($matched[1])) {
+            $retVal = env('APP_URL') . '' . $parseCurrentUrl['path'];
+            $isRedirect = true;
         }
         return $retVal;
     }

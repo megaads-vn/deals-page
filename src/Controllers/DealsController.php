@@ -98,9 +98,9 @@ class DealsController extends Controller {
         if (!empty($store)) {
             $breadcrumbs[] = [
                 'title' => $store->title,
-                'url' => route('frontend::store::listDeal', ['slug' => $store->slug])
+                'url' => dealPageStoreUrl($store->slug)
             ];
-            $canonicalLink = route('frontend::store::listDeal', ['slug' => $store->slug]);
+            $canonicalLink = dealPageStoreUrl($store->slug);
         }
         $breadcrumbs[] = [
             'title' => $getDeal->title,
