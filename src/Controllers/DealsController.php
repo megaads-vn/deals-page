@@ -91,7 +91,7 @@ class DealsController extends Controller {
         if (!empty($categories)) {
             $breadcrumbs[] = [
                 'title' => $categories->title,
-                'url' => route('frontend::category::deals', ['slug' => $categories->slug])
+                'url' => env('APP_URL') . '/coupon-category/' . $categories->slug
             ];
         }
         
