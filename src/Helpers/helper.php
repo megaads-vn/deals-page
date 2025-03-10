@@ -375,7 +375,7 @@ if (!function_exists('dealPageStoreUrl')) {
         if (config('app.wildcard_store_domain', false)) {
             $appDomain = env('APP_DOMAIN');
             $appLang = env('APP_LANG');
-            $storeUrl = 'https://' . $storeSlug . '.' . $appDomain;
+            $storeUrl = 'https://' . $storeSlug . '.' . $appDomain . '/deals';
             if ($appLang !== '') {
                 $storeUrl .= '/' . $appLang;
             }
